@@ -13,7 +13,7 @@
       ],
       "settings": {
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll": true
         },
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnPaste": true,
@@ -22,7 +22,5 @@
     }
   },
   "postCreateCommand": "npm i",
-  "forwardPorts": [
-    3000
-  ]
+  "forwardPorts": [3000]
 }
