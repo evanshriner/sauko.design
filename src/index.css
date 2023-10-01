@@ -9,6 +9,11 @@ body,
   background: #272421;
 }
 
+@font-face {
+  font-family: 'Inclusive Sans';
+  src: url('./fonts/InclusiveSans-Regular.ttf') format('truetype');
+}
+
 .background {
   position: fixed;
   top: 0;
