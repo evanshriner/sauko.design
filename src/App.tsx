@@ -7,7 +7,7 @@ function App() {
       <div className="background">
         <Background />
       </div>
-      <div className="title">sauko design</div>
+      <div className="title">Building brands that reach new heights.</div>
     </div>
   );
 }
