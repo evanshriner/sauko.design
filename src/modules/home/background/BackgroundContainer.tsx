@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import FlexBox from '../../shared/components/FlexBox';
+import FlexBox from '../../../shared/components/FlexBox';
 
 const BackgroundContainer = styled(FlexBox)({
   height: '120vh',

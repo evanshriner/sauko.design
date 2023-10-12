@@ -1,6 +1,6 @@
 import './App.css';
 import { ThemeProvider } from '@emotion/react';
-import { theme } from './theme';
+import { theme } from './theme/theme';
 import Home from './modules/home';
 
 function App() {
