@@ -13,12 +13,12 @@ type FlexboxProps = {
   flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
 };
 
-const Flexbox = styled.div<FlexboxProps>`
-  display: flex;
-  flex-direction: ${(props) => props.flexDirection || 'row'};
-  justify-content: ${(props) => props.justifyContent || 'flex-start'};
-  align-items: ${(props) => props.alignItems || 'stretch'};
-  flex-wrap: ${(props) => props.flexWrap || 'nowrap'};
-`;
+const Flexbox = styled.div((props: FlexboxProps) => ({
+  display: 'flex',
+  flexDirection: props.flexDirection || 'row',
+  justifyContent: props.justifyContent || 'flex-start',
+  alignItems: props.alignItems || 'stretch',
+  flexWrap: props.flexWrap || 'nowrap',
+}));
 
 export default Flexbox;
