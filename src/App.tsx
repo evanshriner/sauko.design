@@ -1,14 +1,13 @@
 import './App.css';
-import Background from './Background';
+import { ThemeProvider } from '@emotion/react';
+import { theme } from './theme';
+import Home from './modules/home';
 
 function App() {
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <div className="background">
-        <Background />
-      </div>
-      <div className="title">Building brands that reach new heights.</div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Home />
+    </ThemeProvider>
   );
 }
 
