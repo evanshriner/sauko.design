@@ -10,7 +10,7 @@ export default function Background() {
         fov: 90,
         near: 0.01,
         far: 200,
-        position: [4, -2, 6],
+        position: [1.5, 2, 2],
       }}
     >
       {/* <Perf position="top-left" /> */}

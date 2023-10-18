@@ -5,7 +5,7 @@ const Title = styled(FlexBox)(({ theme }) => ({
   boxSizing: 'border-box',
   padding: '3rem',
   fontSize: '3.5vw',
-  fontWeight: '300',
+  fontWeight: '400',
   color: theme.colors.primaryText,
   justifyContent: 'center',
   alignItems: 'center',
