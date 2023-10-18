@@ -1,4 +1,3 @@
-import FlexBox from '../../../shared/components/FlexBox';
 import Menu from './Menu';
 import MenuToggle from './MenuToggle';
 import NavBarContainer from './NavBarContainer';

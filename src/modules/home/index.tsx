@@ -12,7 +12,7 @@ function Home() {
       </BackgroundContainer>
       <FlexBox flexDirection="column">
         <NavBar />
-        <Title>Building brands that reach new heights.</Title>
+        <Title>Creating waves in digital innovation.</Title>
       </FlexBox>
     </FlexBox>
   );
