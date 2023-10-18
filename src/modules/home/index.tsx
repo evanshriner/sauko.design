@@ -9,7 +9,7 @@ function Home() {
       <BackgroundContainer>
         <Background />
       </BackgroundContainer>
-      <Title>Building brands that reach new heights.</Title>
+      {/* <Title>Building brands that reach new heights.</Title> */}
     </FlexBox>
   );
 }

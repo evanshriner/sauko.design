@@ -1,4 +1,4 @@
-// import { OrbitControls } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 // import { Perf } from 'r3f-perf';
 import { Canvas } from '@react-three/fiber';
 import Shapes from './Shapes';
@@ -15,7 +15,7 @@ export default function Background() {
     >
       {/* <Perf position="top-left" /> */}
 
-      {/* <OrbitControls makeDefault /> */}
+      <OrbitControls makeDefault />
 
       <Shapes />
     </Canvas>

@@ -1,42 +1,55 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import vertexShader from './shaders/vertex.glsl';
+import fragmentShader from './shaders/fragment.glsl';
 
-// spiraly thing (needs about 30 shapes)
-// const torusGeometry = new THREE.TorusKnotGeometry(10.184, 0.1, 92, 7, 3, 9);
-const torusGeometry = new THREE.TorusKnotGeometry(20, 0.3681, 66, 8, 20, 6);
-const material = new THREE.MeshDepthMaterial({ opacity: 0.2 });
+// const material = new THREE.ShaderMaterial({
+//   extensions: {
+//     derivatives: '#extension GL_OES_standard_derivatives : enable',
+//   },
+//   side: THREE.DoubleSide,
+//   uniforms: {
+//     time: { value: 0 },
+//     resolution: { value: new THREE.Vector4() },
+//   },
+//   // wireframe: true,
+//   vertexShader,
+//   fragmentShader,
+// });
+
+// const sphereGeometry = new THREE.SphereGeometry(5, 32, 32);
 
 export default function Shapes() {
-  const triangles = useRef([]);
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
 
-  useFrame((state, delta) => {
-    for (const triangle of triangles.current) {
-      triangle.rotation.y += delta * 0.05;
+  useEffect(() => {
+    materialRef.current!.needsUpdate = true;
+  }, []);
+
+  useFrame(() => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.time.value += 0.005;
     }
   });
 
-  useEffect(() => {
-    material.needsUpdate = true;
-  }, []);
-
   return (
     <>
-      {[...Array(3)].map((value, index) => (
-        <mesh
-          ref={(element) => (triangles.current[index] = element)}
-          key={index}
-          geometry={torusGeometry}
-          material={material}
-          position={[
-            (Math.random() - 0.5) * 10,
-            (Math.random() - 0.5) * 10,
-            (Math.random() - 0.5) * 10,
-          ]}
-          scale={0.2 + Math.random() * 0.2}
-          rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}
+      <mesh geometry={new THREE.SphereGeometry(4, 32, 32)}>
+        <shaderMaterial
+          ref={materialRef}
+          extensions={{
+            derivatives: '#extension GL_OES_standard_derivatives : enable',
+          }}
+          side={THREE.DoubleSide}
+          uniforms={{
+            time: { value: 0 },
+            resolution: { value: new THREE.Vector4() },
+          }}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
         />
-      ))}
+      </mesh>
     </>
   );
 }
