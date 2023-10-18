@@ -17,6 +17,7 @@ type FlexboxProps = {
 const FlexBox = styled.div((props: FlexboxProps) => ({
   display: 'flex',
   width: props.width || '100%',
+  boxSizing: 'border-box',
   flexDirection: props.flexDirection || 'row',
   justifyContent: props.justifyContent || 'flex-start',
   alignItems: props.alignItems || 'stretch',

@@ -1,7 +1,7 @@
 import FlexBox from '../../shared/components/FlexBox';
 import Background from './background/Background';
 import BackgroundContainer from './background/BackgroundContainer';
-import NavBar from './navbar';
+import NavBar from './navbar/index';
 import Title from './Title';
 
 function Home() {
