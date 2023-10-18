@@ -1,10 +1,6 @@
 uniform float time;
-uniform float progress;
-uniform sampler2D texture1;
 uniform vec4 resolution;
-varying vec2 vUv;
 varying vec3 vPosition;
-float PI = 3.141592653509793238;
 
 
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
@@ -51,10 +47,6 @@ float lines(vec2 uv, float offset) {
 void main() {
     float n = noise(vPosition + time);
 
-    // vec3 color1 = vec3(120./255.,158./255.,113./255.);
-    // vec3 color3 = vec3(0.,0.,0.);
-    // vec3 color2 = vec3(224./255.,148./255.,66./255.);
-
     vec3 color1 = vec3(2./255.,103./255.,93./255.);
     vec3 color3 = vec3(39./255.,36./255.,33./255.);
     vec3 color2 = vec3(20./255.,204./255.,96./255.);
@@ -65,10 +57,8 @@ void main() {
 
     float pattern2 = lines(b_uv, 0.1);
 
-
     vec3 mixedColors = mix(color1,color2,pattern);
     vec3 mixedColors2 = mix(mixedColors,color3,pattern2);
-    // gl_FragColor = vec4(n, 0.,0.0,1.);
-    // gl_FragColor = vec4(b_uv,0.0,1.);
+
     gl_FragColor = vec4(vec3(mixedColors2),1.);
 }
