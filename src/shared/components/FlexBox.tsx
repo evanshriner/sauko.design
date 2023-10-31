@@ -12,6 +12,8 @@ type FlexboxProps = {
   alignItems?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
   flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
   width?: string;
+  gap?: string;
+  padding?: string;
 };
 
 const FlexBox = styled.div((props: FlexboxProps) => ({
@@ -22,6 +24,8 @@ const FlexBox = styled.div((props: FlexboxProps) => ({
   justifyContent: props.justifyContent || 'flex-start',
   alignItems: props.alignItems || 'stretch',
   flexWrap: props.flexWrap || 'nowrap',
+  gap: props.gap || 'none',
+  padding: props.padding || 'none',
 }));
 
 export default FlexBox;
