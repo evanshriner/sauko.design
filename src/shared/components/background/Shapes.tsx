@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import vertexShader from './shaders/vertex.glsl';
@@ -20,8 +20,6 @@ import reflectiveVertex from './shaders/vertex2.glsl';
 //   fragmentShader,
 // });
 
-// const sphereGeometry = new THREE.SphereGeometry(5, 32, 32);
-
 // const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
 //   format: THREE.RGBAFormat,
 //   generateMipmaps: true,
@@ -35,50 +33,108 @@ export default function Shapes() {
   const outerSphereRef = useRef<THREE.ShaderMaterial | null>(null);
   const reflectiveShapeRef = useRef<THREE.ShaderMaterial | null>(null);
 
-  // const { gl, scene } = useThree();
-  useFrame(() => {
+  // Memoize the geometry so it's created only once
+  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
+  const reflectiveGeometry = useMemo(
+    () => new THREE.SphereGeometry(1, 42, 32),
+    [],
+  );
+
+  // Memoize the uniforms object so it's created only once
+  const outerUniforms = useMemo(
+    () => ({
+      time: { value: 0 },
+      resolution: { value: new THREE.Vector4() }, // You might want to update resolution on resize
+    }),
+    [],
+  );
+
+  const reflectiveUniforms = useMemo(
+    () => ({
+      // Uncomment if needed
+      time: { value: 0 },
+      tCube: { value: null }, // Initialize with null or appropriate default
+      resolution: { value: new THREE.Vector4() },
+    }),
+    [],
+  );
+
+  useFrame((state) => {
     if (outerSphereRef.current) {
-      outerSphereRef.current.uniforms.time.value += 0.005;
+      // TODO: possibly use delta here?
+      outerSphereRef.current.uniforms.time.value += 0.001;
     }
     // cubeCamera.update(gl, scene);
     // if (reflectiveShapeRef.current) {
     //   reflectiveShapeRef.current.uniforms.tCube.value =
     //     cubeRenderTarget.texture;
     // }
+
+    // const { gl, scene, camera } = state; // Get gl, scene, camera from state
+    // const cubeRenderTarget = useMemo(
+    //   () =>
+    //     new THREE.WebGLCubeRenderTarget(256, {
+    //       // Memoize render target
+    //       format: THREE.RGBAFormat,
+    //       generateMipmaps: true,
+    //       minFilter: THREE.LinearMipmapLinearFilter,
+    //       colorSpace: THREE.SRGBColorSpace,
+    //     }),
+    //   [],
+    // );
+    // const cubeCamera = useMemo(
+    //   () => new THREE.CubeCamera(0.1, 10, cubeRenderTarget),
+    //   [cubeRenderTarget],
+    // ); // Memoize camera
+
+    // // Before rendering the main scene
+    // if (reflectiveShapeRef.current) {
+    //   reflectiveShapeRef.current.visible = false; // Hide the reflective object itself
+    //   cubeCamera.position.copy(
+    //     reflectiveShapeRef.current.getWorldPosition(new THREE.Vector3()),
+    //   ); // Position camera
+    //   cubeCamera.update(gl, scene); // Render the scene into the cube texture
+    //   reflectiveShapeRef.current.visible = true; // Make it visible again
+
+    //   reflectiveShapeRef.current.uniforms.tCube.value =
+    //     cubeRenderTarget.texture;
+    //   reflectiveUniforms.tCube.value = cubeRenderTarget.texture; // Also update the memoized uniform's value if needed elsewhere
+    // }
   });
 
   return (
     <>
-      <mesh geometry={new THREE.SphereGeometry(4, 32, 32)}>
+      <mesh geometry={sphereGeometry}>
         <shaderMaterial
           ref={outerSphereRef}
           extensions={{
             derivatives: '#extension GL_OES_standard_derivatives : enable',
           }}
           side={THREE.DoubleSide}
-          uniforms={{
-            time: { value: 0 },
-            resolution: { value: new THREE.Vector4() },
-          }}
+          uniforms={outerUniforms}
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
+          // R3F specific: Use keys if shader source changes dynamically
+          // vertexShader={vertexShader} key={vertexShader}
+          // fragmentShader={fragmentShader} key={fragmentShader}
         />
       </mesh>
-      {/* reflective object */}
-      {/* <mesh geometry={new THREE.SphereGeometry(1, 42, 32)}>
+      {/* --- Reflective Object (if uncommented) --- */}
+      {/* <mesh
+        // If the reflective object's position will change, useRef is better
+        // ref={reflectiveMeshRef} // Add a ref to the mesh itself if needed for positioning
+        geometry={reflectiveGeometry}
+      >
         <shaderMaterial
           ref={reflectiveShapeRef}
           extensions={{
             derivatives: '#extension GL_OES_standard_derivatives : enable',
           }}
           side={THREE.DoubleSide}
-          uniforms={{
-            time: { value: 0 },
-            tCube: { value: 0 },
-            resolution: { value: new THREE.Vector4() },
-          }}
+          uniforms={reflectiveUniforms}
           vertexShader={reflectiveVertex}
           fragmentShader={reflectiveFragment}
+          // key={reflectiveVertex + reflectiveFragment} // Add key if shaders change
         />
       </mesh> */}
     </>

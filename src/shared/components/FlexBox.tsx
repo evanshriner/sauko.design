@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-type FlexboxProps = {
+export interface FlexboxProps {
   flexDirection?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
   justifyContent?:
     | 'flex-start'
@@ -13,11 +13,13 @@ type FlexboxProps = {
   flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
   width?: string;
   gap?: string;
+  height?: string;
   padding?: string;
-};
+}
 
-const FlexBox = styled.div((props: FlexboxProps) => ({
+const FlexBox = styled.div<FlexboxProps>((props) => ({
   display: 'flex',
+  height: props.height || 'auto',
   width: props.width || '100%',
   boxSizing: 'border-box',
   flexDirection: props.flexDirection || 'row',

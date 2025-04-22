@@ -3,9 +3,15 @@ import MenuToggle from './MenuToggle';
 import NavBarContainer from './NavBarContainer';
 import MenuItem from './MenuItem';
 import { useState } from 'react';
-import Logo from './Logo';
+import { Logo, NeonText } from './Logo';
 
-export default function NavBar({ onMenuItemClick }) {
+export type Page = 'home' | 'services' | 'about' | 'contact';
+export interface NavBarProps {
+  onMenuItemClick: (menuItem: Page) => void;
+  currentPage: string;
+}
+
+export default function NavBar({ onMenuItemClick, currentPage }: NavBarProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const toggleMenu = () => {
@@ -14,23 +20,23 @@ export default function NavBar({ onMenuItemClick }) {
 
   return (
     <NavBarContainer>
-      <Logo>sauko</Logo>
+      <Logo onClick={() => onMenuItemClick('home')}>sauko</Logo>
       <MenuToggle onClick={toggleMenu} />
       <Menu show={showMenu}>
-        <MenuItem className="menu-item" onClick={() => onMenuItemClick('Blog')}>
-          blog
+        <MenuItem onClick={() => onMenuItemClick('services')}>
+          <NeonText fontSize="1rem" darken={currentPage !== 'services'}>
+            services
+          </NeonText>
         </MenuItem>
-        <MenuItem
-          className="menu-item"
-          onClick={() => onMenuItemClick('About')}
-        >
-          about
+        <MenuItem onClick={() => onMenuItemClick('about')}>
+          <NeonText fontSize="1rem" darken={currentPage !== 'about'}>
+            about
+          </NeonText>
         </MenuItem>
-        <MenuItem
-          className="menu-item"
-          onClick={() => onMenuItemClick('Contact')}
-        >
-          contact
+        <MenuItem onClick={() => onMenuItemClick('contact')}>
+          <NeonText fontSize="1rem" darken={currentPage !== 'contact'}>
+            contact
+          </NeonText>
         </MenuItem>
       </Menu>
     </NavBarContainer>

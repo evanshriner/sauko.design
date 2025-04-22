@@ -5,10 +5,10 @@ const MenuItem = styled(FlexBox)(({ theme }) => ({
   color: theme.colors.primaryText,
   justifyContent: 'center',
   alignItems: 'center',
-  position: 'relative',
   cursor: 'pointer',
+  padding: '0 0.5rem',
   overflow: 'hidden',
-  width: 'fit-content',
+  width: 'auto',
 }));
 
 export default MenuItem;
