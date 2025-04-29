@@ -11,7 +11,7 @@ import NavBar, { Page } from './shared/components/navbar/index';
 import ContentContainer from './shared/components/contentContainer';
 
 // Import Locomotive Scroll CSS and JS directly
-import LocomotiveScroll from 'locomotive-scroll'; // Standard import
+import LocomotiveScroll from 'locomotive-scroll';
 import 'locomotive-scroll/dist/locomotive-scroll.css';
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   // Ref to store the Locomotive Scroll instance
-  const locomotiveScrollRef = useRef<LocomotiveScroll | null>(null); // Use the imported type
+  const locomotiveScrollRef = useRef<LocomotiveScroll | null>(null);
 
   const handleMenuItemClick = (menuItem: Page) => {
     console.log(`Clicked on ${menuItem}`);
@@ -74,15 +74,11 @@ function App() {
           currentPage={currentPage}
         />
         <ContentContainer ref={scrollContainerRef} data-scroll-container>
-          <div data-scroll-section>
-            <Blog />
-          </div>
-          <div data-scroll-section>
-            <Blog />
-          </div>
-          <div data-scroll-section>
-            <Blog />
-          </div>
+          <Home data-scroll-section />
+
+          <Blog data-scroll-section />
+
+          <Blog data-scroll-section />
         </ContentContainer>
       </FlexBox>
     </ThemeProvider>

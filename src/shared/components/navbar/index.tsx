@@ -3,7 +3,8 @@ import MenuToggle from './MenuToggle';
 import NavBarContainer from './NavBarContainer';
 import MenuItem from './MenuItem';
 import { useState } from 'react';
-import { Logo, NeonText } from './Logo';
+import { Logo } from './Logo';
+import NeonText from '../../styles/NeonText';
 
 export type Page = 'home' | 'services' | 'about' | 'contact';
 export interface NavBarProps {
