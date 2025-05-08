@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import NeonText from '../../styles/NeonText';
+import NeonText from '@/shared/styles/NeonText';
 
 const Logo = styled(NeonText)(() => ({
   fontFamily: 'Orbit',

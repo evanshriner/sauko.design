@@ -20,16 +20,16 @@ import reflectiveVertex from './shaders/vertex2.glsl';
 //   fragmentShader,
 // });
 
-// const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
-//   format: THREE.RGBAFormat,
-//   generateMipmaps: true,
-//   minFilter: THREE.LinearMipmapLinearFilter,
-//   colorSpace: THREE.SRGBColorSpace,
-// });
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
+  format: THREE.RGBAFormat,
+  generateMipmaps: true,
+  minFilter: THREE.LinearMipmapLinearFilter,
+  colorSpace: THREE.SRGBColorSpace,
+});
 
-// const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
+const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
 
-export default function Shapes() {
+export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
   const outerSphereRef = useRef<THREE.ShaderMaterial | null>(null);
   const reflectiveShapeRef = useRef<THREE.ShaderMaterial | null>(null);
 
@@ -53,7 +53,7 @@ export default function Shapes() {
     () => ({
       // Uncomment if needed
       time: { value: 0 },
-      tCube: { value: null }, // Initialize with null or appropriate default
+      tCube: { value: 0 }, // Initialize with null or appropriate default
       resolution: { value: new THREE.Vector4() },
     }),
     [],
@@ -64,13 +64,15 @@ export default function Shapes() {
       // TODO: possibly use delta here?
       outerSphereRef.current.uniforms.time.value += 0.001;
     }
-    // cubeCamera.update(gl, scene);
-    // if (reflectiveShapeRef.current) {
-    //   reflectiveShapeRef.current.uniforms.tCube.value =
-    //     cubeRenderTarget.texture;
-    // }
 
-    // const { gl, scene, camera } = state; // Get gl, scene, camera from state
+    const { gl, scene, camera } = state; // Get gl, scene, camera from state
+
+    camera.position.y = -scrollY * 0.001;
+    cubeCamera.update(gl, scene);
+    if (reflectiveShapeRef.current) {
+      reflectiveShapeRef.current.uniforms.tCube.value =
+        cubeRenderTarget.texture;
+    }
     // const cubeRenderTarget = useMemo(
     //   () =>
     //     new THREE.WebGLCubeRenderTarget(256, {
@@ -120,7 +122,7 @@ export default function Shapes() {
         />
       </mesh>
       {/* --- Reflective Object (if uncommented) --- */}
-      {/* <mesh
+      <mesh
         // If the reflective object's position will change, useRef is better
         // ref={reflectiveMeshRef} // Add a ref to the mesh itself if needed for positioning
         geometry={reflectiveGeometry}
@@ -136,7 +138,7 @@ export default function Shapes() {
           fragmentShader={reflectiveFragment}
           // key={reflectiveVertex + reflectiveFragment} // Add key if shaders change
         />
-      </mesh> */}
+      </mesh>
     </>
   );
 }

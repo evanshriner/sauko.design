@@ -4,11 +4,11 @@ import { theme } from './theme/theme';
 import Home from './modules/home';
 import Blog from './modules/blog';
 import { useEffect, useRef, useState } from 'react';
-import FlexBox from './shared/components/FlexBox';
-import Background from './shared/components/background/Background';
-import BackgroundContainer from './shared/components/background/BackgroundContainer';
-import NavBar, { Page } from './shared/components/navbar/index';
-import ContentContainer from './shared/components/contentContainer';
+import FlexBox from '@/shared/components/FlexBox';
+import Background from '@/shared/components/background/Background';
+import BackgroundContainer from '@/shared/components/background/BackgroundContainer';
+import NavBar, { Page } from '@/shared/components/navbar/index';
+import ContentContainer from '@/shared/components/contentContainer';
 
 // Import Locomotive Scroll CSS and JS directly
 import LocomotiveScroll from 'locomotive-scroll';
@@ -16,6 +16,7 @@ import 'locomotive-scroll/dist/locomotive-scroll.css';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [scrollY, setScrollY] = useState(0); // Add this line
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   // Ref to store the Locomotive Scroll instance
@@ -45,6 +46,11 @@ function App() {
 
       locomotiveScrollRef.current = scroll; // Store instance
 
+      // Listen for scroll events
+      scroll.on('scroll', (obj: { scroll: { y: number } }) => {
+        setScrollY(obj.scroll.y);
+      });
+
       // --- Update on Resize ---
       resizeObserver = new ResizeObserver(() => {
         scroll?.update();
@@ -66,7 +72,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <BackgroundContainer>
-        <Background />
+        <Background scrollY={scrollY} />
       </BackgroundContainer>
       <FlexBox flexDirection="column">
         <NavBar

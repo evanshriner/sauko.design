@@ -5,17 +5,7 @@ import porsche from '../../assets/porsche2.webp';
 import grain from '../../assets/grain.png';
 import { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-
-const Title = styled(FlexBox)(({ theme }) => ({
-  boxSizing: 'border-box',
-  padding: '3rem',
-  height: '100%',
-  fontSize: '4.5vw',
-  fontWeight: '500',
-  color: theme.colors.primaryText,
-  justifyContent: 'center',
-  alignItems: 'center',
-}));
+import Title from '@/shared/styles/Title';
 
 const CardBackground = styled(FlexBox)(({ theme }) => ({
   position: 'absolute',
@@ -90,8 +80,8 @@ function Blog() {
   );
 
   return (
-    <FlexBox flexDirection="column">
-      <Title>Our Values</Title>
+    <FlexBox flexDirection="column" height="100vh">
+      <Title>services</Title>
       <FlexBox flexDirection="row" gap="12px" padding="12px">
         <Card>
           <CardBackground />

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import FlexBox from '../../shared/components/FlexBox';
+import NeonText from '@/shared/styles/NeonText';
 
-const Title = styled(FlexBox)(({ theme }) => ({
+const Title = styled(NeonText)(({ theme }) => ({
   boxSizing: 'border-box',
   padding: '3rem',
   height: '100%',

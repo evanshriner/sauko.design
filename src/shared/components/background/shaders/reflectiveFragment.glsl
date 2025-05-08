@@ -23,7 +23,6 @@ void main() {
         -vRefract[2].x, vRefract[2].yz
     )).b;
 
-
     gl_FragColor = mix(refractedColor, reflectedColor,
     clamp(vReflectionFactor, 0.0, 1.0));
 }

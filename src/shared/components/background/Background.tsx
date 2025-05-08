@@ -3,7 +3,7 @@ import { Perf } from 'r3f-perf';
 import { Canvas } from '@react-three/fiber';
 import Shapes from './Shapes';
 
-export default function Background() {
+export default function Background({ scrollY }: { scrollY: number }) {
   return (
     <Canvas
       camera={{
@@ -17,7 +17,7 @@ export default function Background() {
       {/* 
       <OrbitControls makeDefault /> */}
 
-      <Shapes />
+      <Shapes scrollY={scrollY} />
     </Canvas>
   );
 }
