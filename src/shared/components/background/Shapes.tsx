@@ -4,7 +4,10 @@ import * as THREE from 'three';
 import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
 import reflectiveFragment from './shaders/reflectiveFragment.glsl';
-import reflectiveVertex from './shaders/vertex2.glsl';
+import reflectiveVertex from './shaders/reflectiveVertex.glsl';
+
+import dotScreenVertex from './shaders/dotScreenVertex.glsl';
+import dotScreenFragment from './shaders/dotScreenFragment.glsl';
 
 // const material = new THREE.ShaderMaterial({
 //   extensions: {
@@ -27,7 +30,7 @@ const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   colorSpace: THREE.SRGBColorSpace,
 });
 
-const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
+const cubeCamera = new THREE.CubeCamera(4, 0.2, cubeRenderTarget);
 
 export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
   const outerSphereRef = useRef<THREE.ShaderMaterial | null>(null);
@@ -36,7 +39,7 @@ export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
   // Memoize the geometry so it's created only once
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
   const reflectiveGeometry = useMemo(
-    () => new THREE.SphereGeometry(1, 42, 32),
+    () => new THREE.SphereGeometry(0.5, 42, 32),
     [],
   );
 
@@ -68,8 +71,10 @@ export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
     const { gl, scene, camera } = state; // Get gl, scene, camera from state
 
     camera.position.y = -scrollY * 0.001;
-    cubeCamera.update(gl, scene);
     if (reflectiveShapeRef.current) {
+      reflectiveShapeRef.current.visible = false; // stops webgl feedback loop
+      cubeCamera.update(gl, scene);
+      reflectiveShapeRef.current.visible = true; // stops webgl feedback loop
       reflectiveShapeRef.current.uniforms.tCube.value =
         cubeRenderTarget.texture;
     }

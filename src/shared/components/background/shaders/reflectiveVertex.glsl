@@ -7,8 +7,8 @@ void main() {
 
     float mRefractionRatio = 1.02;
     float mFresnelBias = 0.1;
-    float mFresnelScale = 2.;
-    float mFresnelPower = 1.;
+    float mFresnelScale = 5.;
+    float mFresnelPower = 5.;
 
     vec4 mvPosition = modelViewMatrix * vec4(
     position, 1.0 );
