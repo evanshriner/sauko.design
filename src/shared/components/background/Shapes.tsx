@@ -1,27 +1,15 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import vertexShader from './shaders/vertex.glsl';
-import fragmentShader from './shaders/fragment.glsl';
-import reflectiveFragment from './shaders/reflectiveFragment.glsl';
-import reflectiveVertex from './shaders/reflectiveVertex.glsl';
+import {
+  fragmentShader as wavesFragment,
+  vertexShader as wavesVertex,
+} from './shaders/BackgroundWaves';
 
-import dotScreenVertex from './shaders/dotScreenVertex.glsl';
-import dotScreenFragment from './shaders/dotScreenFragment.glsl';
-
-// const material = new THREE.ShaderMaterial({
-//   extensions: {
-//     derivatives: '#extension GL_OES_standard_derivatives : enable',
-//   },
-//   side: THREE.DoubleSide,
-//   uniforms: {
-//     time: { value: 0 },
-//     resolution: { value: new THREE.Vector4() },
-//   },
-//   // wireframe: true,
-//   vertexShader,
-//   fragmentShader,
-// });
+import {
+  fragmentShader as reflectiveFragment,
+  vertexShader as reflectiveVertex,
+} from './shaders/FresnelReflection';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
@@ -78,35 +66,6 @@ export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
       reflectiveShapeRef.current.uniforms.tCube.value =
         cubeRenderTarget.texture;
     }
-    // const cubeRenderTarget = useMemo(
-    //   () =>
-    //     new THREE.WebGLCubeRenderTarget(256, {
-    //       // Memoize render target
-    //       format: THREE.RGBAFormat,
-    //       generateMipmaps: true,
-    //       minFilter: THREE.LinearMipmapLinearFilter,
-    //       colorSpace: THREE.SRGBColorSpace,
-    //     }),
-    //   [],
-    // );
-    // const cubeCamera = useMemo(
-    //   () => new THREE.CubeCamera(0.1, 10, cubeRenderTarget),
-    //   [cubeRenderTarget],
-    // ); // Memoize camera
-
-    // // Before rendering the main scene
-    // if (reflectiveShapeRef.current) {
-    //   reflectiveShapeRef.current.visible = false; // Hide the reflective object itself
-    //   cubeCamera.position.copy(
-    //     reflectiveShapeRef.current.getWorldPosition(new THREE.Vector3()),
-    //   ); // Position camera
-    //   cubeCamera.update(gl, scene); // Render the scene into the cube texture
-    //   reflectiveShapeRef.current.visible = true; // Make it visible again
-
-    //   reflectiveShapeRef.current.uniforms.tCube.value =
-    //     cubeRenderTarget.texture;
-    //   reflectiveUniforms.tCube.value = cubeRenderTarget.texture; // Also update the memoized uniform's value if needed elsewhere
-    // }
   });
 
   return (
@@ -119,8 +78,8 @@ export default function Shapes({ scrollY = 0 }: { scrollY?: number }) {
           }}
           side={THREE.DoubleSide}
           uniforms={outerUniforms}
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
+          vertexShader={wavesVertex}
+          fragmentShader={wavesFragment}
           // R3F specific: Use keys if shader source changes dynamically
           // vertexShader={vertexShader} key={vertexShader}
           // fragmentShader={fragmentShader} key={fragmentShader}

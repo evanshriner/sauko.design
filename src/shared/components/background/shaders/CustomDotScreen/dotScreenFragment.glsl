@@ -18,12 +18,23 @@ float pattern() {
 
 }
 
-void main() {
+
+float random(vec2 p) {
+
+    vec2 k1 = vec2(23.14069263277926, 2.665144142690225);
+    
+    return fract( cos(dot(p, k1)) * 12345.6789 );
+}
+
+void mainUv(inout vec2 uv) {
 
     vec4 color = texture2D( tDiffuse, vUv );
 
-    float average = ( color.r + color.g + color.b ) / 3.0;
+    vec2 uvrandom = vUv;
 
-    gl_FragColor = vec4( vec3( average * 10.0 - 5.0 + pattern() ), color.a );
+    uvrandom.y *= random(vec2(uvrandom.y, 0.4));
 
+    color.rgb += random(uvrandom) *0.3;
+
+    gl_FragColor = color;
 }
