@@ -32,9 +32,21 @@ void mainUv(inout vec2 uv) {
 
     vec2 uvrandom = vUv;
 
-    uvrandom.y *= random(vec2(uvrandom.y, 0.4));
+    uvrandom.y *= random(vec2(uvrandom.y, 0.9));
 
-    color.rgb += random(uvrandom) *0.3;
+    color.rgb += random(uvrandom);
 
     gl_FragColor = color;
 }
+
+// TODO: regardless of these two , it doesnt appear to apply the noise. why?
+
+// void mainUv(inout vec2 uv) {
+
+// 			vec4 color = texture2D( tDiffuse, vUv );
+
+// 			float average = ( color.r + color.g + color.b ) / 3.0;
+
+// 			gl_FragColor = vec4( vec3( average * 10.0 - 5.0 + pattern() ), color.a );
+
+// 		}

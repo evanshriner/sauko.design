@@ -2,7 +2,7 @@ import './App.css';
 import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
 import Home from './modules/home';
-import Blog from './modules/blog';
+import Services from './modules/services';
 import { useEffect, useRef, useState } from 'react';
 import FlexBox from '@/shared/components/FlexBox';
 import Background from '@/shared/components/background/Background';
@@ -22,13 +22,19 @@ function App() {
   // Ref to store the Locomotive Scroll instance
   const locomotiveScrollRef = useRef<LocomotiveScroll | null>(null);
 
+  const handleScrollToTarget = (target) => {
+    if (locomotiveScrollRef.current) {
+      console.log(`Scrolling to ${target}`);
+      locomotiveScrollRef.current.scrollTo(`#${target}`, {
+        duration: 700, // Optional: animation duration in ms
+      });
+    }
+  };
+
   const handleMenuItemClick = (menuItem: Page) => {
     console.log(`Clicked on ${menuItem}`);
     setCurrentPage(menuItem);
-    // locomotiveScrollRef.current?.scrollTo(0, {
-    //   duration: 0,
-    //   disableLerp: true,
-    // });
+    handleScrollToTarget(menuItem);
   };
 
   // Effect for Initialization and Cleanup
@@ -45,6 +51,9 @@ function App() {
       });
 
       locomotiveScrollRef.current = scroll; // Store instance
+
+      // forces navigation to only be clickable items
+      // locomotiveScrollRef.current.stop();
 
       // Listen for scroll events
       scroll.on('scroll', (obj: { scroll: { y: number } }) => {
@@ -82,9 +91,7 @@ function App() {
         <ContentContainer ref={scrollContainerRef} data-scroll-container>
           <Home data-scroll-section />
 
-          <Blog data-scroll-section />
-
-          <Blog data-scroll-section />
+          <Services data-scroll-section />
         </ContentContainer>
       </FlexBox>
     </ThemeProvider>

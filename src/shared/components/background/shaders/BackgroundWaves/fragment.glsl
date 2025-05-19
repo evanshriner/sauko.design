@@ -49,7 +49,7 @@ void main() {
 
     vec3 color1 = vec3(20./255.,23./255.,24./255.);
     vec3 color3 = vec3(9./255.,6./255.,3./255.);
-    vec3 color2 = vec3(120./255.,124./255.,126./255.);
+    vec3 color2 = vec3(40./255.,40./255.,40./255.);
 
     vec2 b_uv = rotate2D(n)*vPosition.xy*0.1;
 

@@ -3,12 +3,11 @@ import NeonText from '@/shared/styles/NeonText';
 
 const Title = styled(NeonText)(({ theme }) => ({
   boxSizing: 'border-box',
-  padding: '3rem',
-  height: '100%',
-  fontSize: '4.5vw',
-  fontWeight: '500',
-  color: theme.colors.primaryText,
-  justifyContent: 'center',
+  padding: '3rem 0 0',
+  height: 'auto',
+  fontSize: '4.5rem',
+  fontWeight: '400',
+  justifyContent: 'flex-start',
   alignItems: 'center',
 }));
 

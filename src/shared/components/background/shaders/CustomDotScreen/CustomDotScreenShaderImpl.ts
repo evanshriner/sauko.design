@@ -14,11 +14,11 @@ export class CustomDotScreenShaderImpl extends Effect {
         // Options
         blendFunction: BlendFunction.NORMAL,
         uniforms: new Map([
-          ['tDiffuse', new Uniform(null)],
+          ['tDiffuse', new Uniform(0)],
           ['tSize', new Uniform(new Vector2(256, 256))],
           ['center', new Uniform(new Vector2(0.5, 0.5))],
           ['angle', new Uniform(1.57)],
-          ['scale', new Uniform(1.0)],
+          ['scale', new Uniform(4)],
         ]),
         vertexShader: dotScreenVertex,
       },

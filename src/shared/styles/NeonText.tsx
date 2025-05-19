@@ -14,19 +14,15 @@ const calculateTextShadow = (fontSize: string) => {
   return `
     ${shadowSize * 0.5}${unit} ${shadowSize * 0.5}${unit} var(--c),
     ${shadowSize}${unit} ${shadowSize * 0.5}${unit} var(--c),
-    ${shadowSize * 1.5}${unit} ${shadowSize}${unit} var(--c),
-    ${shadowSize * 1.5}${unit} ${shadowSize * 0.5}${unit} var(--c),
-    ${shadowSize * 1.5}${unit} ${shadowSize * 1.5}${unit} 7px var(--c),
-    ${-shadowSize * 0.5}${unit} ${shadowSize * 0.5}${unit} 6px var(--c)
   `;
 };
 
 const NeonText = styled(FlexBox)<NeonTextProps>(
+  // TODO: darken should be converted to 'selected' prop
   ({ fontSize = '2rem', darken = false, theme }) => ({
-    color: 'rgba(255, 255, 255, 0.23)',
+    color: `rgba(255, 255, 255, ${darken ? 0.5 : 0.73})`,
     fontSize,
-    '--c': `rgba(255, 255, 255, ${darken ? '0.2' : '0.4'})`,
-    textShadow: calculateTextShadow(fontSize),
+    filter: 'url(#neonGlow)',
   }),
 );
 
