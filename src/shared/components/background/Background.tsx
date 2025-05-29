@@ -4,17 +4,16 @@ import { Canvas } from '@react-three/fiber';
 import { DotScreen, EffectComposer, Noise } from '@react-three/postprocessing';
 
 import Shapes from './Shapes';
-import { BlendFunction } from 'postprocessing';
-import CustomDotScreen from './shaders/CustomDotScreen';
 
 export default function Background({ scrollY }: { scrollY: number }) {
   return (
     <Canvas
       camera={{
-        fov: 90,
+        fov: 70,
         near: 0.01,
-        far: 200,
-        position: [1.5, 0, 0.1],
+        far: 100,
+        // position is being interpolated in the Shapes component
+        position: [0, 0, 0],
       }}
     >
       {/* <Perf position="top-left" /> */}
@@ -28,7 +27,7 @@ export default function Background({ scrollY }: { scrollY: number }) {
           angle={Math.PI / 12} // A different angle
           // TODO: possible adjust scale based on music visualization?
           // settings like 0.1 and 0.03 look really cool here as well.
-          scale={0.73} // Adjust scale
+          scale={10.13} // Adjust scale
         /> */}
         {/* <CustomDotScreen /> */}
         <Noise opacity={0.028} />
