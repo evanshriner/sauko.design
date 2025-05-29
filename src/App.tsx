@@ -13,9 +13,11 @@ import ContentContainer from '@/shared/components/contentContainer';
 // Import Locomotive Scroll CSS and JS directly
 import LocomotiveScroll from 'locomotive-scroll';
 import 'locomotive-scroll/dist/locomotive-scroll.css';
+import { DisplayedObject } from './shared/components/background/ShapeConfig';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [object, setObject] = useState<DisplayedObject>(DisplayedObject.Boombox); // Add this line
   const [scrollY, setScrollY] = useState(0); // Add this line
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -34,7 +36,12 @@ function App() {
   const handleMenuItemClick = (menuItem: Page) => {
     console.log(`Clicked on ${menuItem}`);
     setCurrentPage(menuItem);
-    handleScrollToTarget(menuItem);
+    if (menuItem === 'home') {
+      setObject(DisplayedObject.Boombox); // Set to Boombox when Home is clicked
+    } else if (menuItem === 'services') {
+      setObject(DisplayedObject.Laptop); // Set to Laptop when Services is clicked
+    }
+    // handleScrollToTarget(menuItem);
   };
 
   // Effect for Initialization and Cleanup
@@ -81,7 +88,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <BackgroundContainer>
-        <Background scrollY={scrollY} />
+      <Background scrollY={scrollY} object={object} />
       </BackgroundContainer>
       <FlexBox flexDirection="column">
         <NavBar
