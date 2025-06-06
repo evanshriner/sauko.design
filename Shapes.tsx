@@ -21,7 +21,6 @@ import {
   FLY_OUT_Y_POSITION,
   FLY_IN_Y_START_POSITION,
 } from './ShapeConfig'; // Adjust path if needed
-import { group } from 'console';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
@@ -128,13 +127,12 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
   }, [gltfDataArray]);
 
 
-  
-
-
  
-  useEffect(() => {
-    console.log('gltf map:', gltfMap);
-  }, [gltfMap, ]);
+  // useEffect(() => {
+  //   console.log('Boombox Scene:', postedLetterScene);
+  //   console.log('Boombox Materials:', postedLetterMaterials);
+  //   console.log('Boombox Nodes:', postedLetterNodes);
+  // }, []);
 
 
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
@@ -208,44 +206,39 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
   //   });
   // }, [selectedObjectKey]);
 
-  // useEffect(() => {
-  //   if (transitionState.isTransitioning && transitionState.progress === 0) {
-  //     const newCurrentKey = transitionState.currentKey;
-  //     const newSelectedIndex = objectConfigurations.findIndex(c => c.id === newCurrentKey);
-
-  //     setObjectAnimationProps(prevAnimProps =>
-  //       prevAnimProps.map((objAnimProp, index) => {
-  //         const config = objectConfigurations[index];
-  //         const groupRef = modelRefs.current[index]?.current;
-
-  //         // Use current visual position if available, otherwise the last stored 'current' position
-  //         const startX = groupRef ? groupRef.position.x : objAnimProp.currentX;
-  //         const startY = groupRef ? groupRef.position.y : objAnimProp.currentY;
-          
-  //         return {
-  //           ...objAnimProp, // Retain other properties like id
-  //           id: config.id, // Ensure id is up to date
-  //           fromX: startX,
-  //           targetX: (index - newSelectedIndex) * X_OFFSET_SPACING,
-  //           fromY: startY,
-  //           targetY: config.basePosition.y, // Default resting Y position
-  //         };
-  //       })
-  //     );
-  //   }
-  // }, [
-  //     transitionState.isTransitioning,
-  //     transitionState.progress,
-  //     transitionState.currentKey,
-  //     // objectConfigurations dependency removed for stability, assuming it doesn't change frequently
-  //     // If it does, ensure this effect and dependent logic are robust.
-  // ]);
-
-
   useEffect(() => {
-    console.log(modelRefs.current);
-  }
-  , [modelRefs.current]);
+    if (transitionState.isTransitioning && transitionState.progress === 0) {
+      const newCurrentKey = transitionState.currentKey;
+      const newSelectedIndex = objectConfigurations.findIndex(c => c.id === newCurrentKey);
+
+      setObjectAnimationProps(prevAnimProps =>
+        prevAnimProps.map((objAnimProp, index) => {
+          const config = objectConfigurations[index];
+          const groupRef = modelRefs.current[index]?.current;
+
+          // Use current visual position if available, otherwise the last stored 'current' position
+          const startX = groupRef ? groupRef.position.x : objAnimProp.currentX;
+          const startY = groupRef ? groupRef.position.y : objAnimProp.currentY;
+          
+          return {
+            ...objAnimProp, // Retain other properties like id
+            id: config.id, // Ensure id is up to date
+            fromX: startX,
+            targetX: (index - newSelectedIndex) * X_OFFSET_SPACING,
+            fromY: startY,
+            targetY: config.basePosition.y, // Default resting Y position
+          };
+        })
+      );
+    }
+  }, [
+      transitionState.isTransitioning,
+      transitionState.progress,
+      transitionState.currentKey,
+      // objectConfigurations dependency removed for stability, assuming it doesn't change frequently
+      // If it does, ensure this effect and dependent logic are robust.
+  ]);
+
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     if (outerSphereRef.current) {
@@ -285,32 +278,32 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = true));
 
     // Handle model transitions and animations
-    // if (transitionState.isTransitioning) {
-    //   const newProgress = Math.min(transitionState.progress + delta / ANIMATION_DURATION, 1);
-    //   setTransitionState((prev) => ({ ...prev, progress: newProgress }));
+    if (transitionState.isTransitioning) {
+      const newProgress = Math.min(transitionState.progress + delta / ANIMATION_DURATION, 1);
+      setTransitionState((prev) => ({ ...prev, progress: newProgress }));
 
-    //   if (newProgress >= 1) {
-    //     setTransitionState((prev) => ({
-    //       ...prev,
-    //       isTransitioning: false,
-    //       previousKey: undefined, // Clear previous key once transition is complete
-    //     }));
-    //   }
-    // }
+      if (newProgress >= 1) {
+        setTransitionState((prev) => ({
+          ...prev,
+          isTransitioning: false,
+          previousKey: undefined, // Clear previous key once transition is complete
+        }));
+      }
+    }
 
+    // Animate current and previous models (if transitioning)
+    const keysToAnimate = [transitionState.currentKey, transitionState.previousKey].filter(Boolean);
 
+    keysToAnimate.forEach((key) => {
+      const isCurrent = key === transitionState.currentKey;
+      const groupRef = isCurrent ? currentModelGroupRef : previousModelGroupRef;
+      const config = objectConfigurations.find((c) => c.id === key);
 
-    // its a minor optimization to filter keys to animate, instead we are animating all keys here.
-    // if we'd like to change this in the future, we can filter keysToAnimate based on transitionState or whats in view.
-    // i.e.:      const keysToAnimate = objectConfigurations.map(c => c.id);   
-    objectConfigurations.forEach((key, idx) => {
-      // const isCurrent = key === transitionState.currentKey;
-      const groupRef = modelRefs.current[idx].current;
-
+      if (!groupRef.current || !config || !groupRef.current.children[0]) return;
 
       // Find the first actual mesh within the loaded GLTF scene for detailed animations
       let animatedMesh: THREE.Mesh | undefined;
-      groupRef?.children[0].traverse((child) => {
+      groupRef.current.children[0].traverse((child) => {
         if (child instanceof THREE.Mesh && !animatedMesh) {
           animatedMesh = child;
         }
@@ -318,15 +311,35 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
       if (!animatedMesh) return;
 
 
-      // let groupYPosition = config.basePosition.y;
+      let groupYPosition = config.basePosition.y;
+      let applyIndividualAnimations = false;
 
-    
+      if (transitionState.isTransitioning) {
+        if (isCurrent) { // Incoming model
+          groupYPosition = config.basePosition.y + FLY_IN_Y_START_POSITION * (1 - transitionState.progress);
+          groupRef.current.visible = transitionState.progress > 0.01; // Fade in
+          if (transitionState.progress > 0.5) applyIndividualAnimations = true;
+        } else { // Outgoing model (key === transitionState.previousKey)
+          groupYPosition = config.basePosition.y + FLY_OUT_Y_POSITION * transitionState.progress;
+          if (transitionState.progress > 0.99) groupRef.current.visible = false; // Fade out
+          if (transitionState.progress < 0.5) applyIndividualAnimations = true;
+        }
+      } else if (isCurrent) { // Stable state, only current model
+        groupRef.current.visible = true;
+        applyIndividualAnimations = true;
+      } else { // Stable state, ensure non-current are hidden
+        groupRef.current.visible = false;
+        return;
+      }
 
-      // groupRef?.position.set(key.basePosition.x, key.basePosition.y, key.basePosition.z);
+      groupRef.current.position.set(config.basePosition.x, groupYPosition, config.basePosition.z);
 
-      key.rotationAnimation(animatedMesh, time, key.initialRotationOffset);
-      key.floatAnimation(animatedMesh, time);
+      if (applyIndividualAnimations) {
+        config.rotationAnimation(animatedMesh, time, config.initialRotationOffset);
+        config.floatAnimation(animatedMesh, time);
+      }
     });
+
 
     // // Orbit parameters
     // const radius = 1.3; // Distance from center
@@ -400,24 +413,15 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
       </mesh>
 
       {/* Render current model */}
-      {objectConfigurations.map((config, index) => {
-        const gltf = gltfMap[config.id];
-        if (!gltf) {
-          console.warn(`GLTF data not found for ${config.id}`);
-          return null;
-        }
-        // The object's visibility is controlled within the useFrame loop now
-        return (
-          <ModelInstance
-            key={config.id}
-            ref={modelRefs.current[index]}
-            config={config}
-            gltf={gltf}
-            reflectiveMaterial={config.isReflective ? reflectiveMaterial : null}
-          />
-        );
-      })}
-
+      {currentConfig && gltfMap[transitionState.currentKey] && (
+        <ModelInstance
+          key={transitionState.currentKey + '-current'}
+          ref={currentModelGroupRef}
+          config={currentConfig}
+          gltf={gltfMap[transitionState.currentKey]}
+          reflectiveMaterial={currentConfig.isReflective ? reflectiveMaterial : null}
+        />
+      )}
 
       {/* Render previous model during transition */}
         <Preload all /> 
