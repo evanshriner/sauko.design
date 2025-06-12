@@ -50,16 +50,13 @@ interface ObjectAnimProps {
   fromX: number;
   currentX: number;
   targetX: number;
-  fromY: number;
-  currentY: number;
-  targetY: number;
 }
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-const X_OFFSET_SPACING = 2.5;
+const X_OFFSET_SPACING = 5.5;
 
 
 // Component to render a single model instance
@@ -99,7 +96,7 @@ const ModelInstance = React.forwardRef<
   }, [ref, config.scale]);
 
   return (
-    <group ref={ref} position={config.basePosition}>
+    <group ref={ref}>
       <primitive object={modelScene} />
     </group>
   );
@@ -146,18 +143,23 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     isTransitioning: false,
   });
 
-  const [objectAnimationProps, setObjectAnimationProps] = useState<ObjectAnimProps[]>(() =>
+  // This ref will hold the animation state for each object
+  const animationStates = useRef(
     objectConfigurations.map((config, index) => {
-      const initialSelectedIndex = objectConfigurations.findIndex(c => c.id === selectedObjectKey);
-      const x = (index - initialSelectedIndex) * X_OFFSET_SPACING;
+      const initialSelectedIndex = objectConfigurations.findIndex(
+        (c) => c.id === selectedObjectKey
+      );
+      const carouselOffsetX = (index - initialSelectedIndex) * X_OFFSET_SPACING;
+  
+      // Use the object's basePosition from the config as the starting point
+      const initialPos = config.basePosition.clone();
+      initialPos.x += carouselOffsetX;
+  
       return {
         id: config.id,
-        fromX: x,
-        currentX: x,
-        targetX: x,
-        fromY: config.basePosition.y,
-        currentY: config.basePosition.y,
-        targetY: config.basePosition.y,
+        // Store the full Vector3 for current and target positions
+        currentPos: initialPos,
+        targetPos: initialPos.clone(),
       };
     })
   );
@@ -193,59 +195,38 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     [reflectiveUniforms], // Vertex/Fragment shaders are static strings
   );
 
-  // useEffect(() => {
-  //   setTransitionState((prev) => {
-  //     if (prev.currentKey === selectedObjectKey && !prev.isTransitioning) return prev;
-  //     // If already transitioning to the target key, don't restart
-  //     if (prev.isTransitioning && prev.currentKey === selectedObjectKey) return prev;
+  useEffect(() => {
+    const newSelectedIndex = objectConfigurations.findIndex(
+      (c) => c.id === selectedObjectKey
+    );
+  
+    animationStates.current.forEach((state, index) => {
+      const config = objectConfigurations[index];
+      const carouselOffsetX = (index - newSelectedIndex) * X_OFFSET_SPACING;
+  
+      const basePos = config.basePosition.clone();
+  
+      // Update the entire target position vector
+      state.targetPos.copy(basePos);
+      state.targetPos.x = carouselOffsetX;
+    });
+  }, [selectedObjectKey]);
 
-  //     return {
-  //       currentKey: selectedObjectKey,
-  //       previousKey: prev.currentKey,
-  //       progress: 0, // Start transition
-  //       isTransitioning: true,
-  //     };
-  //   });
-  // }, [selectedObjectKey]);
-
-  // useEffect(() => {
-  //   if (transitionState.isTransitioning && transitionState.progress === 0) {
-  //     const newCurrentKey = transitionState.currentKey;
-  //     const newSelectedIndex = objectConfigurations.findIndex(c => c.id === newCurrentKey);
-
-  //     setObjectAnimationProps(prevAnimProps =>
-  //       prevAnimProps.map((objAnimProp, index) => {
-  //         const config = objectConfigurations[index];
-  //         const groupRef = modelRefs.current[index]?.current;
-
-  //         // Use current visual position if available, otherwise the last stored 'current' position
-  //         const startX = groupRef ? groupRef.position.x : objAnimProp.currentX;
-  //         const startY = groupRef ? groupRef.position.y : objAnimProp.currentY;
-          
-  //         return {
-  //           ...objAnimProp, // Retain other properties like id
-  //           id: config.id, // Ensure id is up to date
-  //           fromX: startX,
-  //           targetX: (index - newSelectedIndex) * X_OFFSET_SPACING,
-  //           fromY: startY,
-  //           targetY: config.basePosition.y, // Default resting Y position
-  //         };
-  //       })
-  //     );
-  //   }
-  // }, [
-  //     transitionState.isTransitioning,
-  //     transitionState.progress,
-  //     transitionState.currentKey,
-  //     // objectConfigurations dependency removed for stability, assuming it doesn't change frequently
-  //     // If it does, ensure this effect and dependent logic are robust.
-  // ]);
-
+  // This effect sets the initial position for each model to prevent a flicker
+  // from [0,0,0] on the first frame.
+  useEffect(() => {
+    modelRefs.current.forEach((ref, index) => {
+        if (ref.current) {
+            ref.current.position.copy(animationStates.current[index].currentPos);
+        }
+    });
+  }, []);
 
   useEffect(() => {
     console.log(modelRefs.current);
   }
   , [modelRefs.current]);
+
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     if (outerSphereRef.current) {
@@ -298,13 +279,42 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     //   }
     // }
 
+      // Animate objects
+    animationStates.current.forEach((animState, idx) => {
+      const groupRef = modelRefs.current[idx];
+      if (groupRef?.current) {
+          // Animate the x position using an easing function
+          groupRef.current.position.x = THREE.MathUtils.damp(
+            groupRef.current.position.x,
+            animState.targetPos.x,
+            6,
+            delta
+          );
+          groupRef.current.position.y = THREE.MathUtils.damp(
+            groupRef.current.position.y,
+            animState.targetPos.y,
+            6,
+            delta
+          );
+          groupRef.current.position.z = THREE.MathUtils.damp(
+            groupRef.current.position.z,
+            animState.targetPos.z,
+            6,
+            delta
+          );
+    
+          // Keep our state in sync with the current position for the next frame
+          animState.currentPos.copy(groupRef.current.position);
+      }
+    });
+
 
 
     // its a minor optimization to filter keys to animate, instead we are animating all keys here.
     // if we'd like to change this in the future, we can filter keysToAnimate based on transitionState or whats in view.
     // i.e.:      const keysToAnimate = objectConfigurations.map(c => c.id);   
     objectConfigurations.forEach((key, idx) => {
-      // const isCurrent = key === transitionState.currentKey;
+      // the objectConfigurations map to the modelRefs array, so we can use the index to get the correct ref
       const groupRef = modelRefs.current[idx].current;
 
 
@@ -318,11 +328,9 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
       if (!animatedMesh) return;
 
 
-      // let groupYPosition = config.basePosition.y;
+      // TODO: if the object configuration is 
 
     
-
-      // groupRef?.position.set(key.basePosition.x, key.basePosition.y, key.basePosition.z);
 
       key.rotationAnimation(animatedMesh, time, key.initialRotationOffset);
       key.floatAnimation(animatedMesh, time);

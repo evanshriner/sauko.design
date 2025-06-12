@@ -40,19 +40,19 @@ export const objectConfigurations: ObjectConfig[] = [
     initialRotationOffset: 4.73,
     isReflective: true,
   },
-//   {
-//     id: DisplayedObject.Laptop,
-//     gltfPath: '/Laptop.glb',
-//     scale: 0.4,
-//     basePosition: new THREE.Vector3(0, 0.2, 0), // Centered when active
-//     rotationAnimation: (mesh, time) => {
-//       mesh.rotation.y = time * 0.15;
-//     },
-//     floatAnimation: (mesh, time) => {
-//       mesh.position.y = Math.cos(time * 0.6) * 0.03;
-//     },
-//     isReflective: true,
-//   },
+  {
+    id: DisplayedObject.Laptop,
+    gltfPath: '/Laptop.glb',
+    scale: 0.4,
+    basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
+    rotationAnimation: (mesh, time) => {
+      mesh.rotation.y = time * 0.15;
+    },
+    floatAnimation: (mesh, time) => {
+      mesh.position.y = Math.cos(time * 0.6) * 0.03;
+    },
+    isReflective: true,
+  },
 //   {
 //     id: DisplayedObject.PostedLetter,
 //     gltfPath: '/PostedLetter.glb',
