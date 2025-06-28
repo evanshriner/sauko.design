@@ -4,9 +4,10 @@ import { Canvas } from '@react-three/fiber';
 import { DotScreen, EffectComposer, Noise } from '@react-three/postprocessing';
 
 import Shapes from './Shapes';
-import { DisplayedObject } from './ShapeConfig';
+import { DisplayedObject, objectConfigurations } from './ShapeConfig';
+import { Pages } from '@/shared/interfaces/pages';
 
-export default function Background({ scrollY, object }: { scrollY: number; object?: DisplayedObject }) {
+export default function Background({ scrollY, currentPage }: { scrollY: number; currentPage?: Pages }) {
   return (
     <Canvas
       camera={{
@@ -21,7 +22,7 @@ export default function Background({ scrollY, object }: { scrollY: number; objec
       {/* 
       <OrbitControls makeDefault /> */}
 
-      <Shapes scrollY={scrollY} selectedObjectKey={object || DisplayedObject.Boombox} />
+      <Shapes scrollY={scrollY} selectedObjectKey={objectConfigurations.find((config) => config.page === currentPage)?.id || DisplayedObject.Boombox} />
       <EffectComposer>
         {/* <DotScreen
           blendFunction={BlendFunction.NORMAL} // Try other modes like ADD, SCREEN, OVERLAY

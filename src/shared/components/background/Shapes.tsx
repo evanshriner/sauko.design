@@ -226,7 +226,7 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     const time = state.clock.getElapsedTime();
     if (outerSphereRef.current) {
       // TODO: possibly use delta here?
-      outerSphereRef.current.uniforms.time.value += 0.001;
+      outerSphereRef.current.uniforms.time.value += delta * 0.2;
     }
 
     const { gl, scene, camera } = state; // Get gl, scene, camera from state

@@ -1,4 +1,5 @@
 // src/objectConfig.ts
+import { Pages } from '@/shared/interfaces/pages';
 import * as THREE from 'three';
 
 export enum DisplayedObject {
@@ -11,6 +12,7 @@ export enum DisplayedObject {
 export interface ObjectConfig {
   id: DisplayedObject;
   gltfPath: string;
+  page: Pages;
   scale: THREE.Vector3 | number; // Uniform scale or per-axis
   basePosition: THREE.Vector3; // The "center" position it will occupy when active
   // Animation function for rotation
@@ -27,6 +29,7 @@ export interface ObjectConfig {
 export const objectConfigurations: ObjectConfig[] = [
   {
     id: DisplayedObject.Boombox,
+    page: Pages.AudioEngineering,
     gltfPath: '/Boombox.glb',
     scale: 0.45,
     basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
@@ -43,6 +46,7 @@ export const objectConfigurations: ObjectConfig[] = [
   {
     id: DisplayedObject.Laptop,
     gltfPath: '/Laptop.glb',
+    page: Pages.Software,
     scale: 0.4,
     basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
     rotationAnimation: (mesh, time) => {
