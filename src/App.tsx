@@ -1,6 +1,7 @@
 import './App.css';
 import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
+import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
 import Services from './modules/services';
 import { useEffect, useRef, useState } from 'react';
@@ -66,6 +67,7 @@ function App() {
    
      return (
        <ThemeProvider theme={theme}>
+         <CustomCursor />
          <BackgroundContainer>
          <Background scrollY={scrollY} currentPage={currentPage} />
          </BackgroundContainer>
