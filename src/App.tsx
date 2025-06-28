@@ -74,7 +74,7 @@ function App() {
              onMenuItemClick={() => {}}
              currentPage={currentPage}
            />
-           <ContentContainer ref={scrollContainerRef} data-scroll-container>
+           <ContentContainer ref={scrollContainerRef} data-scroll-container alignItems="center">
              <Home data-scroll-section setPage={setCurrentPage} currentPage={currentPage}/>
    
              <Services data-scroll-section />

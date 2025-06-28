@@ -42,7 +42,7 @@ function Home({ setPage, currentPage }: HomeProps) {
      speed: 10,
    });
 
-   return <ContentContainer id="home" justifyContent={"center"} flexDirection="column">
+   return <ContentContainer id="home" justifyContent={"center"} flexDirection="column" maxWidth="1800px">
      <FlexBox justifyContent='space-between' padding='0 0.1vw' height='50%' alignItems='flex-end'>
        <ChevronButton direction='left' onClick={handlePreviousPage}/>
        <ChevronButton direction='right' onClick={handleNextPage}/>

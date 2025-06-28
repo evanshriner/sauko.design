@@ -12,6 +12,7 @@ export interface FlexboxProps {
   alignItems?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
   flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
   width?: string;
+  maxWidth?: string;
   gap?: string;
   height?: string;
   padding?: string;
@@ -22,6 +23,7 @@ const FlexBox = styled.div<FlexboxProps>((props) => ({
   height: props.height || 'auto',
   width: props.width || '100%',
   boxSizing: 'border-box',
+  maxWidth: props.maxWidth || '100%',
   flexDirection: props.flexDirection || 'row',
   justifyContent: props.justifyContent || 'flex-start',
   alignItems: props.alignItems || 'stretch',

@@ -18,14 +18,31 @@ const StyledChevronButton = styled(FlexBox)`
   padding: 8px;
   border-radius: 50%;
   background-color: transparent;
-  transition: background-color 0.3s ease;
+  transition: transform 0.5s ease;
+  transform: scale(1);
+
+  @keyframes pulse {
+    0% {
+      opacity: 0.73;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.73;
+    }
+  }
+
+  &:hover {
+    transform: scale(1.2);
+    animation: pulse 1.5s infinite alternate;
+  }
 `;
 
 export const ChevronButton: React.FC<ChevronButtonProps> = ({
   direction,
   onClick,
   size = 78,
-  color = 'white',
 }) => {
   const Icon = direction === 'left' ? MdChevronLeft : MdChevronRight;
   return (
