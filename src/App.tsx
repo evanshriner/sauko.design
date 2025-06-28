@@ -19,6 +19,7 @@ import { Pages } from './shared/interfaces/pages';
 function App() {
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
   const [scrollY, setScrollY] = useState(0);
+  const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   // Ref to store the Locomotive Scroll instance
@@ -67,7 +68,7 @@ function App() {
    
      return (
        <ThemeProvider theme={theme}>
-         <CustomCursor />
+         <CustomCursor isHoveringNav={isHoveringNav} />
          <BackgroundContainer>
          <Background scrollY={scrollY} currentPage={currentPage} />
          </BackgroundContainer>
@@ -75,6 +76,7 @@ function App() {
            <NavBar
              onMenuItemClick={() => {}}
              currentPage={currentPage}
+             onHoverChange={setIsHoveringNav}
            />
            <ContentContainer ref={scrollContainerRef} data-scroll-container alignItems="center">
              <Home data-scroll-section setPage={setCurrentPage} currentPage={currentPage}/>
