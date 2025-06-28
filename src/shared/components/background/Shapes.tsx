@@ -21,7 +21,6 @@ import {
   FLY_OUT_Y_POSITION,
   FLY_IN_Y_START_POSITION,
 } from './ShapeConfig'; // Adjust path if needed
-import { group } from 'console';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
@@ -50,10 +49,6 @@ interface ObjectAnimProps {
   fromX: number;
   currentX: number;
   targetX: number;
-}
-
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 const X_OFFSET_SPACING = 5.5;
