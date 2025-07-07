@@ -49,7 +49,7 @@ function Home({ setPage, currentPage }: HomeProps) {
      </FlexBox>
      {/* this vw isnt bad, but im curious if there is a better way to scale text, as well as other items (like the chevron) depending on screen size.
          since the REM size is not consistent with screen size between phones (i.e. iphone SE has huge default REM,), it seems like pixels is the best option.*/}
-     <NeonText fontSize="30px" height="30%" justifyContent="center" alignItems="flex-end">{animatedText}</NeonText>
+     <NeonText fontSize="30px" height="30%" justifyContent="center" alignItems="flex-end" animatedHover>{animatedText}</NeonText>
      </ContentContainer>;
  }
  
