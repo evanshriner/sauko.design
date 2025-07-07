@@ -3,6 +3,8 @@ declare module '@emotion/react' {
     colors: {
       primaryText: string;
       primaryBackground: string;
+      defaultText: string;
+      defaultTextFilter: string;
     };
   }
 }

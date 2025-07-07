@@ -1,5 +1,5 @@
 export enum Pages {
-  AudioEngineering = 'audio engineering',
-  Software = 'prototyping',
+  AudioEngineering,
+  Software,
   // Add more object identifiers here
 }

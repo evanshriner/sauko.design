@@ -10,34 +10,33 @@ interface ChevronButtonProps {
   color?: string;
 }
 
-const StyledChevronButton = styled(FlexBox)`
-  cursor: pointer;
-  width: auto;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border-radius: 50%;
-  background-color: transparent;
-  transition: transform 0.5s ease;
-  transform: scale(1);
+const StyledChevronButton = styled(FlexBox)({
+  cursor: 'pointer',
+  width: 'auto',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '8px',
+  backgroundColor: 'transparent',
+  transition: 'transform 0.5s ease',
+  transform: 'scale(1)',
 
-  @keyframes pulse {
-    0% {
-      opacity: 0.73;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0.73;
-    }
-  }
+  '@keyframes pulse': {
+    '0%': {
+      opacity: 0.73,
+    },
+    '50%': {
+      opacity: 1,
+    },
+    '100%': {
+      opacity: 0.73,
+    },
+  },
 
-  &:hover {
-    transform: scale(1.2);
-    animation: pulse 1.5s infinite alternate;
-  }
-`;
+  '&:hover': {
+    transform: 'scale(1.2)',
+    animation: 'pulse 1.5s infinite alternate',
+  },
+});
 
 export const ChevronButton: React.FC<ChevronButtonProps> = ({
   direction,

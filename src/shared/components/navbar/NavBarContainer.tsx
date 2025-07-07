@@ -7,6 +7,7 @@ const NavBarContainer = styled(FlexBox)({
   zIndex: 1000,
   position: 'fixed',
   padding: '2rem 6rem 0',
+  gap: '16px',
 });
 
 export default NavBarContainer;

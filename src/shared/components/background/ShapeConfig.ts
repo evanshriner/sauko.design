@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 export enum DisplayedObject {
   Boombox = 'BOOMBOX',
-  Laptop = 'LAPTOP',
+  Lab = 'LAB',
   PostedLetter = 'POSTED_LETTER',
   // Add more object identifiers here
 }
@@ -44,13 +44,13 @@ export const objectConfigurations: ObjectConfig[] = [
     isReflective: true,
   },
   {
-    id: DisplayedObject.Laptop,
-    gltfPath: '/Laptop.glb',
+    id: DisplayedObject.Lab,
+    gltfPath: '/LabOptimized.glb',
     page: Pages.Software,
-    scale: 0.4,
+    scale: 0.42,
     basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
-    rotationAnimation: (mesh, time) => {
-      mesh.rotation.y = time * 0.15;
+    rotationAnimation: (mesh, time, initialOffset = 4.73) => {
+      mesh.rotation.y = -time * 0.06 - (initialOffset + (Math.sin(time * 0.5) * 0.05));
     },
     floatAnimation: (mesh, time) => {
       mesh.position.y = Math.cos(time * 0.6) * 0.03;
