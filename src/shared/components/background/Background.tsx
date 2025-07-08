@@ -7,7 +7,13 @@ import Shapes from './Shapes';
 import { DisplayedObject, objectConfigurations } from './ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
 
-export default function Background({ scrollY, currentPage }: { scrollY: number; currentPage?: Pages }) {
+export default function Background({
+  scrollY,
+  currentPage,
+}: {
+  scrollY: number;
+  currentPage?: Pages;
+}) {
   return (
     <Canvas
       camera={{
@@ -22,7 +28,13 @@ export default function Background({ scrollY, currentPage }: { scrollY: number; 
       {/* 
       <OrbitControls makeDefault /> */}
 
-      <Shapes scrollY={scrollY} selectedObjectKey={objectConfigurations.find((config) => config.page === currentPage)?.id || DisplayedObject.Boombox} />
+      <Shapes
+        scrollY={scrollY}
+        selectedObjectKey={
+          objectConfigurations.find((config) => config.page === currentPage)
+            ?.id || DisplayedObject.Boombox
+        }
+      />
       <EffectComposer>
         {/* <DotScreen
           blendFunction={BlendFunction.NORMAL} // Try other modes like ADD, SCREEN, OVERLAY
@@ -32,7 +44,7 @@ export default function Background({ scrollY, currentPage }: { scrollY: number; 
           scale={10.13} // Adjust scale
         /> */}
         {/* <CustomDotScreen /> */}
-        <Noise opacity={0.028} />
+        <Noise opacity={0.08} />
       </EffectComposer>
     </Canvas>
   );

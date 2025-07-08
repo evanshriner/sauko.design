@@ -6,6 +6,7 @@ export enum DisplayedObject {
   Boombox = 'BOOMBOX',
   Lab = 'LAB',
   PostedLetter = 'POSTED_LETTER',
+  Robot = 'ROBOT',
   // Add more object identifiers here
 }
 
@@ -34,7 +35,8 @@ export const objectConfigurations: ObjectConfig[] = [
     scale: 0.45,
     basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
     rotationAnimation: (mesh, time, initialOffset = 4.73) => {
-      mesh.rotation.y = -time * 0.06 - (initialOffset + (Math.sin(time * 0.5) * 0.05));
+      mesh.rotation.y =
+        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
     },
     floatAnimation: (mesh, time) => {
       // Floats around its local origin; group handles fly-in/out
@@ -50,27 +52,43 @@ export const objectConfigurations: ObjectConfig[] = [
     scale: 0.42,
     basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
     rotationAnimation: (mesh, time, initialOffset = 4.73) => {
-      mesh.rotation.y = -time * 0.06 - (initialOffset + (Math.sin(time * 0.5) * 0.05));
+      mesh.rotation.y =
+        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
     },
     floatAnimation: (mesh, time) => {
       mesh.position.y = Math.cos(time * 0.6) * 0.03;
     },
     isReflective: true,
   },
-//   {
-//     id: DisplayedObject.PostedLetter,
-//     gltfPath: '/PostedLetter.glb',
-//     scale: 0.6,
-//     basePosition: new THREE.Vector3(0, 0.15, 0),
-//     rotationAnimation: (mesh, time) => {
-//       mesh.rotation.x = Math.sin(time * 0.5) * 0.1;
-//       mesh.rotation.y = time * 0.2;
-//     },
-//     floatAnimation: (mesh, time) => {
-//       mesh.position.y = Math.sin(time * 0.8) * 0.05;
-//     },
-//     isReflective: true, 
-//   },
+  {
+    id: DisplayedObject.Robot,
+    gltfPath: '/Robot.glb',
+    page: Pages.AIAugmentation,
+    scale: 0.42,
+    basePosition: new THREE.Vector3(0.0, 0.2, 0), // Centered when active
+    rotationAnimation: (mesh, time, initialOffset = 4.73) => {
+      mesh.rotation.y =
+        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+    },
+    floatAnimation: (mesh, time) => {
+      mesh.position.y = Math.cos(time * 0.6) * 0.03;
+    },
+    isReflective: true,
+  },
+  //   {
+  //     id: DisplayedObject.PostedLetter,
+  //     gltfPath: '/PostedLetter.glb',
+  //     scale: 0.6,
+  //     basePosition: new THREE.Vector3(0, 0.15, 0),
+  //     rotationAnimation: (mesh, time) => {
+  //       mesh.rotation.x = Math.sin(time * 0.5) * 0.1;
+  //       mesh.rotation.y = time * 0.2;
+  //     },
+  //     floatAnimation: (mesh, time) => {
+  //       mesh.position.y = Math.sin(time * 0.8) * 0.05;
+  //     },
+  //     isReflective: true,
+  //   },
 ];
 
 // Animation constants for transitions
