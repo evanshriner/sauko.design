@@ -6,25 +6,26 @@ import dotScreenVertex from './dotScreenVertex.glsl';
 import dotScreenFragment from './dotScreenFragment.glsl';
 
 export class CustomDotScreenShaderImpl extends Effect {
-  constructor() {
+  constructor({ strength = 0.25 } = {}) {
     super(
       'CustomDotScreenShader', // Effect name
       dotScreenFragment, // Fragment shader
       {
         // Options
-        blendFunction: BlendFunction.NORMAL,
+        blendFunction: BlendFunction.ADD,
         uniforms: new Map([
-          ['tDiffuse', new Uniform(0)],
-          ['tSize', new Uniform(new Vector2(256, 256))],
-          ['center', new Uniform(new Vector2(0.5, 0.5))],
-          ['angle', new Uniform(1.57)],
-          ['scale', new Uniform(4)],
+          ['u_strength', new Uniform(strength)],
+          ['u_time', new Uniform(0)]
         ]),
         vertexShader: dotScreenVertex,
       },
     );
   }
 
+  update(renderer, inputBuffer, deltaTime) {
+    // Increment the time uniform on each frame
+    this.uniforms.get('u_time').value += deltaTime;
+  }
   //   // You can add an update(renderer, inputBuffer, deltaTime) method
   //   // if your effect needs to update uniforms frame by frame based on logic
   //   // For simple uniform changes via props, the wrapper component handles it.

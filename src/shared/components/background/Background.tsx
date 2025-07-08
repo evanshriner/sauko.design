@@ -1,11 +1,14 @@
 import { OrbitControls } from '@react-three/drei';
 import { Perf } from 'r3f-perf';
 import { Canvas } from '@react-three/fiber';
-import { DotScreen, EffectComposer, Noise } from '@react-three/postprocessing';
+import { Bloom, DepthOfField, DotScreen, EffectComposer, Sepia, Vignette } from '@react-three/postprocessing';
+import { useEffect, useRef, useState } from 'react';
 
 import Shapes from './Shapes';
 import { DisplayedObject, objectConfigurations } from './ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
+import { BlendFunction } from 'postprocessing';
+import CustomDotScreen from './shaders/CustomDotScreen';
 
 export default function Background({
   scrollY,
@@ -14,6 +17,7 @@ export default function Background({
   scrollY: number;
   currentPage?: Pages;
 }) {
+ 
   return (
     <Canvas
       camera={{
@@ -25,7 +29,8 @@ export default function Background({
       }}
     >
       {/* <Perf position="top-left" /> */}
-      {/* 
+      {/*
+
       <OrbitControls makeDefault /> */}
 
       <Shapes
@@ -43,8 +48,20 @@ export default function Background({
           // settings like 0.1 and 0.03 look really cool here as well.
           scale={10.13} // Adjust scale
         /> */}
-        {/* <CustomDotScreen /> */}
-        <Noise opacity={0.08} />
+        <CustomDotScreen />
+        {/* <Pixelation
+    granularity={20} // pixel granularity
+  /> could have this follow mouse */} 
+    <Sepia
+    intensity={0.10} // sepia intensity
+    blendFunction={BlendFunction.NORMAL} // blend mode
+  />
+    <Vignette
+    offset={0.6} // vignette offset
+    darkness={0.4} // vignette darkness
+    eskil={false} // Eskil's vignette technique
+    blendFunction={BlendFunction.NORMAL} // blend mode
+   />
       </EffectComposer>
     </Canvas>
   );

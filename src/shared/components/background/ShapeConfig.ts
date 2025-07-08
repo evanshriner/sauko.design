@@ -64,9 +64,9 @@ export const objectConfigurations: ObjectConfig[] = [
     id: DisplayedObject.Robot,
     gltfPath: '/Robot.glb',
     page: Pages.AIAugmentation,
-    scale: 0.42,
-    basePosition: new THREE.Vector3(0.0, 0.2, 0), // Centered when active
-    rotationAnimation: (mesh, time, initialOffset = 4.73) => {
+    scale: 0.011,
+    basePosition: new THREE.Vector3(0.0, -0.15, 0), // Centered when active
+    rotationAnimation: (mesh, time, initialOffset = 0) => {
       mesh.rotation.y =
         -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
     },
