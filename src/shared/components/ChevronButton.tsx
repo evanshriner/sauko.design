@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import FlexBox from './FlexBox';
 import styled from '@emotion/styled';
 
@@ -36,6 +36,31 @@ const StyledChevronButton = styled(FlexBox)({
     transform: 'scale(1.2)',
     animation: 'pulse 1.5s infinite alternate',
   },
+
+  '@keyframes springClick': {
+    '0%': {
+      transform: 'scale(1)',
+    },
+    '20%': {
+      transform: 'scale(0.8)',
+    },
+    '40%': {
+      transform: 'scale(1.2)',
+    },
+    '60%': {
+      transform: 'scale(0.9)',
+    },
+    '80%': {
+      transform: 'scale(1.1)',
+    },
+    '100%': {
+      transform: 'scale(1)',
+    },
+  },
+
+  '&:active': {
+    animation: 'springClick 2.5s ease-out',
+  },
 });
 
 export const ChevronButton: React.FC<ChevronButtonProps> = ({
@@ -46,7 +71,11 @@ export const ChevronButton: React.FC<ChevronButtonProps> = ({
   const Icon = direction === 'left' ? MdChevronLeft : MdChevronRight;
   return (
     <StyledChevronButton onClick={onClick}>
-      <Icon size={size} color={`rgba(255, 255, 255, 0.73)`} filter='url(#neonGlow)' />
+      <Icon
+        size={size}
+        color={`rgba(255, 255, 255, 0.73)`}
+        filter="url(#neonGlow)"
+      />
     </StyledChevronButton>
   );
 };

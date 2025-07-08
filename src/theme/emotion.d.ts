@@ -1,3 +1,4 @@
+import '@emotion/react';
 declare module '@emotion/react' {
   export interface Theme {
     colors: {
@@ -5,6 +6,8 @@ declare module '@emotion/react' {
       primaryBackground: string;
       defaultText: string;
       defaultTextFilter: string;
+      defaultSelected: string;
+      defaultUnselected: string;
     };
   }
 }

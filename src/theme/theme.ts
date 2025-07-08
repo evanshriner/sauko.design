@@ -6,5 +6,7 @@ export const theme: Theme = {
     primaryBackground: '#c9c8c9',
     defaultText: 'rgba(255, 255, 255, 0.73)',
     defaultTextFilter: 'url(#neonGlow)',
+    defaultSelected: 'rgba(255, 255, 255, 0.93)',
+    defaultUnselected: 'rgba(255, 255, 255, 0.31)',
   },
 };
