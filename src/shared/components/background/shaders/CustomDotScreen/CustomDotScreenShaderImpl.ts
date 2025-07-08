@@ -12,7 +12,7 @@ export class CustomDotScreenShaderImpl extends Effect {
       dotScreenFragment, // Fragment shader
       {
         // Options
-        blendFunction: BlendFunction.ADD,
+        blendFunction: BlendFunction.NORMAL,
         uniforms: new Map([
           ['u_strength', new Uniform(strength)],
           ['u_time', new Uniform(0)]
@@ -26,10 +26,4 @@ export class CustomDotScreenShaderImpl extends Effect {
     // Increment the time uniform on each frame
     this.uniforms.get('u_time').value += deltaTime;
   }
-  //   // You can add an update(renderer, inputBuffer, deltaTime) method
-  //   // if your effect needs to update uniforms frame by frame based on logic
-  //   // For simple uniform changes via props, the wrapper component handles it.
-  //   update(renderer, inputBuffer, deltaTime) {
-  //     // this.uniforms.get('intensity').value = ...; // if dynamically changing
-  //   }
 }

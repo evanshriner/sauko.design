@@ -46,9 +46,9 @@ export default function Background({
           angle={Math.PI / 12} // A different angle
           // TODO: possible adjust scale based on music visualization?
           // settings like 0.1 and 0.03 look really cool here as well.
-          scale={10.13} // Adjust scale
+          scale={0.1} // Adjust scale
         /> */}
-        <CustomDotScreen />
+        <CustomDotScreen /> 
         {/* <Pixelation
     granularity={20} // pixel granularity
   /> could have this follow mouse */} 

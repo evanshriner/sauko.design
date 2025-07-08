@@ -71,7 +71,7 @@ export const objectConfigurations: ObjectConfig[] = [
         -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
     },
     floatAnimation: (mesh, time) => {
-      mesh.position.y = Math.cos(time * 0.6) * 0.03;
+      mesh.position.y = Math.cos(time * 0.6) * 2;
     },
     isReflective: true,
   },
