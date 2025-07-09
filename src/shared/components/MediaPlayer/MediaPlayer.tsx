@@ -88,8 +88,7 @@ const ScrubberHandle = styled(motion.div)(({ theme }) => ({
   backgroundColor: `${theme.colors.defaultText}`,
   borderRadius: '50%',
   filter: theme.colors.defaultTextFilter,
-  top: '35%',
-  y: '-50%',
+  top: '30%',
   cursor: 'grab',
   boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)',
   '&:active': {
