@@ -1,16 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
-import {
-  motion,
-  PanInfo,
-  useAnimationFrame,
-  useMotionValue,
-} from 'framer-motion';
+import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
 import { useTheme } from '@emotion/react';
 import FlexBox from '../FlexBox';
 import { FaPlay, FaPause, FaExternalLinkAlt } from 'react-icons/fa';
 import { FaBackwardStep, FaForwardStep } from 'react-icons/fa6';
 import NeonText from '@/shared/styles/NeonText';
+import { useMediaPlayer } from '@/shared/hooks/useMediaPlayer';
 
 const MediaPlayerContainer = styled(FlexBox)(() => ({
   backgroundColor: 'transparent',
@@ -98,18 +94,27 @@ const ScrubberHandle = styled(motion.div)(({ theme }) => ({
 
 const MediaPlayer: React.FC = () => {
   const theme = useTheme();
+  const {
+    isPlaying,
+    progress,
+    tracks,
+    currentTrackIndex,
+    play,
+    pause,
+    skipForward,
+    skipBackward,
+    seek,
+  } = useMediaPlayer();
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0.3);
   const [scrubberWidth, setScrubberWidth] = useState(0);
 
-  const scrubberRef = useRef(null);
+  const scrubberRef = useRef<HTMLDivElement>(null);
   const handleX = useMotionValue(0);
   const handleY = useMotionValue(0);
 
-  const foregroundWaveRef = useRef(null);
-  const backgroundWaveRef = useRef(null);
-  const clipRectRef = useRef(null);
+  const foregroundWaveRef = useRef<SVGPathElement>(null);
+  const backgroundWaveRef = useRef<SVGPathElement>(null);
+  const clipRectRef = useRef<SVGRectElement>(null);
   const timeRef = useRef(0);
 
   useAnimationFrame((time, delta) => {
@@ -170,31 +175,33 @@ const MediaPlayer: React.FC = () => {
   useEffect(() => {
     const unsubscribe = handleX.onChange((latestX) => {
       const newProgress = scrubberWidth > 0 ? latestX / scrubberWidth : 0;
-      setProgress(Math.max(0, Math.min(1, newProgress)));
+      seek(Math.max(0, Math.min(1, newProgress)));
     });
     return () => unsubscribe();
-  }, [handleX, scrubberWidth]);
+  }, [handleX, scrubberWidth, seek]);
 
   // Sync progress state with visual elements (handle and clip path)
   useEffect(() => {
+    // TODO: this is the issue right here
     const newX = progress * scrubberWidth;
     handleX.set(newX);
     if (clipRectRef.current) {
-      clipRectRef.current.setAttribute('width', newX);
+      clipRectRef.current.setAttribute('width', String(newX));
     }
   }, [progress, scrubberWidth, handleX]);
 
   // --- Event Handlers ---
-
-  const togglePlayPause = () => setIsPlaying(!isPlaying);
 
   const handleScrubberClick = (e: { clientX: number }) => {
     if (!scrubberRef.current) return;
     const scrubberRect = scrubberRef.current.getBoundingClientRect();
     const clickX = e.clientX - scrubberRect.left;
     const newProgress = Math.max(0, Math.min(1, clickX / scrubberWidth));
-    setProgress(newProgress);
+    seek(newProgress);
   };
+
+  const currentTrack =
+    currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
 
   return (
     <MediaPlayerContainer
@@ -202,7 +209,7 @@ const MediaPlayer: React.FC = () => {
       alignItems="center"
       gap="16px"
     >
-      <PlayPauseButton onClick={togglePlayPause}>
+      <PlayPauseButton onClick={isPlaying ? pause : play}>
         {isPlaying ? (
           <PlayPauseIcon key="pause">
             <FaPause />
@@ -215,10 +222,12 @@ const MediaPlayer: React.FC = () => {
       </PlayPauseButton>
       <FlexBox width="100%" flexDirection="column">
         <NeonText fontSize="14px" justifyContent="center" alignItems="center">
-          steady.220 | suralo
+          {currentTrack
+            ? `${currentTrack.title} | ${currentTrack.artist}`
+            : 'No track loaded'}
         </NeonText>
         <FlexBox justifyContent="space-around" width="100%" alignItems="center">
-          <ControlButton>
+          <ControlButton onClick={skipBackward}>
             <FaBackwardStep />
           </ControlButton>
 
@@ -265,7 +274,7 @@ const MediaPlayer: React.FC = () => {
             />
           </ScrubberContainer>
 
-          <ControlButton>
+          <ControlButton onClick={skipForward}>
             <FaForwardStep />
           </ControlButton>
         </FlexBox>

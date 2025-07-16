@@ -49,7 +49,7 @@ export const objectConfigurations: ObjectConfig[] = [
     id: DisplayedObject.Lab,
     gltfPath: '/LabOptimized.glb',
     page: Pages.Software,
-    scale: 0.42,
+    scale: 0.47,
     basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
     rotationAnimation: (mesh, time, initialOffset = 4.73) => {
       mesh.rotation.y =
