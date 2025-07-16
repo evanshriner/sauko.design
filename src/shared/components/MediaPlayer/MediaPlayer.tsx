@@ -116,11 +116,23 @@ const MediaPlayer: React.FC = () => {
   const backgroundWaveRef = useRef<SVGPathElement>(null);
   const clipRectRef = useRef<SVGRectElement>(null);
   const timeRef = useRef(0);
+  const isDraggingRef = useRef(false);
 
   useAnimationFrame((time, delta) => {
     // Only animate the wave if playing
     if (isPlaying) {
       timeRef.current += delta / 1500; // Adjust divisor to control speed
+    }
+
+    // Sync progress state with visual elements (handle and clip path)
+    // We do this in useAnimationFrame to ensure smooth updates that are
+    // synced with the browser's paint cycle, and only when not dragging.
+    if (scrubberWidth > 0 && !isDraggingRef.current) {
+      const newX = progress * scrubberWidth;
+      handleX.set(newX);
+      if (clipRectRef.current) {
+        clipRectRef.current.setAttribute('width', String(newX));
+      }
     }
 
     if (
@@ -174,21 +186,13 @@ const MediaPlayer: React.FC = () => {
   // Sync handle drag position with progress state
   useEffect(() => {
     const unsubscribe = handleX.onChange((latestX) => {
+      // Only seek when the user is actively dragging the handle
+      if (!isDraggingRef.current) return;
       const newProgress = scrubberWidth > 0 ? latestX / scrubberWidth : 0;
       seek(Math.max(0, Math.min(1, newProgress)));
     });
     return () => unsubscribe();
   }, [handleX, scrubberWidth, seek]);
-
-  // Sync progress state with visual elements (handle and clip path)
-  useEffect(() => {
-    // TODO: this is the issue right here
-    const newX = progress * scrubberWidth;
-    handleX.set(newX);
-    if (clipRectRef.current) {
-      clipRectRef.current.setAttribute('width', String(newX));
-    }
-  }, [progress, scrubberWidth, handleX]);
 
   // --- Event Handlers ---
 
@@ -271,6 +275,8 @@ const MediaPlayer: React.FC = () => {
               dragElastic={0}
               dragMomentum={false}
               style={{ x: handleX, y: handleY }}
+              onDragStart={() => (isDraggingRef.current = true)}
+              onDragEnd={() => (isDraggingRef.current = false)}
             />
           </ScrubberContainer>
 

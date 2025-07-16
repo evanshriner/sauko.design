@@ -38,25 +38,14 @@ export const useMediaPlayer = () => {
     const syncPlayState = () => {
       setIsPlaying(!audio.paused);
     };
-    const handleWaiting = () => {
-      // console.log('Audio playback stopped to buffer. (waiting event)');
-    };
-    const handleStalled = () => {
-      // console.log(
-      //   'Browser is trying to get media data, but data is not available. (stalled event)',
-      // );
-    };
+
     audio.addEventListener('play', syncPlayState);
     audio.addEventListener('pause', syncPlayState);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('waiting', handleWaiting);
-    audio.addEventListener('stalled', handleStalled);
     return () => {
       audio.removeEventListener('play', syncPlayState);
       audio.removeEventListener('pause', syncPlayState);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('waiting', handleWaiting);
-      audio.removeEventListener('stalled', handleStalled);
     };
   }, [handleLoadedMetadata]);
 
@@ -87,7 +76,7 @@ export const useMediaPlayer = () => {
     const now = Date.now();
     const audio = audioRef.current;
     // so we dont spam progress updates
-    if (now - lastProgressUpdate.current > 250) {
+    if (now - lastProgressUpdate.current > 150) {
       if (audio.duration > 0) {
         lastProgressUpdate.current = now;
         setProgress(audio.currentTime / audio.duration);
