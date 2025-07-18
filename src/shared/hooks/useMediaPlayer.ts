@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+
+type WindowWithAudioContext = Window &
+  typeof globalThis & {
+    webkitAudioContext: typeof AudioContext;
+  };
 import { Track, AudioService } from '../services/AudioService';
 
 const audioService = new AudioService();
@@ -14,6 +19,8 @@ export const useMediaPlayer = () => {
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const lastProgressUpdate = useRef<number>(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
     audioRef.current.preload = 'auto';
@@ -26,6 +33,16 @@ export const useMediaPlayer = () => {
       }
     };
     fetchTracks();
+    const audio = audioRef.current;
+    if (audioContextRef.current && analyserRef.current) {
+      const source = audioContextRef.current.createMediaElementSource(audio);
+      source.connect(analyserRef.current);
+      analyserRef.current.connect(audioContextRef.current.destination);
+
+      return () => {
+        source.disconnect();
+      };
+    }
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
@@ -49,10 +66,29 @@ export const useMediaPlayer = () => {
     };
   }, [handleLoadedMetadata]);
 
+  useEffect(() => {
+    if (!audioContextRef.current) {
+      try {
+        const context = new (window.AudioContext ||
+          (window as WindowWithAudioContext).webkitAudioContext)();
+        audioContextRef.current = context;
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+        analyserRef.current = analyser;
+      } catch (e) {
+        console.error('Web Audio API is not supported in this browser', e);
+      }
+    }
+  }, []);
+
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   });
+
+  useEffect(() => {
+    console.log('Analyser node updated:', analyserRef.current);
+  }, [analyserRef.current]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -146,5 +182,7 @@ export const useMediaPlayer = () => {
     skipForward,
     skipBackward,
     seek,
+    audioRef,
+    analyserRef,
   };
 };

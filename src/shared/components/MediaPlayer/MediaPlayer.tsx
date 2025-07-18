@@ -6,7 +6,7 @@ import FlexBox from '../FlexBox';
 import { FaPlay, FaPause, FaExternalLinkAlt } from 'react-icons/fa';
 import { FaBackwardStep, FaForwardStep } from 'react-icons/fa6';
 import NeonText from '@/shared/styles/NeonText';
-import { useMediaPlayer } from '@/shared/hooks/useMediaPlayer';
+import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 
 const MediaPlayerContainer = styled(FlexBox)(() => ({
   backgroundColor: 'transparent',
@@ -104,7 +104,7 @@ const MediaPlayer: React.FC = () => {
     skipForward,
     skipBackward,
     seek,
-  } = useMediaPlayer();
+  } = useMediaPlayerContext();
 
   const [scrubberWidth, setScrubberWidth] = useState(0);
 
