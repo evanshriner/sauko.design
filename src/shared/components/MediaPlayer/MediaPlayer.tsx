@@ -1,96 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled from '@emotion/styled';
 import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
 import { useTheme } from '@emotion/react';
 import FlexBox from '../FlexBox';
 import { FaPlay, FaPause, FaExternalLinkAlt } from 'react-icons/fa';
 import { FaBackwardStep, FaForwardStep } from 'react-icons/fa6';
-import NeonText from '@/shared/styles/NeonText';
-import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
-
-const MediaPlayerContainer = styled(FlexBox)(() => ({
-  backgroundColor: 'transparent',
-  borderRadius: '0px',
-  padding: '8px',
-  maxWidth: '500px',
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-}));
-
-const ControlButton = styled(motion.button)(({ theme }) => ({
-  background: 'none',
-  border: 'none',
-  color: theme.colors.defaultText,
-  filter: theme.colors.defaultTextFilter,
-  fontSize: '1rem',
-  cursor: 'pointer',
-  padding: '8px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'transform 0.5s ease',
-  transform: 'scale(1)',
-
-  '@keyframes pulse': {
-    '0%': {
-      opacity: 0.73,
-    },
-    '50%': {
-      opacity: 1,
-    },
-    '100%': {
-      opacity: 0.73,
-    },
-  },
-
-  '&:hover': {
-    transform: 'scale(1.2)',
-    animation: 'pulse 1.5s infinite alternate',
-  },
-}));
-
-const PlayPauseButton = styled(ControlButton)(({ theme }) => ({
-  border: `2px solid ${theme.colors.defaultText}`,
-  display: 'flex',
-  fontSize: '0.9rem',
-  justifyContent: 'center',
-  alignItems: 'center',
-  overflow: 'hidden',
-}));
-
-const PlayPauseIcon = styled(motion.div)(() => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  width: '100%',
-  height: '100%',
-}));
-
-const ScrubberContainer = styled(FlexBox)({
-  position: 'relative',
-  width: '100%',
-  height: '24px',
-  marginTop: '9px',
-  cursor: 'pointer',
-  alignItems: 'center',
-  // Padding provides space so the handle doesn't overlap the container edges
-});
-
-const ScrubberHandle = styled(motion.div)(({ theme }) => ({
-  position: 'absolute',
-  width: '14px',
-  height: '14px',
-  backgroundColor: `${theme.colors.defaultText}`,
-  borderRadius: '50%',
-  filter: theme.colors.defaultTextFilter,
-  top: '30%',
-  cursor: 'grab',
-  boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)',
-  '&:active': {
-    cursor: 'grabbing',
-  },
-}));
+import NeonText from '../../styles/NeonText';
+import { useMediaPlayerContext } from '../../context/MediaPlayerContext';
+import * as C from './constants';
+import {
+  ControlButton,
+  MediaPlayerContainer,
+  PlayPauseButton,
+  PlayPauseIcon,
+  ScrubberContainer,
+  ScrubberHandle,
+} from './styles';
 
 const MediaPlayer: React.FC = () => {
   const theme = useTheme();
@@ -121,7 +45,7 @@ const MediaPlayer: React.FC = () => {
   useAnimationFrame((time, delta) => {
     // Only animate the wave if playing
     if (isPlaying) {
-      timeRef.current += delta / 1500; // Adjust divisor to control speed
+      timeRef.current += delta / C.WAVE_ANIMATION_SPEED_DIVISOR; // Adjust divisor to control speed
     }
 
     // Sync progress state with visual elements (handle and clip path)
@@ -142,8 +66,8 @@ const MediaPlayer: React.FC = () => {
     )
       return;
 
-    const amplitude = 3.5; // Wave height
-    const frequency = 5; // Number of full waves across the scrubber
+    const amplitude = C.WAVE_AMPLITUDE; // Wave height
+    const frequency = C.WAVE_FREQUENCY; // Number of full waves across the scrubber
 
     // Build the SVG path string for the sine wave
     let d = `M 0 0`;
@@ -161,10 +85,11 @@ const MediaPlayer: React.FC = () => {
     const currentX = handleX.get();
     const handleAngle =
       (currentX / scrubberWidth) * frequency * Math.PI * 2 + timeRef.current;
-    const handleYOffset = Math.sin(handleAngle) * amplitude * 1.1; // Slightly larger amplitude for handle
+    const handleYOffset =
+      Math.sin(handleAngle) * amplitude * C.HANDLE_AMPLITUDE_MULTIPLIER; // Slightly larger amplitude for handle
 
     // Set Y value: wave offset - half handle height to center the handle on the wave
-    handleY.set(handleYOffset - 7); // 14px handle height / 2 = 8
+    handleY.set(handleYOffset - C.SCRUBBER_HANDLE_Y_OFFSET);
   });
 
   useEffect(() => {
@@ -211,7 +136,7 @@ const MediaPlayer: React.FC = () => {
     <MediaPlayerContainer
       justifyContent="space-around"
       alignItems="center"
-      gap="16px"
+      gap={C.MEDIA_PLAYER_GAP}
     >
       <PlayPauseButton onClick={isPlaying ? pause : play}>
         {isPlaying ? (
@@ -225,7 +150,11 @@ const MediaPlayer: React.FC = () => {
         )}
       </PlayPauseButton>
       <FlexBox width="100%" flexDirection="column">
-        <NeonText fontSize="14px" justifyContent="center" alignItems="center">
+        <NeonText
+          fontSize={C.TRACK_INFO_FONT_SIZE}
+          justifyContent="center"
+          alignItems="center"
+        >
           {currentTrack
             ? `${currentTrack.title} | ${currentTrack.artist}`
             : 'No track loaded'}
