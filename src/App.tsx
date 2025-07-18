@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import FlexBox from '@/shared/components/FlexBox';
 import Background from '@/shared/components/background/Background';
 import BackgroundContainer from '@/shared/components/background/BackgroundContainer';
-import NavBar, { Page } from '@/shared/components/navbar/index';
+import NavBar from '@/shared/components/navbar/index';
 import ContentContainer from '@/shared/components/contentContainer';
 
 // Import Locomotive Scroll CSS and JS directly
@@ -19,7 +19,6 @@ import { Pages } from './shared/interfaces/pages';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
-  const [scrollY, setScrollY] = useState(0);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -45,9 +44,7 @@ function App() {
       // locomotiveScrollRef.current.stop();
 
       // Listen for scroll events
-      scroll.on('scroll', (obj: { scroll: { y: number } }) => {
-        setScrollY(obj.scroll.y);
-      });
+      scroll.on('scroll', () => {});
 
       // --- Update on Resize ---
       resizeObserver = new ResizeObserver(() => {
@@ -72,12 +69,12 @@ function App() {
       <MediaPlayerProvider>
         <CustomCursor isHoveringNav={isHoveringNav} />
         <BackgroundContainer>
-          <Background scrollY={scrollY} currentPage={currentPage} />
+          <Background currentPage={currentPage} />
         </BackgroundContainer>
         <FlexBox flexDirection="column">
           <NavBar
             onMenuItemClick={() => {}}
-            currentPage={currentPage}
+            currentPage={currentPage.toString()}
             onHoverChange={setIsHoveringNav}
           />
           <ContentContainer
