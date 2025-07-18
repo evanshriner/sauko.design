@@ -1,5 +1,6 @@
 uniform float time;
 uniform vec4 resolution;
+uniform float uAmplitude;
 varying vec3 vPosition;
 
 
@@ -47,18 +48,20 @@ float lines(vec2 uv, float offset) {
 void main() {
     float n = noise(vPosition + time);
 
-    vec3 color1 = vec3(20./255.,23./255.,24./255.);
-    vec3 color3 = vec3(9./255.,6./255.,3./255.);
-    vec3 color2 = vec3(40./255.,40./255.,40./255.);
+    vec3 color1 = vec3(20./255., 23./255., 24./255.);
+    vec3 color3 = vec3(9./255., 6./255., 3./255.);
 
-    vec2 b_uv = rotate2D(n)*vPosition.xy*0.1;
+    // Intensity of color2 fluctuates with audio amplitude
+    float intensity = (120.0 + 160.0 * uAmplitude) / 255.0;
+    vec3 color2 = vec3(intensity);
+
+    vec2 b_uv = rotate2D(n) * vPosition.xy * 0.1;
 
     float pattern = lines(b_uv, 0.5);
-
     float pattern2 = lines(b_uv, 0.1);
 
-    vec3 mixedColors = mix(color1,color2,pattern);
-    vec3 mixedColors2 = mix(mixedColors,color3,pattern2);
+    vec3 mixedColors = mix(color1, color2, pattern);
+    vec3 mixedColors2 = mix(mixedColors, color3, pattern2);
 
-    gl_FragColor = vec4(vec3(mixedColors2),1.);
+    gl_FragColor = vec4(mixedColors2, 1.0);
 }

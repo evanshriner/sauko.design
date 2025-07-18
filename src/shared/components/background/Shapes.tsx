@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState, Suspense } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Preload } from '@react-three/drei';
 import type { GLTF } from 'three-stdlib';
@@ -17,10 +17,8 @@ import {
   DisplayedObject,
   ObjectConfig,
   objectConfigurations,
-  ANIMATION_DURATION,
-  FLY_OUT_Y_POSITION,
-  FLY_IN_Y_START_POSITION,
 } from './ShapeConfig'; // Adjust path if needed
+import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
@@ -34,7 +32,6 @@ const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
 
 interface ShapesSwitcherProps {
   selectedObjectKey: DisplayedObject;
-  scrollY?: number; // Retained if needed for other effects, e.g. camera adjustments
 }
 
 interface TransitionState {
@@ -44,15 +41,7 @@ interface TransitionState {
   isTransitioning: boolean;
 }
 
-interface ObjectAnimProps {
-  id: DisplayedObject;
-  fromX: number;
-  currentX: number;
-  targetX: number;
-}
-
 const X_OFFSET_SPACING = 5.5;
-
 
 // Component to render a single model instance
 const ModelInstance = React.forwardRef<
@@ -72,7 +61,7 @@ const ModelInstance = React.forwardRef<
         // Apply reflective material if configured and available
         if (config.isReflective && reflectiveMaterial) {
           child.material = reflectiveMaterial;
-        } 
+        }
         // You might need more sophisticated material handling based on your GLTF structure
       }
     });
@@ -97,42 +86,33 @@ const ModelInstance = React.forwardRef<
   );
 });
 
-export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObject.Boombox}: ShapesSwitcherProps) {
+export default function Shapes({
+  selectedObjectKey = DisplayedObject.Boombox,
+}: ShapesSwitcherProps) {
+  const { analyserRef: analyser } = useMediaPlayerContext();
   const outerSphereRef = useRef<THREE.ShaderMaterial>(null);
-  const modelRefs = useRef(objectConfigurations.map(() => React.createRef<THREE.Group>()));
-  const currentModelGroupRef = useRef<THREE.Group>(null);
-  const previousModelGroupRef = useRef<THREE.Group>(null);
-  const reflectiveShapeRef = useRef<THREE.ShaderMaterial | null>(null);
-  const boomboxMeshRef = useRef<THREE.Mesh | null>(null);
-  const laptopMeshRef = useRef<THREE.Mesh | null>(null);
+  const modelRefs = useRef(
+    objectConfigurations.map(() => React.createRef<THREE.Group>()),
+  );
 
-  const gltfDataArray = objectConfigurations.map(config => ({
-    id: config.id,
-    data: useGLTF(config.gltfPath) as GLTF,
-  }));
+  const gltfPaths = objectConfigurations.map((config) => config.gltfPath);
+  const gltfs = useGLTF(gltfPaths) as GLTF[];
 
   const gltfMap = useMemo(() => {
     const map: Record<DisplayedObject, GLTF> = {} as any;
-    gltfDataArray.forEach(item => {
-      map[item.id] = item.data;
+    objectConfigurations.forEach((config, index) => {
+      map[config.id] = gltfs[index];
     });
     return map;
-  }, [gltfDataArray]);
+  }, [gltfs]);
 
-
-  
-
-
- 
   useEffect(() => {
     console.log('gltf map:', gltfMap);
-  }, [gltfMap, ]);
-
+  }, [gltfMap]);
 
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
 
-
-  const [transitionState, setTransitionState] = useState<TransitionState>({
+  const [transitionState] = useState<TransitionState>({
     currentKey: selectedObjectKey,
     progress: 1,
     isTransitioning: false,
@@ -142,21 +122,21 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
   const animationStates = useRef(
     objectConfigurations.map((config, index) => {
       const initialSelectedIndex = objectConfigurations.findIndex(
-        (c) => c.id === selectedObjectKey
+        (c) => c.id === selectedObjectKey,
       );
       const carouselOffsetX = (index - initialSelectedIndex) * X_OFFSET_SPACING;
-  
+
       // Use the object's basePosition from the config as the starting point
       const initialPos = config.basePosition.clone();
       initialPos.x += carouselOffsetX;
-  
+
       return {
         id: config.id,
         // Store the full Vector3 for current and target positions
         currentPos: initialPos,
         targetPos: initialPos.clone(),
       };
-    })
+    }),
   );
 
   // Memoized shader uniforms and materials
@@ -164,6 +144,7 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     () => ({
       time: { value: 0 },
       resolution: { value: new THREE.Vector4() },
+      uAmplitude: { value: 0.0 },
     }),
     [],
   );
@@ -181,7 +162,6 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
   const reflectiveMaterial = useMemo(
     () =>
       new THREE.ShaderMaterial({
-        extensions: { derivatives: '#extension GL_OES_standard_derivatives : enable' },
         side: THREE.DoubleSide,
         uniforms: reflectiveUniforms,
         vertexShader: reflectiveVertex,
@@ -192,15 +172,15 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
 
   useEffect(() => {
     const newSelectedIndex = objectConfigurations.findIndex(
-      (c) => c.id === selectedObjectKey
+      (c) => c.id === selectedObjectKey,
     );
-  
+
     animationStates.current.forEach((state, index) => {
       const config = objectConfigurations[index];
       const carouselOffsetX = (index - newSelectedIndex) * X_OFFSET_SPACING;
-  
+
       const basePos = config.basePosition.clone();
-  
+
       // Update the entire target position vector
       state.targetPos.copy(basePos);
       state.targetPos.x = carouselOffsetX;
@@ -211,16 +191,15 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
   // from [0,0,0] on the first frame.
   useEffect(() => {
     modelRefs.current.forEach((ref, index) => {
-        if (ref.current) {
-            ref.current.position.copy(animationStates.current[index].currentPos);
-        }
+      if (ref.current) {
+        ref.current.position.copy(animationStates.current[index].currentPos);
+      }
     });
   }, []);
 
   useEffect(() => {
     console.log(modelRefs.current);
-  }
-  , [modelRefs.current]);
+  }, [modelRefs.current]);
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
@@ -229,8 +208,20 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
       outerSphereRef.current.uniforms.time.value += delta * 0.2;
     }
 
-    const { gl, scene, camera } = state; // Get gl, scene, camera from state
+    if (analyser?.current) {
+      const dataArray = new Uint8Array(analyser.current.frequencyBinCount);
+      analyser.current.getByteFrequencyData(dataArray);
+      const average =
+        dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
+      const normalizedAverage = average / 255;
 
+      if (outerSphereRef.current) {
+        console.log('Setting amplitude:', normalizedAverage);
+        outerSphereRef.current.uniforms.uAmplitude.value = normalizedAverage;
+      }
+    }
+
+    const { gl, scene, camera } = state; // Get gl, scene, camera from state
 
     ///////////// camera adjustments /////////////
 
@@ -243,7 +234,6 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     camera.position.y = 0.3; // Keep your scroll effect if needed
 
     camera.lookAt(0, 0.3, 0); // Always look at the center
-
 
     ///////////// ensure reflections on shapes are updated /////////////
     const reflectiveMeshesInScene: THREE.Mesh[] = [];
@@ -274,44 +264,41 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     //   }
     // }
 
-      // Animate objects
+    // Animate objects
     animationStates.current.forEach((animState, idx) => {
       const groupRef = modelRefs.current[idx];
       if (groupRef?.current) {
-          // Animate the x position using an easing function
-          groupRef.current.position.x = THREE.MathUtils.damp(
-            groupRef.current.position.x,
-            animState.targetPos.x,
-            6,
-            delta
-          );
-          groupRef.current.position.y = THREE.MathUtils.damp(
-            groupRef.current.position.y,
-            animState.targetPos.y,
-            6,
-            delta
-          );
-          groupRef.current.position.z = THREE.MathUtils.damp(
-            groupRef.current.position.z,
-            animState.targetPos.z,
-            6,
-            delta
-          );
-    
-          // Keep our state in sync with the current position for the next frame
-          animState.currentPos.copy(groupRef.current.position);
+        // Animate the x position using an easing function
+        groupRef.current.position.x = THREE.MathUtils.damp(
+          groupRef.current.position.x,
+          animState.targetPos.x,
+          6,
+          delta,
+        );
+        groupRef.current.position.y = THREE.MathUtils.damp(
+          groupRef.current.position.y,
+          animState.targetPos.y,
+          6,
+          delta,
+        );
+        groupRef.current.position.z = THREE.MathUtils.damp(
+          groupRef.current.position.z,
+          animState.targetPos.z,
+          6,
+          delta,
+        );
+
+        // Keep our state in sync with the current position for the next frame
+        animState.currentPos.copy(groupRef.current.position);
       }
     });
 
-
-
     // its a minor optimization to filter keys to animate, instead we are animating all keys here.
     // if we'd like to change this in the future, we can filter keysToAnimate based on transitionState or whats in view.
-    // i.e.:      const keysToAnimate = objectConfigurations.map(c => c.id);   
+    // i.e.:      const keysToAnimate = objectConfigurations.map(c => c.id);
     objectConfigurations.forEach((key, idx) => {
       // the objectConfigurations map to the modelRefs array, so we can use the index to get the correct ref
       const groupRef = modelRefs.current[idx].current;
-
 
       // Find the first actual mesh within the loaded GLTF scene for detailed animations
       let animatedMesh: THREE.Mesh | undefined;
@@ -322,10 +309,7 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
       });
       if (!animatedMesh) return;
 
-
-      // TODO: if the object configuration is 
-
-    
+      // TODO: if the object configuration is
 
       key.rotationAnimation(animatedMesh, time, key.initialRotationOffset);
       key.floatAnimation(animatedMesh, time);
@@ -385,16 +369,12 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
     // }
   });
 
-  const currentConfig = objectConfigurations.find(c => c.id === transitionState.currentKey);
-  const previousConfig = transitionState.previousKey ? objectConfigurations.find(c => c.id === transitionState.previousKey) : undefined;
-
   return (
     <>
       {/* render background / surrounding sphere */}
       <mesh geometry={sphereGeometry}>
         <shaderMaterial
           ref={outerSphereRef}
-          extensions={{ derivatives: '#extension GL_OES_standard_derivatives : enable' }}
           side={THREE.BackSide}
           uniforms={outerUniforms}
           vertexShader={wavesVertex}
@@ -421,9 +401,8 @@ export default function Shapes({ scrollY = 0, selectedObjectKey = DisplayedObjec
         );
       })}
 
-
       {/* Render previous model during transition */}
-        <Preload all /> 
+      <Preload all />
     </>
   );
 }

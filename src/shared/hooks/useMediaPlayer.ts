@@ -16,6 +16,7 @@ export const useMediaPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isAudioGraphSetup, setIsAudioGraphSetup] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const lastProgressUpdate = useRef<number>(0);
@@ -33,16 +34,6 @@ export const useMediaPlayer = () => {
       }
     };
     fetchTracks();
-    const audio = audioRef.current;
-    if (audioContextRef.current && analyserRef.current) {
-      const source = audioContextRef.current.createMediaElementSource(audio);
-      source.connect(analyserRef.current);
-      analyserRef.current.connect(audioContextRef.current.destination);
-
-      return () => {
-        source.disconnect();
-      };
-    }
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
@@ -65,21 +56,6 @@ export const useMediaPlayer = () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [handleLoadedMetadata]);
-
-  useEffect(() => {
-    if (!audioContextRef.current) {
-      try {
-        const context = new (window.AudioContext ||
-          (window as WindowWithAudioContext).webkitAudioContext)();
-        audioContextRef.current = context;
-        const analyser = context.createAnalyser();
-        analyser.fftSize = 256;
-        analyserRef.current = analyser;
-      } catch (e) {
-        console.error('Web Audio API is not supported in this browser', e);
-      }
-    }
-  }, []);
 
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {
@@ -134,14 +110,40 @@ export const useMediaPlayer = () => {
   }, [isPlaying, progressLoop]);
 
   const play = useCallback(async () => {
-    if (currentTrackIndex !== null) {
-      try {
-        await audioRef.current.play();
-      } catch (error) {
-        console.error('Playback failed:', error);
+    if (currentTrackIndex === null) return;
+
+    if (!isAudioGraphSetup) {
+      if (!audioContextRef.current) {
+        try {
+          const context = new (window.AudioContext ||
+            (window as WindowWithAudioContext).webkitAudioContext)();
+          audioContextRef.current = context;
+          const analyser = context.createAnalyser();
+          analyser.fftSize = 256;
+          analyserRef.current = analyser;
+        } catch (e) {
+          console.error('Web Audio API is not supported in this browser', e);
+          return;
+        }
+      }
+      const audio = audioRef.current;
+      if (audioContextRef.current && analyserRef.current) {
+        const source = audioContextRef.current.createMediaElementSource(audio);
+        source.connect(analyserRef.current);
+        analyserRef.current.connect(audioContextRef.current.destination);
+        setIsAudioGraphSetup(true);
       }
     }
-  }, [currentTrackIndex]);
+
+    try {
+      if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      await audioRef.current.play();
+    } catch (error) {
+      console.error('Playback failed:', error);
+    }
+  }, [currentTrackIndex, isAudioGraphSetup]);
 
   const pause = useCallback(() => {
     audioRef.current.pause();
