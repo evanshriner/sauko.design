@@ -8,6 +8,52 @@ import { Track, AudioService } from '../services/AudioService';
 
 const audioService = new AudioService();
 
+const getAmplitudeForFrequencyRange = (
+  analyser: AnalyserNode,
+  dataArray: Uint8Array,
+  minFreq: number,
+  maxFreq: number,
+): number => {
+  const sampleRate = analyser.context.sampleRate;
+  const frequencyBinCount = analyser.frequencyBinCount;
+  const maxPossibleFreq = sampleRate / 2;
+  const { minDecibels, maxDecibels } = analyser;
+
+  const startIndex = Math.floor((minFreq / maxPossibleFreq) * frequencyBinCount);
+  const endIndex = Math.min(
+    Math.floor((maxFreq / maxPossibleFreq) * frequencyBinCount),
+    frequencyBinCount - 1,
+  );
+
+  if (startIndex >= endIndex) return 0;
+
+  let linearSum = 0;
+  const decibelRange = maxDecibels - minDecibels;
+
+  for (let i = startIndex; i < endIndex; i++) {
+    const amplitudeByte = dataArray[i];
+    // Convert byte value back to decibels
+    const decibels = (amplitudeByte / 255) * decibelRange + minDecibels;
+    // Convert decibels to linear amplitude
+    const linear = Math.pow(10, decibels / 20);
+    linearSum += linear;
+  }
+
+  const averageLinear = linearSum / (endIndex - startIndex);
+
+  // Normalize the average linear amplitude against the max possible amplitude.
+  const maxLinearAmplitude = Math.pow(10, maxDecibels / 20);
+
+  if (maxLinearAmplitude === 0) return 0;
+
+  let normalizedAmplitude = averageLinear / maxLinearAmplitude;
+
+  // Clamp to 0-1 range to be safe.
+  normalizedAmplitude = Math.max(0, Math.min(1, normalizedAmplitude));
+
+  return normalizedAmplitude;
+};
+
 export const useMediaPlayer = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
@@ -17,6 +63,9 @@ export const useMediaPlayer = () => {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isAudioGraphSetup, setIsAudioGraphSetup] = useState(false);
+  const [amplitude, setAmplitude] = useState(0);
+  const [intensity, setIntensity] = useState(100);
+  const amplitudeHistoryRef = useRef<number[]>([]);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const lastProgressUpdate = useRef<number>(0);
@@ -72,6 +121,9 @@ export const useMediaPlayer = () => {
       const track = tracks[currentTrackIndex];
       audio.src = track.url;
       audio.load();
+
+      setAmplitude(0);
+
       if (isPlayingRef.current) {
         audio.play().catch((e) => {
           console.error('Autoplay failed', e);
@@ -93,6 +145,43 @@ export const useMediaPlayer = () => {
         lastProgressUpdate.current = now;
         setProgress(audio.currentTime / audio.duration);
       }
+    }
+
+    if (analyserRef.current) {
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteFrequencyData(dataArray);
+      const rawAmplitude = getAmplitudeForFrequencyRange(
+        analyserRef.current,
+        dataArray,
+        100,
+        14000,
+      );
+
+      const history = amplitudeHistoryRef.current;
+      history.push(rawAmplitude);
+      if (history.length > 15) {
+        history.shift();
+      }
+
+      const minAmp = Math.min(...history);
+      const maxAmp = Math.max(...history);
+      let range = maxAmp - minAmp;
+
+      // establish a minimum dynamic range to stabilize output for smooth audio
+      const MIN_RANGE = 0.15;
+      range = Math.max(range, MIN_RANGE);
+
+      let dynamicAmplitude = (rawAmplitude - minAmp) / range;
+
+      // clamp the value to a 0-1 range.
+      dynamicAmplitude = Math.max(0, Math.min(1.0, dynamicAmplitude));
+
+      // apply a power curve to make quieter dynamics more visible
+      const finalAmplitude = Math.pow(dynamicAmplitude, 1.5);
+
+      // console.log('finalAmplitude:', finalAmplitude);
+      // smoothing and intensity scaling
+      setAmplitude((prev) => prev * 0.5 + finalAmplitude * (intensity * 2));
     }
   }, []);
 
@@ -119,7 +208,10 @@ export const useMediaPlayer = () => {
             (window as WindowWithAudioContext).webkitAudioContext)();
           audioContextRef.current = context;
           const analyser = context.createAnalyser();
-          analyser.fftSize = 256;
+          analyser.fftSize = 2048;
+          analyser.smoothingTimeConstant = 0.2;
+          analyser.minDecibels = -90;
+          analyser.maxDecibels = -10;
           analyserRef.current = analyser;
         } catch (e) {
           console.error('Web Audio API is not supported in this browser', e);
@@ -186,5 +278,8 @@ export const useMediaPlayer = () => {
     seek,
     audioRef,
     analyserRef,
+    amplitude,
+    intensity,
+    setIntensity,
   };
 };

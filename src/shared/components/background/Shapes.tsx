@@ -20,39 +20,6 @@ import {
 } from './ShapeConfig'; // Adjust path if needed
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 
-const getAmplitudeForFrequencyRange = (
-  analyser: AnalyserNode,
-  dataArray: Uint8Array,
-  minFreq: number,
-  maxFreq: number,
-): number => {
-  const sampleRate = analyser.context.sampleRate;
-  const frequencyBinCount = analyser.frequencyBinCount;
-  const maxPossibleFreq = sampleRate / 2;
-
-  // Calculate start and end indices for the frequency range
-  const startIndex = Math.floor((minFreq / maxPossibleFreq) * frequencyBinCount);
-  const endIndex = Math.min(
-    Math.floor((maxFreq / maxPossibleFreq) * frequencyBinCount),
-    frequencyBinCount - 1,
-  );
-
-  if (startIndex > endIndex) {
-    return 0; // Invalid range
-  }
-
-  // Extract the data for the frequency range and compute average
-  let sum = 0;
-  for (let i = startIndex; i <= endIndex; i++) {
-    sum += dataArray[i];
-  }
-
-  const numFrequencies = endIndex - startIndex + 1;
-  const average = numFrequencies > 0 ? sum / numFrequencies : 0;
-
-  return average / 255; // Normalize to 0-1 range
-};
-
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
   generateMipmaps: false,
@@ -122,7 +89,7 @@ const ModelInstance = React.forwardRef<
 export default function Shapes({
   selectedObjectKey = DisplayedObject.Boombox,
 }: ShapesSwitcherProps) {
-  const { analyserRef: analyser } = useMediaPlayerContext();
+  const { amplitude } = useMediaPlayerContext();
   const outerSphereRef = useRef<THREE.ShaderMaterial>(null);
   const modelRefs = useRef(
     objectConfigurations.map(() => React.createRef<THREE.Group>()),
@@ -237,25 +204,8 @@ export default function Shapes({
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     if (outerSphereRef.current) {
-      // TODO: possibly use delta here?
       outerSphereRef.current.uniforms.time.value += delta * 0.2;
-    }
-
-    if (analyser?.current) {
-      const dataArray = new Uint8Array(analyser.current.frequencyBinCount);
-      analyser.current.getByteFrequencyData(dataArray);
-      // Example: Analyze bass frequencies (e.g., 20Hz to 140Hz)
-      const bassAmplitude = getAmplitudeForFrequencyRange(
-        analyser.current,
-        dataArray,
-        5020,
-        7040,
-      );
-
-      if (outerSphereRef.current) {
-        console.log('currentamplitude:', bassAmplitude);
-        outerSphereRef.current.uniforms.uAmplitude.value = bassAmplitude;
-      }
+      outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
     }
 
     const { gl, scene, camera } = state; // Get gl, scene, camera from state
