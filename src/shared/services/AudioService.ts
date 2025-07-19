@@ -8,7 +8,7 @@ export interface Track {
 
 export class AudioService {
   getTracks(): Promise<Track[]> {
-    const trackFiles = ['steady220.mp3', 'summer_w_suralo.mp3'];
+    const trackFiles = ['steady220.mp3', 'summer_w_suralo.mp3', 'session_add.mp3'];
 
     const trackPromises = trackFiles.map((file) => {
       const staticUrl = `/music/${file}`;
