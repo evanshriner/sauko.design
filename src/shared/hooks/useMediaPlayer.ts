@@ -19,7 +19,9 @@ const getAmplitudeForFrequencyRange = (
   const maxPossibleFreq = sampleRate / 2;
   const { minDecibels, maxDecibels } = analyser;
 
-  const startIndex = Math.floor((minFreq / maxPossibleFreq) * frequencyBinCount);
+  const startIndex = Math.floor(
+    (minFreq / maxPossibleFreq) * frequencyBinCount,
+  );
   const endIndex = Math.min(
     Math.floor((maxFreq / maxPossibleFreq) * frequencyBinCount),
     frequencyBinCount - 1,
@@ -65,12 +67,14 @@ export const useMediaPlayer = () => {
   const [isAudioGraphSetup, setIsAudioGraphSetup] = useState(false);
   const [amplitude, setAmplitude] = useState(0);
   const [intensity, setIntensity] = useState(100);
+  const [volume, setVolumeState] = useState(1);
   const amplitudeHistoryRef = useRef<number[]>([]);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const lastProgressUpdate = useRef<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     audioRef.current.preload = 'auto';
@@ -183,6 +187,17 @@ export const useMediaPlayer = () => {
       // smoothing and intensity scaling
       setAmplitude((prev) => prev * 0.5 + finalAmplitude * (intensity * 2));
     }
+  }, [intensity]);
+
+  const setVolume = useCallback((newVolume: number) => {
+    const clampedVolume = Math.max(0, Math.min(100, newVolume)) / 100; // convert to 0-1
+    setVolumeState(clampedVolume);
+    if (gainRef.current) {
+      gainRef.current.gain.setValueAtTime(
+        clampedVolume,
+        audioContextRef.current?.currentTime ?? 0,
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -213,16 +228,21 @@ export const useMediaPlayer = () => {
           analyser.minDecibels = -90;
           analyser.maxDecibels = -10;
           analyserRef.current = analyser;
+
+          const gainNode = context.createGain();
+          gainNode.gain.value = volume;
+          gainRef.current = gainNode;
         } catch (e) {
           console.error('Web Audio API is not supported in this browser', e);
           return;
         }
       }
       const audio = audioRef.current;
-      if (audioContextRef.current && analyserRef.current) {
+      if (audioContextRef.current && analyserRef.current && gainRef.current) {
         const source = audioContextRef.current.createMediaElementSource(audio);
         source.connect(analyserRef.current);
-        analyserRef.current.connect(audioContextRef.current.destination);
+        analyserRef.current.connect(gainRef.current);
+        gainRef.current.connect(audioContextRef.current.destination);
         setIsAudioGraphSetup(true);
       }
     }
@@ -281,5 +301,7 @@ export const useMediaPlayer = () => {
     amplitude,
     intensity,
     setIntensity,
+    volume: volume * 100, // convert back to 0-100 for UI
+    setVolume,
   };
 };

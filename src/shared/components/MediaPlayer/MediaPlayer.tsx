@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
+import { useAnimationFrame, useMotionValue } from 'framer-motion';
 import { useTheme } from '@emotion/react';
 import FlexBox from '../FlexBox';
-import { FaPlay, FaPause, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaPlay, FaPause } from 'react-icons/fa';
 import { FaBackwardStep, FaForwardStep } from 'react-icons/fa6';
+import { BsBrightnessHighFill } from 'react-icons/bs';
+import { PiSpeakerSimpleHighFill } from 'react-icons/pi';
+
 import NeonText from '../../styles/NeonText';
 import { useMediaPlayerContext } from '../../context/MediaPlayerContext';
 import * as C from './constants';
 import {
   ControlButton,
+  MediaControlContainer,
   MediaPlayerContainer,
   PlayPauseButton,
   PlayPauseIcon,
@@ -28,11 +32,17 @@ const MediaPlayer: React.FC = () => {
     skipForward,
     skipBackward,
     seek,
+    intensity,
+    setIntensity,
+    volume,
+    setVolume,
   } = useMediaPlayerContext();
 
   const [scrubberWidth, setScrubberWidth] = useState(0);
 
   const scrubberRef = useRef<HTMLDivElement>(null);
+  const intensityControlRef = useRef<HTMLDivElement>(null);
+  const volumeControlRef = useRef<HTMLDivElement>(null);
   const handleX = useMotionValue(0);
   const handleY = useMotionValue(0);
 
@@ -129,6 +139,50 @@ const MediaPlayer: React.FC = () => {
     seek(newProgress);
   };
 
+  const createVerticalSliderHandler = (
+    controlRef: React.RefObject<HTMLDivElement>,
+    setter: (value: number) => void,
+  ) => {
+    return (event: React.MouseEvent<HTMLDivElement>) => {
+      const changeValue = (
+        e: React.MouseEvent<HTMLDivElement> | MouseEvent,
+      ) => {
+        if (!controlRef.current) return;
+        const rect = controlRef.current.getBoundingClientRect();
+        const mouseY = e.clientY;
+        const elementY = rect.top;
+        const elementHeight = rect.height;
+        let percentage = ((mouseY - elementY) / elementHeight) * 100;
+        percentage = 100 - percentage; // invert (we want top to be 100%)
+        const newValue = Math.max(0, Math.min(100, percentage));
+        setter(newValue);
+      };
+
+      changeValue(event); // Initial value on click
+
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        changeValue(moveEvent);
+      };
+
+      const handleMouseUp = () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    };
+  };
+
+  const handleIntensityMouseDown = createVerticalSliderHandler(
+    intensityControlRef,
+    setIntensity,
+  );
+  const handleVolumeMouseDown = createVerticalSliderHandler(
+    volumeControlRef,
+    setVolume,
+  );
+
   const currentTrack =
     currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
 
@@ -150,15 +204,21 @@ const MediaPlayer: React.FC = () => {
         )}
       </PlayPauseButton>
       <FlexBox width="100%" flexDirection="column">
-        <NeonText
-          fontSize={C.TRACK_INFO_FONT_SIZE}
-          justifyContent="center"
-          alignItems="center"
-        >
-          {currentTrack
-            ? `${currentTrack.title} | ${currentTrack.artist}`
-            : 'No track loaded'}
-        </NeonText>
+        <FlexBox>
+          <NeonText
+            fontSize={C.TRACK_INFO_FONT_SIZE}
+            justifyContent="center"
+            alignItems="center"
+          >
+            {currentTrack
+              ? `${currentTrack.title} | ${currentTrack.artist}`
+              : 'No track loaded'}
+          </NeonText>
+          {/* TODO: find a way to go to source audio */}
+          {/* <ControlButton>
+            <FaExternalLinkAlt />
+          </ControlButton> */}
+        </FlexBox>
         <FlexBox justifyContent="space-around" width="100%" alignItems="center">
           <ControlButton onClick={skipBackward}>
             <FaBackwardStep />
@@ -214,9 +274,22 @@ const MediaPlayer: React.FC = () => {
           </ControlButton>
         </FlexBox>
       </FlexBox>
-      <ControlButton>
-        <FaExternalLinkAlt />
-      </ControlButton>
+      <FlexBox gap="8px" alignItems="center" width="auto" height="100%">
+        <MediaControlContainer
+          ref={intensityControlRef}
+          onMouseDown={handleIntensityMouseDown}
+          intensity={intensity}
+        >
+          <BsBrightnessHighFill style={{ mixBlendMode: 'difference' }} />
+        </MediaControlContainer>
+        <MediaControlContainer
+          ref={volumeControlRef}
+          onMouseDown={handleVolumeMouseDown}
+          intensity={volume}
+        >
+          <PiSpeakerSimpleHighFill style={{ mixBlendMode: 'difference' }} />
+        </MediaControlContainer>
+      </FlexBox>
     </MediaPlayerContainer>
   );
 };

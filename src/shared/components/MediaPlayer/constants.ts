@@ -6,6 +6,7 @@ export const HANDLE_AMPLITUDE_MULTIPLIER = 1.1;
 
 // Sizing and layout constants
 export const MEDIA_PLAYER_MAX_WIDTH = '500px';
+export const CONTROL_CONTAINER_MAX_WIDTH = '20px';
 export const MEDIA_PLAYER_PADDING = '8px';
 export const MEDIA_PLAYER_GAP = '16px';
 export const CONTROL_BUTTON_PADDING = '8px';
@@ -14,7 +15,7 @@ export const SCRUBBER_MARGIN_TOP = '9px';
 export const SCRUBBER_HANDLE_SIZE = '14px';
 export const SCRUBBER_HANDLE_Y_OFFSET = 7; // Half of SCRUBBER_HANDLE_SIZE
 export const PLAY_PAUSE_BUTTON_FONT_SIZE = '0.9rem';
-export const CONTROL_BUTTON_FONT_SIZE = '1rem';
+export const CONTROL_BUTTON_FONT_SIZE = '16px';
 export const TRACK_INFO_FONT_SIZE = '14px';
 export const WAVE_SVG_HEIGHT = '10';
 export const WAVE_CLIP_PATH_Y = '-5';
