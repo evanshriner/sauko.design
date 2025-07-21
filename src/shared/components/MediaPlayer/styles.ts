@@ -74,6 +74,7 @@ export const MediaControlContainer = styled(FlexBox)<{ intensity?: number }>(
     padding: '3px',
     height: '100%',
     fontSize: '12px',
+    opacity: 0.8,
     border: `${C.PLAY_PAUSE_BORDER_WIDTH} solid ${theme.colors.defaultText}`,
     width: C.CONTROL_CONTAINER_MAX_WIDTH,
     filter: theme.colors.defaultTextFilter,
