@@ -1,6 +1,7 @@
 import React from 'react';
 import SvgLogo from '@/shared/components/navbar/SvgLogo';
 import { useMatrixAnimation } from '@/shared/hooks/useMatrixAnimation';
+import { useThrottledProgress } from '@/shared/hooks/useThrottledProgress';
 import {
   LoadingContainer,
   EnterMessage,
@@ -23,6 +24,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onStarted,
 }) => {
   const theme = useTheme();
+  const throttledProgress = useThrottledProgress({
+    progress,
+    minDuration: 4000,
+    staggered: true,
+  });
 
   const handleClick = () => {
     if (hasLoaded) {
@@ -40,11 +46,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>
       <StyledCanvas ref={canvasRef} />
       <ContentWrapper>
-        {hasLoaded && (
-          <EnterMessage>Click to enter</EnterMessage>
-        )}
-          <SvgLogo progress={progress} />
-        
+        {hasLoaded && <EnterMessage>Click to enter</EnterMessage>}
+        <SvgLogo progress={throttledProgress} />
       </ContentWrapper>
     </LoadingContainer>
   );

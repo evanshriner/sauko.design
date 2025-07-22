@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import React from 'react';
 
 interface SvgLogoProps extends React.SVGProps<SVGSVGElement> {
@@ -9,15 +10,17 @@ const SvgLogo: React.FC<SvgLogoProps> = ({ progress, ...props }) => {
 
   return (
     <svg
-      width="140"
-      height="40"
       viewBox="0 0 140 40"
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', width: '50vw' }}
       {...props}
     >
       <defs>
         <clipPath id={clipPathId}>
-          <rect width={`${progress}%`} height="100%" />
+          <motion.rect
+            height="100%"
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: 'easeIn', duration: 0.5 }}
+          />
         </clipPath>
       </defs>
 
@@ -30,7 +33,7 @@ const SvgLogo: React.FC<SvgLogoProps> = ({ progress, ...props }) => {
         style={{
           fontFamily: 'Orbit, sans-serif',
           fontSize: '2rem',
-          fill: 'rgba(255, 255, 255, 0.5)',
+          fill: 'rgba(255, 255, 255, 0.3)',
         }}
       >
         sauko
@@ -45,7 +48,7 @@ const SvgLogo: React.FC<SvgLogoProps> = ({ progress, ...props }) => {
         style={{
           fontFamily: 'Orbit, sans-serif',
           fontSize: '2rem',
-          fill: 'rgba(255, 255, 255, 0.73)',
+          fill: 'rgba(255, 255, 255, 0.63)',
           filter: 'url(#neonGlow)',
           clipPath: `url(#${clipPathId})`,
         }}
