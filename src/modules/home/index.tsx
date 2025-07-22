@@ -1,13 +1,11 @@
 import useMatrixText from '../../shared/hooks/useMatrixText';
 import ContentContainer from './ContentContainer';
-import NeonText from '../../shared/styles/NeonText';
 import FlexBox from '../../shared/components/FlexBox';
 import { ChevronButton } from '../../shared/components/ChevronButton';
 // TODO: this feels violating. there should be a cleaner mapping to find the order of available objects, i.e. not from page -> object configurations.
 // there should be a central location between the two components that toggles whether or not pages are available.
 import { objectConfigurations } from '../../shared/components/background/ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
-import Title from '@/shared/styles/Title';
 import TitleText from './TitleText';
 
 export interface HomeProps {

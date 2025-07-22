@@ -23,24 +23,6 @@ export const LoadingContainer = styled.div<{ isStarted: boolean }>`
   animation: ${({ isStarted }) => (isStarted ? fadeOut : 'none')} 0.5s forwards;
 `;
 
-export const ProgressBar = styled.div`
-  width: 50%;
-  height: 20px;
-  background-color: #333;
-  border-radius: 10px;
-  overflow: hidden;
-
-  > div {
-    height: 100%;
-    background-color: #fff;
-    transition: width 0.2s ease-in-out;
-  }
-`;
-
-export const ProgressText = styled.p`
-  margin-top: 10px;
-  font-size: 1.2rem;
-`;
 
 export const EnterMessage = styled.p`
   font-size: 2rem;

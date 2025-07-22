@@ -1,9 +1,8 @@
 import React from 'react';
+import SvgLogo from '@/shared/components/navbar/SvgLogo';
 import { useMatrixAnimation } from '@/shared/hooks/useMatrixAnimation';
 import {
   LoadingContainer,
-  ProgressBar,
-  ProgressText,
   EnterMessage,
   ContentWrapper,
   StyledCanvas,
@@ -41,16 +40,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>
       <StyledCanvas ref={canvasRef} />
       <ContentWrapper>
-        {hasLoaded ? (
+        {hasLoaded && (
           <EnterMessage>Click to enter</EnterMessage>
-        ) : (
-          <>
-            <ProgressBar>
-              <div style={{ width: `${progress}%` }} />
-            </ProgressBar>
-            <ProgressText>{Math.round(progress)}%</ProgressText>
-          </>
         )}
+          <SvgLogo progress={progress} />
+        
       </ContentWrapper>
     </LoadingContainer>
   );
