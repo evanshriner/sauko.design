@@ -17,10 +17,6 @@ export const LoadingContainer = styled.div<{ isStarted: boolean }>`
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   background-color: #000;
   color: #fff;
   z-index: 999;
@@ -50,4 +46,24 @@ export const EnterMessage = styled.p`
   font-size: 2rem;
   cursor: pointer;
   color: #fff;
+`;
+
+export const ContentWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const StyledCanvas = styled.canvas`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 `;

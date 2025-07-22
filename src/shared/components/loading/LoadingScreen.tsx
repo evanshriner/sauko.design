@@ -5,6 +5,8 @@ import {
   ProgressBar,
   ProgressText,
   EnterMessage,
+  ContentWrapper,
+  StyledCanvas,
 } from './styles';
 import { useTheme } from '@emotion/react';
 
@@ -37,7 +39,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
   return (
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>
-      <canvas ref={canvasRef}>
+      <StyledCanvas ref={canvasRef} />
+      <ContentWrapper>
         {hasLoaded ? (
           <EnterMessage>Click to enter</EnterMessage>
         ) : (
@@ -48,7 +51,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             <ProgressText>{Math.round(progress)}%</ProgressText>
           </>
         )}
-      </canvas>
+      </ContentWrapper>
     </LoadingContainer>
   );
 };
