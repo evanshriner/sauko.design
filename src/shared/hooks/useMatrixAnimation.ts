@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 
+const DEFAULT_CHARACTERS =
+  '!#$%^*()_+-=[]{}|;:,.<>/?`~1234567890アイウエオカキクケコサシスセソタチツテト';
+
 export const useMatrixAnimation = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
   font?: string,
@@ -23,9 +26,8 @@ export const useMatrixAnimation = (
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const letters =
-      '!#$%^*()_+-=[]{}|;:,.<>/?`~1234567890アイウエオカキクケコサシスセソタチツテト';
-    const availableLetters = letters.split('');
+    const characters = DEFAULT_CHARACTERS;
+    const availableCharacters = characters.split('');
     const fontSize = 8;
     if (ctx && font) {
       ctx.font = `${fontSize}px ${font}`;
@@ -44,7 +46,9 @@ export const useMatrixAnimation = (
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < drops.length; i++) {
         const text =
-          availableLetters[Math.floor(Math.random() * availableLetters.length)];
+          availableCharacters[
+            Math.floor(Math.random() * availableCharacters.length)
+          ];
         ctx.fillStyle = '#0f0';
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
         drops[i]++;
