@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const LETTERS =
+const CHARACTERS =
   '!#$%^*()_+-=[]{}|;:,.<>/?`~1234567890アイウエオカキクケコサシスセソタチツテト';
 const FONT_SIZE = 8;
 const ANIMATION_INTERVAL = 50; // ms
@@ -75,13 +75,13 @@ export const useMatrixAnimation = (
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const { drops } = animationState.current;
-    const availableLetters = LETTERS.split('');
+    const availableCharacters = CHARACTERS.split('');
 
     ctx.fillStyle = color;
 
     for (let i = 0; i < drops.length; i++) {
       const text =
-        availableLetters[Math.floor(Math.random() * availableLetters.length)];
+        availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
       ctx.fillText(text, i * FONT_SIZE, drops[i] * FONT_SIZE);
 
       // Move the drop down
