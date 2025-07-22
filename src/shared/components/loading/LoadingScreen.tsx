@@ -30,7 +30,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   };
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  useMatrixAnimation(canvasRef, 'Noto Sans JP', theme.colors.sepiaText);
+  useMatrixAnimation(canvasRef, {
+    font: 'Noto Sans JP',
+    color: theme.colors.sepiaText,
+  });
 
   return (
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>
