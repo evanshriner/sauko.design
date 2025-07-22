@@ -5,6 +5,7 @@ declare module '@emotion/react' {
       primaryText: string;
       primaryBackground: string;
       defaultText: string;
+      sepiaText: string;
       defaultTextFilter: string;
       defaultSelected: string;
       defaultUnselected: string;

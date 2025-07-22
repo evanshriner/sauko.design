@@ -6,6 +6,7 @@ import {
   ProgressText,
   EnterMessage,
 } from './styles';
+import { useTheme } from '@emotion/react';
 
 interface LoadingScreenProps {
   progress: number;
@@ -20,6 +21,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   isStarted,
   onStarted,
 }) => {
+  const theme = useTheme();
+
   const handleClick = () => {
     if (hasLoaded) {
       onStarted();
@@ -27,7 +30,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   };
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  useMatrixAnimation(canvasRef, 'Noto Sans JP');
+  useMatrixAnimation(canvasRef, 'Noto Sans JP', theme.colors.sepiaText);
 
   return (
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>

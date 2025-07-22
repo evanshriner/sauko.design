@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 export const useMatrixAnimation = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
   font?: string,
+  color?: string,
 ) => {
   useEffect(() => {
     if (canvasRef.current === null) return;
@@ -45,7 +46,7 @@ export const useMatrixAnimation = (
       for (let i = 0; i < drops.length; i++) {
         const text =
           availableLetters[Math.floor(Math.random() * availableLetters.length)];
-        ctx.fillStyle = '#0f0';
+        ctx.fillStyle = color || '#0f0';
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
         drops[i]++;
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
@@ -73,5 +74,5 @@ export const useMatrixAnimation = (
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [canvasRef, font]);
+  }, [canvasRef, font, color]);
 };
