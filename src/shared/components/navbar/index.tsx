@@ -1,10 +1,8 @@
 import Menu from './Menu';
 import MenuToggle from './MenuToggle';
 import NavBarContainer from './NavBarContainer';
-import MenuItem from './MenuItem';
 import { useState } from 'react';
 import { Logo } from './Logo';
-import NeonText from '../../styles/NeonText';
 import MediaPlayer from '../MediaPlayer/MediaPlayer';
 
 export type Page = 'home' | 'services' | 'about' | 'contact';
@@ -14,7 +12,11 @@ export interface NavBarProps {
   onHoverChange: (isHovering: boolean) => void;
 }
 
-export default function NavBar({ onMenuItemClick, currentPage, onHoverChange }: NavBarProps) {
+export default function NavBar({
+  onMenuItemClick,
+  currentPage,
+  onHoverChange,
+}: NavBarProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const toggleMenu = () => {
@@ -23,10 +25,17 @@ export default function NavBar({ onMenuItemClick, currentPage, onHoverChange }: 
 
   return (
     <NavBarContainer>
-      <Logo onClick={() => onMenuItemClick('home')} onMouseEnter={() => onHoverChange(true)} onMouseLeave={() => onHoverChange(false)}>sauko</Logo>
+      <Logo
+        onClick={() => onMenuItemClick('home')}
+        onMouseEnter={() => onHoverChange(true)}
+        onMouseLeave={() => onHoverChange(false)}
+        disableSelection
+      >
+        sauko
+      </Logo>
       <MenuToggle onClick={toggleMenu} />
       <Menu show={showMenu}>
-        <MediaPlayer/>
+        <MediaPlayer />
       </Menu>
     </NavBarContainer>
   );

@@ -5,11 +5,13 @@ import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
 import Services from './modules/services';
 import { useEffect, useRef, useState } from 'react';
+import { useProgress } from '@react-three/drei';
 import FlexBox from '@/shared/components/FlexBox';
 import Background from '@/shared/components/background/Background';
 import BackgroundContainer from '@/shared/components/background/BackgroundContainer';
 import NavBar from '@/shared/components/navbar/index';
 import ContentContainer from '@/shared/components/contentContainer';
+import LoadingScreen from '@/shared/components/loading/LoadingScreen';
 
 // Import Locomotive Scroll CSS and JS directly
 import LocomotiveScroll from 'locomotive-scroll';
@@ -18,6 +20,8 @@ import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
 
 function App() {
+  const { progress } = useProgress();
+  const [isStarted, setIsStarted] = useState(false);
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
@@ -66,6 +70,12 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <LoadingScreen
+        hasLoaded={progress === 100}
+        progress={progress}
+        isStarted={isStarted}
+        onStarted={() => setIsStarted(true)}
+      />
       <MediaPlayerProvider>
         <CustomCursor isHoveringNav={isHoveringNav} />
         <BackgroundContainer>

@@ -1,0 +1,53 @@
+import { keyframes } from '@emotion/react';
+import styled from '@emotion/styled';
+
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+`;
+
+export const LoadingContainer = styled.div<{ isStarted: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  color: #fff;
+  z-index: 999;
+  animation: ${({ isStarted }) => (isStarted ? fadeOut : 'none')} 0.5s forwards;
+`;
+
+export const ProgressBar = styled.div`
+  width: 50%;
+  height: 20px;
+  background-color: #333;
+  border-radius: 10px;
+  overflow: hidden;
+
+  > div {
+    height: 100%;
+    background-color: #fff;
+    transition: width 0.2s ease-in-out;
+  }
+`;
+
+export const ProgressText = styled.p`
+  margin-top: 10px;
+  font-size: 1.2rem;
+`;
+
+export const EnterMessage = styled.p`
+  font-size: 2rem;
+  cursor: pointer;
+  color: #fff;
+`;

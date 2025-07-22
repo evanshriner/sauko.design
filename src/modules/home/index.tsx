@@ -1,4 +1,4 @@
-import useHackerText from '../../shared/hooks/useHackerText';
+import useMatrixText from '../../shared/hooks/useMatrixText';
 import ContentContainer from './ContentContainer';
 import NeonText from '../../shared/styles/NeonText';
 import FlexBox from '../../shared/components/FlexBox';
@@ -7,6 +7,8 @@ import { ChevronButton } from '../../shared/components/ChevronButton';
 // there should be a central location between the two components that toggles whether or not pages are available.
 import { objectConfigurations } from '../../shared/components/background/ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
+import Title from '@/shared/styles/Title';
+import TitleText from './TitleText';
 
 export interface HomeProps {
   setPage: (page: Pages) => void;
@@ -38,7 +40,7 @@ function Home({ setPage, currentPage }: HomeProps) {
     setPage(objectConfigurations[prevIndex].page);
   };
 
-  const animatedText = useHackerText(pageTitles[currentPage], {
+  const animatedText = useMatrixText(pageTitles[currentPage], {
     speed: 10,
   });
 
@@ -60,15 +62,9 @@ function Home({ setPage, currentPage }: HomeProps) {
       </FlexBox>
       {/* this vw isnt bad, but im curious if there is a better way to scale text, as well as other items (like the chevron) depending on screen size.
          since the REM size is not consistent with screen size between phones (i.e. iphone SE has huge default REM,), it seems like pixels is the best option.*/}
-      <NeonText
-        fontSize="30px"
-        height="30%"
-        justifyContent="center"
-        alignItems="flex-end"
-        animatedHover
-      >
+      <TitleText animatedHover disableSelection>
         {animatedText}
-      </NeonText>
+      </TitleText>
     </ContentContainer>
   );
 }
