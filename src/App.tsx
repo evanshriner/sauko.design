@@ -18,10 +18,12 @@ import LocomotiveScroll from 'locomotive-scroll';
 import 'locomotive-scroll/dist/locomotive-scroll.css';
 import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
+import { AppContainer } from './App.styles';
 
 function App() {
   const { progress } = useProgress();
   const [isStarted, setIsStarted] = useState(false);
+  const [isBlooming, setIsBlooming] = useState(false);
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
@@ -68,40 +70,50 @@ function App() {
     };
   }, []); // Run only once on mount
 
+  const handleStarted = () => {
+    setIsStarted(true);
+    setIsBlooming(true);
+    setTimeout(() => {
+      setIsBlooming(false);
+    }, 1000); // Match the bloom duration
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <LoadingScreen
         hasLoaded={progress === 100}
         progress={progress}
         isStarted={isStarted}
-        onStarted={() => setIsStarted(true)}
+        onStarted={handleStarted}
       />
-      <MediaPlayerProvider>
-        <CustomCursor isHoveringNav={isHoveringNav} />
-        <BackgroundContainer>
-          <Background currentPage={currentPage} />
-        </BackgroundContainer>
-        <FlexBox flexDirection="column">
-          <NavBar
-            onMenuItemClick={() => {}}
-            currentPage={currentPage.toString()}
-            onHoverChange={setIsHoveringNav}
-          />
-          <ContentContainer
-            ref={scrollContainerRef}
-            data-scroll-container
-            alignItems="center"
-          >
-            <Home
-              data-scroll-section
-              setPage={setCurrentPage}
-              currentPage={currentPage}
+      <AppContainer isBlooming={isBlooming}>
+        <MediaPlayerProvider>
+          <CustomCursor isHoveringNav={isHoveringNav} />
+          <BackgroundContainer>
+            <Background currentPage={currentPage} />
+          </BackgroundContainer>
+          <FlexBox flexDirection="column">
+            <NavBar
+              onMenuItemClick={() => {}}
+              currentPage={currentPage.toString()}
+              onHoverChange={setIsHoveringNav}
             />
+            <ContentContainer
+              ref={scrollContainerRef}
+              data-scroll-container
+              alignItems="center"
+            >
+              <Home
+                data-scroll-section
+                setPage={setCurrentPage}
+                currentPage={currentPage}
+              />
 
-            <Services data-scroll-section />
-          </ContentContainer>
-        </FlexBox>
-      </MediaPlayerProvider>
+              <Services data-scroll-section />
+            </ContentContainer>
+          </FlexBox>
+        </MediaPlayerProvider>
+      </AppContainer>
     </ThemeProvider>
   );
 }
