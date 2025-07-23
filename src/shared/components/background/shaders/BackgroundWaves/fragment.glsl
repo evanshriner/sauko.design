@@ -52,7 +52,7 @@ void main() {
     vec3 color3 = vec3(9./255., 6./255., 3./255.);
 
     // Intensity of color2 fluctuates with audio amplitude
-    float intensity = (60.0 + 120.0 * uAmplitude) / 255.0;
+    float intensity = (40.0 + 120.0 * uAmplitude) / 255.0;
     vec3 color2 = vec3(intensity);
 
     vec2 b_uv = rotate2D(n) * vPosition.xy * 0.1;
