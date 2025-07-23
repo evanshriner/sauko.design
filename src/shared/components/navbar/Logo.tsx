@@ -7,6 +7,7 @@ const Logo = styled(NeonText)(() => ({
   width: 'auto',
   whiteSpace: 'nowrap',
   cursor: 'pointer',
+  lineHeight: 1,
 }));
 
 export { Logo };

@@ -1,14 +1,19 @@
 import React from 'react';
 import SvgLogo from '@/shared/components/navbar/SvgLogo';
+import BlockyProgressBar from './BlockyProgressBar';
 import { useMatrixAnimation } from '@/shared/hooks/useMatrixAnimation';
 import { useThrottledProgress } from '@/shared/hooks/useThrottledProgress';
 import {
   LoadingContainer,
-  EnterMessage,
   ContentWrapper,
   StyledCanvas,
+  ProgressBarContainer,
+  ProgressText,
 } from './styles';
 import { useTheme } from '@emotion/react';
+import NeonText from '@/shared/styles/NeonText';
+import { Logo } from '../navbar/Logo';
+import FlexBox from '../FlexBox';
 
 interface LoadingScreenProps {
   progress: number;
@@ -42,12 +47,49 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     color: theme.colors.sepiaText,
   });
 
+  const tvTurnOnVariants = {
+    initial: {
+      opacity: 0,
+      scaleY: 0.01,
+      scaleX: 0.5,
+    },
+    animate: {
+      opacity: 1,
+      scaleY: 1,
+      scaleX: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.43, 0.13, 0.23, 0.96],
+      },
+    },
+  };
+
   return (
     <LoadingContainer isStarted={isStarted} onClick={handleClick}>
       <StyledCanvas ref={canvasRef} />
-      <ContentWrapper>
-        {hasLoaded && <EnterMessage>Click to enter</EnterMessage>}
-        <SvgLogo progress={throttledProgress} />
+      <ContentWrapper
+        initial="initial"
+        animate="animate"
+        variants={tvTurnOnVariants}
+      >
+        <FlexBox flexDirection="column">
+          <Logo disableSelection fontSize="50px">
+            sauko
+          </Logo>
+          <NeonText
+            darken
+            disableSelection
+            fontSize="15px"
+            padding="0 0px 10px 5px"
+          >
+            the signals agency
+          </NeonText>
+        </FlexBox>
+        <ProgressBarContainer>
+          <BlockyProgressBar progress={throttledProgress} />
+          <ProgressText>{`${Math.round(throttledProgress)}`}</ProgressText>
+        </ProgressBarContainer>
+        {/* <EnterMessage>{hasLoaded && 'Click to enter'}</EnterMessage> */}
       </ContentWrapper>
     </LoadingContainer>
   );

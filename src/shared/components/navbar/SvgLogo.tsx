@@ -2,16 +2,16 @@ import { motion } from 'framer-motion';
 import React from 'react';
 
 interface SvgLogoProps extends React.SVGProps<SVGSVGElement> {
-  progress: number;
+  progress?: number;
 }
 
-const SvgLogo: React.FC<SvgLogoProps> = ({ progress, ...props }) => {
+const SvgLogo: React.FC<SvgLogoProps> = ({ progress = 100, ...props }) => {
   const clipPathId = 'logo-clip-path';
 
   return (
     <svg
-      viewBox="0 0 140 40"
-      style={{ cursor: 'pointer', width: '50vw' }}
+      viewBox="0 0 100 30"
+      style={{ cursor: 'pointer', width: '30vw' }}
       {...props}
     >
       <defs>
@@ -48,7 +48,7 @@ const SvgLogo: React.FC<SvgLogoProps> = ({ progress, ...props }) => {
         style={{
           fontFamily: 'Orbit, sans-serif',
           fontSize: '2rem',
-          fill: 'rgba(255, 255, 255, 0.63)',
+          fill: 'rgba(255, 255, 255, 0.73)',
           filter: 'url(#neonGlow)',
           clipPath: `url(#${clipPathId})`,
         }}
