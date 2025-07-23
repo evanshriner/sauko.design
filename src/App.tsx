@@ -22,8 +22,8 @@ import { AppContainer } from './App.styles';
 
 function App() {
   const { progress } = useProgress();
-  const [isStarted, setIsStarted] = useState(false);
-  const [isBlooming, setIsBlooming] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
@@ -68,25 +68,30 @@ function App() {
       locomotiveScrollRef.current = null; // Clear the ref
       console.log('Locomotive Scroll destroyed');
     };
-  }, []); // Run only once on mount
+  }, []);
 
+  // effect to handle transition between loading screen and main content
   const handleStarted = () => {
-    setIsStarted(true);
-    setIsBlooming(true);
+    setIsTransitioning(true);
+
+    // cancel animations after they complete
     setTimeout(() => {
-      setIsBlooming(false);
-    }, 1000); // Match the bloom duration
+      setShowLoadingScreen(false);
+      setIsTransitioning(false);
+    }, 1000); // this matches the bloom animation durations found in the wrapping components
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <LoadingScreen
-        hasLoaded={progress === 100}
-        progress={progress}
-        isStarted={isStarted}
-        onStarted={handleStarted}
-      />
-      <AppContainer isBlooming={isBlooming}>
+      {showLoadingScreen && (
+        <LoadingScreen
+          hasLoaded={progress === 100}
+          progress={progress}
+          isTransitioning={isTransitioning}
+          onStarted={handleStarted}
+        />
+      )}
+      <AppContainer isTransitioning={isTransitioning}>
         <MediaPlayerProvider>
           <CustomCursor isHoveringNav={isHoveringNav} />
           <BackgroundContainer>

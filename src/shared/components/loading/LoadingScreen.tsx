@@ -18,18 +18,19 @@ import { Ripple, RippleEffect } from '@/shared/components/effects/Ripple';
 interface LoadingScreenProps {
   progress: number;
   hasLoaded: boolean;
-  isStarted: boolean;
+  isTransitioning: boolean;
   onStarted: () => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   progress,
   hasLoaded,
-  isStarted,
+  isTransitioning,
   onStarted,
 }) => {
   const theme = useTheme();
   const [ripples, setRipples] = useState<Ripple[]>([]);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const throttledProgress = useThrottledProgress({
     progress,
@@ -38,7 +39,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   });
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (hasLoaded) {
+    if (hasLoaded && !isTransitioning) {
       const newRipple = {
         x: e.clientX,
         y: e.clientY,
@@ -46,6 +47,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         id: Date.now(),
       };
       setRipples([...ripples, newRipple]);
+      setTimeout(() => {
+        setIsFadingOut(true);
+      }, 500);
       onStarted();
     }
   };
@@ -74,7 +78,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   };
 
   return (
-    <LoadingContainer isStarted={isStarted} onClick={handleClick}>
+    <LoadingContainer
+      isBlooming={isTransitioning}
+      isFadingOut={isFadingOut}
+      onClick={handleClick}
+    >
       <RippleEffect ripples={ripples} />
       <StyledCanvas ref={canvasRef} />
       <ContentWrapper

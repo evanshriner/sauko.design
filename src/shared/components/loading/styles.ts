@@ -3,17 +3,10 @@ import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 
-const fadeOut = keyframes`
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-`;
-
-export const LoadingContainer = styled.div<{ isStarted: boolean }>`
+export const LoadingContainer = styled.div<{
+  isBlooming: boolean;
+  isFadingOut: boolean;
+}>`
   position: fixed;
   top: 0;
   left: 0;
@@ -22,7 +15,10 @@ export const LoadingContainer = styled.div<{ isStarted: boolean }>`
   background-color: #000;
   color: #fff;
   z-index: 999;
-  animation: ${({ isStarted }) => (isStarted ? fadeOut : 'none')} 0.5s forwards;
+  transition: filter 0.5s ease-in-out, opacity 0.7s ease-out;
+  filter: ${({ isBlooming }) =>
+    isBlooming ? 'blur(6px) brightness(1.65)' : 'none'};
+  opacity: ${({ isFadingOut }) => (isFadingOut ? 0 : 1)};
 `;
 
 export const EnterMessage = styled(NeonText)`
