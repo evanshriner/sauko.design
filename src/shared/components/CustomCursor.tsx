@@ -32,8 +32,8 @@ const StyledCursor = styled(motion.div)`
 
 const cursorVariants = {
   default: {
-    width: "20px",
-    height: "20px",
+    width: "7px",
+    height: "7px",
     transition: {
       type: "tween",
       ease: "easeOut",
