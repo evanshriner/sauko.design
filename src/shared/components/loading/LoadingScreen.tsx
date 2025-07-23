@@ -17,14 +17,12 @@ import { Ripple, RippleEffect } from '@/shared/components/effects/Ripple';
 
 interface LoadingScreenProps {
   progress: number;
-  hasLoaded: boolean;
   isTransitioning: boolean;
   onStarted: () => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   progress,
-  hasLoaded,
   isTransitioning,
   onStarted,
 }) => {
@@ -37,6 +35,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     minDuration: 4000,
     staggered: true,
   });
+
+  const hasLoaded = throttledProgress >= 100;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (hasLoaded && !isTransitioning) {
@@ -63,13 +63,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const tvTurnOnVariants = {
     initial: {
       opacity: 0,
-      scaleY: 0.01,
-      scaleX: 0.5,
     },
     animate: {
       opacity: 1,
-      scaleY: 1,
-      scaleX: 1,
       transition: {
         duration: 0.5,
         ease: [0.43, 0.13, 0.23, 0.96],

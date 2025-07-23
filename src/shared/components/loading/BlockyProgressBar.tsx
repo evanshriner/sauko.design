@@ -39,6 +39,7 @@ const BlockyProgressBar: React.FC<BlockyProgressBarProps> = ({ progress }) => {
           fontSize: '11px',
           fill: 'rgba(255, 255, 255, 0.3)',
           whiteSpace: 'pre',
+          userSelect: 'none',
         }}
       >
         {slashes}
@@ -55,6 +56,7 @@ const BlockyProgressBar: React.FC<BlockyProgressBarProps> = ({ progress }) => {
           fill: 'rgba(255, 255, 255, 0.9)',
           clipPath: `url(#${clipPathId})`,
           whiteSpace: 'pre',
+          userSelect: 'none',
         }}
       >
         {slashes}
