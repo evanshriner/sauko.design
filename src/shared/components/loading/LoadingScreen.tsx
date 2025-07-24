@@ -8,7 +8,6 @@ import {
   ContentWrapper,
   StyledCanvas,
   ProgressBarContainer,
-  ProgressText,
 } from './styles';
 import { useTheme } from '@emotion/react';
 import NeonText from '@/shared/styles/NeonText';
@@ -133,7 +132,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </FlexBox>
           <ProgressBarContainer>
             <BlockyProgressBar progress={throttledProgress} />
-            <ProgressText>{`${Math.round(throttledProgress)}`}</ProgressText>
+            <NeonText disableSelection fontSize='10px' padding='0 0 0 10px'>{`${Math.round(throttledProgress)}`}</NeonText>
           </ProgressBarContainer>
         </FlexBox>
         <FlexBox
@@ -149,6 +148,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
               <>
                 <NeonText
                   fontSize="25px"
+                  disableSelection
                   justifyContent="flex-end"
                   style={{ opacity: soundQuestionText ? 1 : 0 }}
                 >
@@ -156,6 +156,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 </NeonText>
                 <NeonText
                   fontSize="15px"
+                  disableSelection
                   justifyContent="flex-end"
                   style={{ opacity: startSoundSubtext ? 1 : 0 }}
                 >

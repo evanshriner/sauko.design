@@ -63,13 +63,6 @@ export const ProgressBarContainer = styled.div`
   width: 100%;
 `;
 
-export const ProgressText = styled.span`
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 10px;
-  color: #fff;
-  margin-left: 10px;
-`;
-
 export const StyledCanvas = styled.canvas`
   position: absolute;
   top: 0;
