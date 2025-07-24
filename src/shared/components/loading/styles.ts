@@ -1,5 +1,4 @@
 import NeonText from '@/shared/styles/NeonText';
-import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 
@@ -41,9 +40,21 @@ export const ContentWrapper = styled(motion.div)`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  // flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+
+    #loading-screen-sound-selection {
+      height: auto;
+      justify-content: center;
+      align-items: flex-end;
+    }
+  }
 `;
 
 export const ProgressBarContainer = styled.div`

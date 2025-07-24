@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import BlockyProgressBar from './BlockyProgressBar';
+import React, { useState, useEffect } from 'react';
+import BlockyProgressBar from './ProgressBar';
 import { useMatrixAnimation } from '@/shared/hooks/useMatrixAnimation';
 import { useThrottledProgress } from '@/shared/hooks/useThrottledProgress';
+import useTypingAnimation from '@/shared/hooks/useTypingAnimation';
 import {
   LoadingContainer,
   ContentWrapper,
@@ -13,6 +14,7 @@ import { useTheme } from '@emotion/react';
 import NeonText from '@/shared/styles/NeonText';
 import { Logo } from '../navbar/Logo';
 import FlexBox from '../FlexBox';
+import { motion } from 'framer-motion';
 import { Ripple, RippleEffect } from '@/shared/components/effects/Ripple';
 import { PiSpeakerHighFill, PiSpeakerSimpleXFill } from 'react-icons/pi';
 import { SoundButton } from '../buttons/SoundButton';
@@ -66,6 +68,32 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     color: theme.colors.sepiaText,
   });
 
+  const [startSoundSubtext, setStartSoundSubtext] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+
+  useEffect(() => {
+    if (hasLoaded) {
+      const subtextTimer = setTimeout(() => {
+        setStartSoundSubtext(true);
+      }, 700);
+      const buttonsTimer = setTimeout(() => {
+        setShowButtons(true);
+      }, 2300);
+
+      return () => {
+        clearTimeout(subtextTimer);
+        clearTimeout(buttonsTimer);
+      };
+    }
+  }, [hasLoaded]);
+
+  const soundQuestionText = useTypingAnimation('sound?', {
+    trigger: hasLoaded,
+  });
+  const soundSubtext = useTypingAnimation("(it's better with it...)", {
+    trigger: startSoundSubtext,
+  });
+
   const tvTurnOnVariants = {
     initial: {
       opacity: 0,
@@ -93,6 +121,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           alignItems="center"
           id="loading-screen-logo"
           justifyContent="center"
+          height="50%"
         >
           <FlexBox flexDirection="column">
             <Logo disableSelection fontSize="50px">
@@ -115,40 +144,50 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           id="loading-screen-sound-selection"
           flexDirection="column"
         >
-          <NeonText fontSize="25px" justifyContent="flex-end">
-            sound?
-          </NeonText>
-          <NeonText fontSize="15px" justifyContent="flex-end">
-            (its better with it)
-          </NeonText>
-          <FlexBox gap="15px" justifyContent="flex-end" padding="10px 0">
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClick(e, 'sound-on');
-              }}
-            >
-              <SoundButton
-                icon={PiSpeakerHighFill}
-                onClick={() => {}}
-                label="Sound On"
-                selectionKey="sound-on"
-              />
-            </div>
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClick(e, 'sound-off');
-              }}
-            >
-              <SoundButton
-                icon={PiSpeakerSimpleXFill}
-                onClick={() => {}}
-                label="Sound Off"
-                selectionKey="sound-off"
-              />
-            </div>
-          </FlexBox>
+          <div style={{ minHeight: '120px' }}>
+            {hasLoaded && (
+              <>
+                <NeonText
+                  fontSize="25px"
+                  justifyContent="flex-end"
+                  style={{ opacity: soundQuestionText ? 1 : 0 }}
+                >
+                  {soundQuestionText || ' '}
+                </NeonText>
+                <NeonText
+                  fontSize="15px"
+                  justifyContent="flex-end"
+                  style={{ opacity: startSoundSubtext ? 1 : 0 }}
+                >
+                  {soundSubtext || ' '}
+                </NeonText>
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    gap: '15px',
+                    justifyContent: 'flex-end',
+                    padding: '10px 0',
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: showButtons ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <SoundButton
+                    icon={PiSpeakerHighFill}
+                    onClick={(e) => handleClick(e, 'sound-on')}
+                    label="Sound On"
+                    selectionKey="sound-on"
+                  />
+                  <SoundButton
+                    icon={PiSpeakerSimpleXFill}
+                    onClick={(e) => handleClick(e, 'sound-off')}
+                    label="Sound Off"
+                    selectionKey="sound-off"
+                  />
+                </motion.div>
+              </>
+            )}
+          </div>
         </FlexBox>
       </ContentWrapper>
     </LoadingContainer>

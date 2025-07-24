@@ -4,7 +4,7 @@ import { SoundButtonContainer } from './styles';
 
 interface SoundButtonProps {
   icon: IconType;
-  onClick: (selection: string) => void;
+  onClick: (e: React.MouseEvent<HTMLElement>, selection: string) => void;
   label: string;
   selectionKey: string;
 }
@@ -19,7 +19,10 @@ export const SoundButton: React.FC<SoundButtonProps> = ({
   return (
     <SoundButtonContainer
       aria-label={label}
-      onClick={() => onClick(selectionKey)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e, selectionKey);
+      }}
     >
       <Icon />
     </SoundButtonContainer>

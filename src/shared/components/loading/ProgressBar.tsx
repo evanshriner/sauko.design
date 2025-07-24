@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 
-interface BlockyProgressBarProps {
+interface ProgressBarProps {
   progress: number;
 }
 
-const BlockyProgressBar: React.FC<BlockyProgressBarProps> = ({ progress }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   const clipPathId = 'progress-bar-clip-path';
   // A string of forward slashes to act as the progress bar visuals.
   const slashes = '/'.repeat(30);
@@ -65,4 +65,4 @@ const BlockyProgressBar: React.FC<BlockyProgressBarProps> = ({ progress }) => {
   );
 };
 
-export default BlockyProgressBar;
+export default ProgressBar;

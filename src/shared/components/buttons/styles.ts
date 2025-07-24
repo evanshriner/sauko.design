@@ -1,11 +1,6 @@
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 
-const pulse = keyframes`
-  from { opacity: 0.5; }
-  to { opacity: 0.8; }
-`;
-
 const springClick = keyframes`
   0% { transform: scale(1); }
   20% { transform: scale(0.8); }
@@ -13,6 +8,12 @@ const springClick = keyframes`
   60% { transform: scale(0.9); }
   80% { transform: scale(1.1); }
   100% { transform: scale(1); }
+`;
+
+const pulse = keyframes`
+    0% { opacity: 0.73; }
+    50% { opacity: 1; }
+    100% { opacity: 0.73; }
 `;
 
 export const SoundButtonContainer = styled.button`
@@ -39,6 +40,7 @@ export const SoundButtonContainer = styled.button`
 
   &:hover {
     transform: scale(1.2);
+    animation: ${pulse} 1.5s infinite alternate;
   }
 
   &:active {
