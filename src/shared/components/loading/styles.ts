@@ -15,7 +15,9 @@ export const LoadingContainer = styled.div<{
   background-color: #000;
   color: #fff;
   z-index: 999;
-  transition: filter 0.5s ease-in-out, opacity 0.7s ease-out;
+  transition:
+    filter 0.5s ease-in-out,
+    opacity 0.7s ease-out;
   filter: ${({ isBlooming }) =>
     isBlooming ? 'blur(6px) brightness(1.65)' : 'none'};
   opacity: ${({ isFadingOut }) => (isFadingOut ? 0 : 1)};
@@ -38,9 +40,10 @@ export const ContentWrapper = styled(motion.div)`
   padding: 0 4rem;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  // flex-wrap: wrap;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 `;
 
 export const ProgressBarContainer = styled.div`

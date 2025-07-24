@@ -71,7 +71,8 @@ function App() {
   }, []);
 
   // effect to handle transition between loading screen and main content
-  const handleStarted = () => {
+  const handleStarted = (soundPreference: string) => {
+    console.log('Sound preference selected:', soundPreference);
     setIsTransitioning(true);
 
     // cancel animations after they complete
@@ -85,7 +86,6 @@ function App() {
     <ThemeProvider theme={theme}>
       {showLoadingScreen && (
         <LoadingScreen
-          hasLoaded={progress === 100}
           progress={progress}
           isTransitioning={isTransitioning}
           onStarted={handleStarted}
