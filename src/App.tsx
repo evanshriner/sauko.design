@@ -71,8 +71,7 @@ function App() {
   }, []);
 
   // effect to handle transition between loading screen and main content
-  const handleStarted = (soundPreference: string) => {
-    console.log('Sound preference selected:', soundPreference);
+  const handleStarted = () => {
     setIsTransitioning(true);
 
     // cancel animations after they complete
@@ -84,6 +83,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+    <MediaPlayerProvider>
       {showLoadingScreen && (
         <LoadingScreen
           progress={progress}
@@ -92,7 +92,6 @@ function App() {
         />
       )}
       <AppContainer isTransitioning={isTransitioning}>
-        <MediaPlayerProvider>
           <CustomCursor isHoveringNav={isHoveringNav} />
           <BackgroundContainer>
             <Background currentPage={currentPage} />
@@ -117,8 +116,8 @@ function App() {
               <Services data-scroll-section />
             </ContentContainer>
           </FlexBox>
-        </MediaPlayerProvider>
       </AppContainer>
+    </MediaPlayerProvider>
     </ThemeProvider>
   );
 }

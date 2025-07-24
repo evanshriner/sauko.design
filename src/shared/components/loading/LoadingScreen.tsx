@@ -17,11 +17,12 @@ import { motion } from 'framer-motion';
 import { Ripple, RippleEffect } from '@/shared/components/effects/Ripple';
 import { PiSpeakerHighFill, PiSpeakerSimpleXFill } from 'react-icons/pi';
 import { SoundButton } from '../buttons/SoundButton';
+import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 
 interface LoadingScreenProps {
   progress: number;
   isTransitioning: boolean;
-  onStarted: (soundPreference: string) => void;
+  onStarted: () => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
@@ -32,6 +33,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const theme = useTheme();
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const {
+    play,
+  } = useMediaPlayerContext();
 
   const throttledProgress = useThrottledProgress({
     progress,
@@ -57,7 +61,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
       setTimeout(() => {
         setIsFadingOut(true);
       }, 500);
-      onStarted(soundPreference);
+      if (soundPreference === 'sound-on') {
+        play();
+      }
+      onStarted();
     }
   };
 
