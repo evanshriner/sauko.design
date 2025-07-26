@@ -44,45 +44,39 @@ interface TransitionState {
 const X_OFFSET_SPACING = 5.5;
 
 // Component to render a single model instance
+// eslint-disable-next-line react/display-name
 const ModelInstance = React.forwardRef<
   THREE.Group,
   {
     config: ObjectConfig;
     gltf: GLTF;
-    reflectiveMaterial: THREE.ShaderMaterial | null; // Allow null if not reflective
+    reflectiveMaterial: THREE.ShaderMaterial | null;
   }
 >(({ config, gltf, reflectiveMaterial }, ref) => {
   const modelScene = useMemo(() => {
     const clonedScene = gltf.scene.clone();
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        // Apply reflective material if configured and available
-        if (config.isReflective && reflectiveMaterial) {
+        if (!child.geometry.attributes.normal) {
+          // this needs to be done for some models that
+          // done have pre-calculated normals.
+          child.geometry.computeVertexNormals();
+        }
+
+        if (reflectiveMaterial) {
           child.material = reflectiveMaterial;
         }
-        // You might need more sophisticated material handling based on your GLTF structure
       }
     });
     return clonedScene;
-  }, [gltf, config.isReflective, reflectiveMaterial]);
-
-  useEffect(() => {
-    const group = (ref as React.RefObject<THREE.Group>)?.current;
-    if (group) {
-      if (typeof config.scale === 'number') {
-        group.scale.setScalar(config.scale);
-      } else {
-        group.scale.copy(config.scale);
-      }
-    }
-  }, [ref, config.scale]);
+  }, [gltf, reflectiveMaterial]);
 
   return (
-    <group ref={ref}>
-      <primitive object={modelScene} />
-    </group>
+    <primitive
+      ref={ref} // Attach the ref here
+      object={modelScene}
+      scale={config.scale} // Pass scale declaratively
+    />
   );
 });
 
@@ -280,26 +274,16 @@ export default function Shapes({
       }
     });
 
-    // its a minor optimization to filter keys to animate, instead we are animating all keys here.
-    // if we'd like to change this in the future, we can filter keysToAnimate based on transitionState or whats in view.
-    // i.e.:      const keysToAnimate = objectConfigurations.map(c => c.id);
     objectConfigurations.forEach((key, idx) => {
-      // the objectConfigurations map to the modelRefs array, so we can use the index to get the correct ref
-      const groupRef = modelRefs.current[idx].current;
+      // Get the ref to the root group of the model
+      const groupRef = modelRefs.current[idx]?.current;
 
-      // Find the first actual mesh within the loaded GLTF scene for detailed animations
-      let animatedMesh: THREE.Mesh | undefined;
-      groupRef?.children[0].traverse((child) => {
-        if (child instanceof THREE.Mesh && !animatedMesh) {
-          animatedMesh = child;
-        }
-      });
-      if (!animatedMesh) return;
+      // If the ref isn't available yet, skip
+      if (!groupRef) return;
 
-      // TODO: if the object configuration is
-
-      key.rotationAnimation(animatedMesh, time, key.initialRotationOffset);
-      key.floatAnimation(animatedMesh, time);
+      // Apply animations directly to the entire group object
+      key.rotationAnimation(groupRef, time, key.initialRotationOffset);
+      key.floatAnimation(groupRef, time);
     });
 
     // // Orbit parameters
@@ -383,7 +367,7 @@ export default function Shapes({
             ref={modelRefs.current[index]}
             config={config}
             gltf={gltf}
-            reflectiveMaterial={config.isReflective ? reflectiveMaterial : null}
+            reflectiveMaterial={reflectiveMaterial}
           />
         );
       })}

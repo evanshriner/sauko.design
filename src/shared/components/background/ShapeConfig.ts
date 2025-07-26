@@ -18,12 +18,11 @@ export interface ObjectConfig {
   basePosition: THREE.Vector3; // The "center" position it will occupy when active
   // Animation function for rotation
   rotationAnimation: (
-    mesh: THREE.Mesh,
+    mesh: THREE.Group,
     time: number,
     initialRotationOffset?: number,
   ) => void;
-  floatAnimation: (mesh: THREE.Mesh, time: number) => void; // bouncing up and down animation
-  initialRotationOffset?: number; // Optional: for specific starting orientations
+  floatAnimation: (mesh: THREE.Group, time: number) => void; // bouncing up and down animation
   isReflective?: boolean; // Flag to determine if this object uses the reflective shader
 }
 
@@ -42,22 +41,6 @@ export const objectConfigurations: ObjectConfig[] = [
       // Floats around its local origin; group handles fly-in/out
       mesh.position.y = Math.sin(time * 0.7) * 0.02;
     },
-    initialRotationOffset: 4.73,
-    isReflective: true,
-  },
-  {
-    id: DisplayedObject.Lab,
-    gltfPath: '/LabOptimized.glb',
-    page: Pages.Software,
-    scale: 0.47,
-    basePosition: new THREE.Vector3(5.0, 0.2, 0), // Centered when active
-    rotationAnimation: (mesh, time, initialOffset = 4.73) => {
-      mesh.rotation.y =
-        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
-    },
-    floatAnimation: (mesh, time) => {
-      mesh.position.y = Math.cos(time * 0.6) * 0.03;
-    },
     isReflective: true,
   },
   {
@@ -65,30 +48,46 @@ export const objectConfigurations: ObjectConfig[] = [
     gltfPath: '/Robot.glb',
     page: Pages.AIAugmentation,
     scale: 0.011,
-    basePosition: new THREE.Vector3(0.0, -0.15, 0), // Centered when active
+    basePosition: new THREE.Vector3(0.0, 0.0, 0),
     rotationAnimation: (mesh, time, initialOffset = 0) => {
       mesh.rotation.y =
         -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
     },
     floatAnimation: (mesh, time) => {
-      mesh.position.y = Math.cos(time * 0.6) * 2;
+      mesh.position.y = -0.15 + Math.cos(time * 0.6) * 0.03;
     },
     isReflective: true,
   },
-  //   {
-  //     id: DisplayedObject.PostedLetter,
-  //     gltfPath: '/PostedLetter.glb',
-  //     scale: 0.6,
-  //     basePosition: new THREE.Vector3(0, 0.15, 0),
-  //     rotationAnimation: (mesh, time) => {
-  //       mesh.rotation.x = Math.sin(time * 0.5) * 0.1;
-  //       mesh.rotation.y = time * 0.2;
-  //     },
-  //     floatAnimation: (mesh, time) => {
-  //       mesh.position.y = Math.sin(time * 0.8) * 0.05;
-  //     },
-  //     isReflective: true,
+  {
+    id: DisplayedObject.Lab,
+    gltfPath: '/Lab.glb',
+    page: Pages.Software,
+    scale: 0.47,
+    basePosition: new THREE.Vector3(0.0, 0.0, 0),
+    rotationAnimation: (mesh, time, initialOffset = 1.55) => {
+      mesh.rotation.y =
+        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+    },
+    floatAnimation: (mesh, time) => {
+      mesh.position.y = 0.18 + Math.cos(time * 0.6) * 0.03;
+    },
+    isReflective: true,
+  },
+  // {
+  //   id: DisplayedObject.PostedLetter,
+  //   gltfPath: '/PostedLetter.glb',
+  //   page: Pages.AIAugmentation,
+  //   scale: 0.6,
+  //   basePosition: new THREE.Vector3(0, 0.15, 0),
+  //   rotationAnimation: (mesh, time) => {
+  //     mesh.rotation.x = Math.sin(time * 0.5) * 0.1;
+  //     mesh.rotation.y = time * 0.2;
   //   },
+  //   floatAnimation: (mesh, time) => {
+  //     mesh.position.y = Math.sin(time * 0.8) * 0.05;
+  //   },
+  //   isReflective: true,
+  // },
 ];
 
 // Animation constants for transitions
