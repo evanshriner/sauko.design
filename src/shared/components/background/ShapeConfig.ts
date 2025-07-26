@@ -10,11 +10,20 @@ export enum DisplayedObject {
   // Add more object identifiers here
 }
 
+export interface ResponsiveScale {
+  minScale: number;
+  maxScale: number;
+  minViewportWidth: number; // in pixels
+  maxViewportWidth: number; // in pixels
+}
+
 export interface ObjectConfig {
   id: DisplayedObject;
   gltfPath: string;
+  gltfPathMobile?: string;
   page: Pages;
   scale: THREE.Vector3 | number; // Uniform scale or per-axis
+  responsiveScale?: ResponsiveScale; // Optional responsive scaling configuration
   basePosition: THREE.Vector3; // The "center" position it will occupy when active
   // Animation function for rotation
   rotationAnimation: (
@@ -31,7 +40,14 @@ export const objectConfigurations: ObjectConfig[] = [
     id: DisplayedObject.Boombox,
     page: Pages.AudioEngineering,
     gltfPath: '/Boombox.glb',
-    scale: 0.45,
+    gltfPathMobile: '/Boombox.glb',
+    scale: 0.45, // Fallback scale
+    responsiveScale: {
+      minScale: 0.3,
+      maxScale: 0.6,
+      minViewportWidth: 275,
+      maxViewportWidth: 1920,
+    },
     basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
     rotationAnimation: (mesh, time, initialOffset = 4.73) => {
       mesh.rotation.y =
@@ -46,8 +62,15 @@ export const objectConfigurations: ObjectConfig[] = [
   {
     id: DisplayedObject.Robot,
     gltfPath: '/Robot.glb',
+    gltfPathMobile: '/Robot.glb',
     page: Pages.AIAugmentation,
     scale: 0.011,
+    responsiveScale: {
+      minScale: 0.009,
+      maxScale: 0.011,
+      minViewportWidth: 375,
+      maxViewportWidth: 1920,
+    },
     basePosition: new THREE.Vector3(0.0, 0.0, 0),
     rotationAnimation: (mesh, time, initialOffset = 0) => {
       mesh.rotation.y =
@@ -61,8 +84,15 @@ export const objectConfigurations: ObjectConfig[] = [
   {
     id: DisplayedObject.Lab,
     gltfPath: '/Lab.glb',
+    gltfPathMobile: '/Lab.glb',
     page: Pages.Software,
     scale: 0.47,
+    responsiveScale: {
+      minScale: 0.38,
+      maxScale: 0.47,
+      minViewportWidth: 375,
+      maxViewportWidth: 1920,
+    },
     basePosition: new THREE.Vector3(0.0, 0.0, 0),
     rotationAnimation: (mesh, time, initialOffset = 1.55) => {
       mesh.rotation.y =

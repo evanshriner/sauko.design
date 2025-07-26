@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Preload } from '@react-three/drei';
@@ -19,6 +19,7 @@ import {
   objectConfigurations,
 } from './ShapeConfig'; // Adjust path if needed
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
+import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
@@ -34,13 +35,6 @@ interface ShapesSwitcherProps {
   selectedObjectKey: DisplayedObject;
 }
 
-interface TransitionState {
-  currentKey: DisplayedObject;
-  previousKey?: DisplayedObject;
-  progress: number; // 0 to 1 for transition
-  isTransitioning: boolean;
-}
-
 const X_OFFSET_SPACING = 5.5;
 
 // Component to render a single model instance
@@ -53,6 +47,11 @@ const ModelInstance = React.forwardRef<
     reflectiveMaterial: THREE.ShaderMaterial | null;
   }
 >(({ config, gltf, reflectiveMaterial }, ref) => {
+  const responsiveScale = useResponsiveScale(
+    config.responsiveScale,
+    config.scale,
+  );
+
   const modelScene = useMemo(() => {
     const clonedScene = gltf.scene.clone();
     clonedScene.traverse((child) => {
@@ -75,7 +74,7 @@ const ModelInstance = React.forwardRef<
     <primitive
       ref={ref} // Attach the ref here
       object={modelScene}
-      scale={config.scale} // Pass scale declaratively
+      scale={responsiveScale} // Pass scale declaratively
     />
   );
 });
@@ -93,7 +92,7 @@ export default function Shapes({
   const gltfs = useGLTF(gltfPaths) as GLTF[];
 
   const gltfMap = useMemo(() => {
-    const map: Record<DisplayedObject, GLTF> = {} as any;
+    const map: Record<string, GLTF> = {};
     objectConfigurations.forEach((config, index) => {
       map[config.id] = gltfs[index];
     });
@@ -105,12 +104,6 @@ export default function Shapes({
   }, [gltfMap]);
 
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
-
-  const [transitionState] = useState<TransitionState>({
-    currentKey: selectedObjectKey,
-    progress: 1,
-    isTransitioning: false,
-  });
 
   // This ref will hold the animation state for each object
   const animationStates = useRef(
@@ -282,7 +275,7 @@ export default function Shapes({
       if (!groupRef) return;
 
       // Apply animations directly to the entire group object
-      key.rotationAnimation(groupRef, time, key.initialRotationOffset);
+      key.rotationAnimation(groupRef, time);
       key.floatAnimation(groupRef, time);
     });
 
