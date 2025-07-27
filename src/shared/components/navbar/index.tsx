@@ -4,17 +4,16 @@ import NavBarContainer from './NavBarContainer';
 import { useState } from 'react';
 import { Logo } from './Logo';
 import MediaPlayer from '../MediaPlayer/MediaPlayer';
+import { Pages } from '@/shared/interfaces/pages';
 
-export type Page = 'home' | 'services' | 'about' | 'contact';
 export interface NavBarProps {
-  onMenuItemClick: (menuItem: Page) => void;
+  onMenuItemClick: (menuItem: Pages) => void;
   currentPage: string;
   onHoverChange: (isHovering: boolean) => void;
 }
 
 export default function NavBar({
   onMenuItemClick,
-  currentPage,
   onHoverChange,
 }: NavBarProps) {
   const [showMenu, setShowMenu] = useState(false);
@@ -26,7 +25,7 @@ export default function NavBar({
   return (
     <NavBarContainer>
       <Logo
-        onClick={() => onMenuItemClick('home')}
+        onClick={() => onMenuItemClick(Pages.Home)}
         onMouseEnter={() => onHoverChange(true)}
         onMouseLeave={() => onHoverChange(false)}
         disableSelection

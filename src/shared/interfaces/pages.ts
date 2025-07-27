@@ -1,6 +1,6 @@
 export enum Pages {
   AudioEngineering,
+  Home,
   Software,
   AIAugmentation,
-  // Add more object identifiers here
 }

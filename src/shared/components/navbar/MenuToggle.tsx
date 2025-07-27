@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import FlexBox from '../../../shared/components/FlexBox';
-import { LuAudioLines } from "react-icons/lu";
+import { LuAudioLines } from 'react-icons/lu';
 
 interface MenuToggleProps {
   onClick: () => void;
@@ -9,7 +9,7 @@ interface MenuToggleProps {
 const MenuToggleContainer = styled(FlexBox)({
   alignItems: 'center',
   justifyContent: 'flex-end',
-  '@media (min-width: 768px)': {
+  '@media (min-width: 769px)': {
     display: 'none',
   },
 });
@@ -41,14 +41,16 @@ const MenuToggleButton = styled('button')(({ theme }) => ({
   },
 
   '&:hover': {
-    transform: 'scale(1.2)',
+    transform: 'scale(1.1)',
     animation: 'pulse 1.5s infinite alternate',
   },
 }));
 
 const MenuToggle = ({ onClick }: MenuToggleProps) => (
   <MenuToggleContainer>
-    <MenuToggleButton onClick={onClick}><LuAudioLines/></MenuToggleButton>
+    <MenuToggleButton onClick={onClick}>
+      <LuAudioLines />
+    </MenuToggleButton>
   </MenuToggleContainer>
 );
 

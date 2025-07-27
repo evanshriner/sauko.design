@@ -6,11 +6,10 @@ const Menu = styled(FlexBox)((props) => ({
   gap: '1.75rem',
   '@media (max-width: 768px)': {
     display: props.show ? 'flex' : 'none',
-    flexDirection: 'column',
     position: 'absolute',
     top: '3.75rem',
     right: '0.625rem',
-    backgroundColor: '#333',
+    backgroundColor: 'transparent',
     gap: '0.625rem',
     padding: '0.625rem',
   },
