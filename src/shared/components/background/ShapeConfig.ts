@@ -17,14 +17,11 @@ export interface ResponsiveScale {
   maxViewportWidth: number; // in pixels
 }
 
-export interface ObjectConfig {
-  id: DisplayedObject;
+export interface ObjectModelConfig {
   gltfPath: string;
-  gltfPathMobile?: string;
-  page: Pages;
   scale: THREE.Vector3 | number; // Uniform scale or per-axis
   responsiveScale?: ResponsiveScale; // Optional responsive scaling configuration
-  basePosition: THREE.Vector3; // The "center" position it will occupy when active
+  basePosition: THREE.Vector3; // spawn in position, helps to center the object
   // Animation function for rotation
   rotationAnimation: (
     mesh: THREE.Group,
@@ -32,76 +29,126 @@ export interface ObjectConfig {
     initialRotationOffset?: number,
   ) => void;
   floatAnimation: (mesh: THREE.Group, time: number) => void; // bouncing up and down animation
-  isReflective?: boolean; // Flag to determine if this object uses the reflective shader
+}
+
+export interface ObjectConfig {
+  id: DisplayedObject;
+  page: Pages;
+  models: {
+    mobile?: ObjectModelConfig;
+    desktop: ObjectModelConfig;
+  };
 }
 
 export const objectConfigurations: ObjectConfig[] = [
   {
     id: DisplayedObject.Boombox,
     page: Pages.AudioEngineering,
-    gltfPath: '/Boombox.glb',
-    gltfPathMobile: '/Boombox.glb',
-    scale: 0.45, // Fallback scale
-    responsiveScale: {
-      minScale: 0.3,
-      maxScale: 0.6,
-      minViewportWidth: 275,
-      maxViewportWidth: 1920,
+    models: {
+      desktop: {
+        gltfPath: '/Boombox.glb',
+        scale: 0.45,
+        responsiveScale: {
+          minScale: 0.3,
+          maxScale: 0.6,
+          minViewportWidth: 275,
+          maxViewportWidth: 1920,
+        },
+        basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
+        rotationAnimation: (mesh, time, initialOffset = 4.73) => {
+          mesh.rotation.y =
+            -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+        },
+        floatAnimation: (mesh, time) => {
+          // Floats around its local origin; group handles fly-in/out
+          mesh.position.y = -0.09 + Math.sin(time * 0.7) * 0.02;
+        },
+      },
+      mobile: {
+        gltfPath: '/Speaker.glb',
+        scale: 0.15,
+        responsiveScale: {
+          minScale: 0.05,
+          maxScale: 0.11,
+          minViewportWidth: 280,
+          maxViewportWidth: 1920,
+        },
+        basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
+        rotationAnimation: (mesh, time, initialOffset = 4.73) => {
+          mesh.rotation.y =
+            -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+        },
+        floatAnimation: (mesh, time) => {
+          mesh.position.y = -0.1 + Math.sin(time * 0.7) * 0.02;
+        },
+      },
     },
-    basePosition: new THREE.Vector3(0.0, 0.0, 0.0),
-    rotationAnimation: (mesh, time, initialOffset = 4.73) => {
-      mesh.rotation.y =
-        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
-    },
-    floatAnimation: (mesh, time) => {
-      // Floats around its local origin; group handles fly-in/out
-      mesh.position.y = Math.sin(time * 0.7) * 0.02;
-    },
-    isReflective: true,
   },
   {
     id: DisplayedObject.Robot,
-    gltfPath: '/Robot.glb',
-    gltfPathMobile: '/Robot.glb',
     page: Pages.AIAugmentation,
-    scale: 0.011,
-    responsiveScale: {
-      minScale: 0.009,
-      maxScale: 0.011,
-      minViewportWidth: 375,
-      maxViewportWidth: 1920,
+    models: {
+      desktop: {
+        gltfPath: '/Robot.glb',
+        scale: 0.011,
+        responsiveScale: {
+          minScale: 0.009,
+          maxScale: 0.011,
+          minViewportWidth: 375,
+          maxViewportWidth: 1920,
+        },
+        basePosition: new THREE.Vector3(0.0, 0.0, 0),
+        rotationAnimation: (mesh, time, initialOffset = 0) => {
+          mesh.rotation.y =
+            -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+        },
+        floatAnimation: (mesh, time) => {
+          mesh.position.y = -0.15 + Math.cos(time * 0.6) * 0.03;
+        },
+      },
     },
-    basePosition: new THREE.Vector3(0.0, 0.0, 0),
-    rotationAnimation: (mesh, time, initialOffset = 0) => {
-      mesh.rotation.y =
-        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
-    },
-    floatAnimation: (mesh, time) => {
-      mesh.position.y = -0.15 + Math.cos(time * 0.6) * 0.03;
-    },
-    isReflective: true,
   },
   {
     id: DisplayedObject.Lab,
-    gltfPath: '/Lab.glb',
-    gltfPathMobile: '/Lab.glb',
+    models: {
+      desktop: {
+        gltfPath: '/Lab.glb',
+        scale: 0.47,
+        responsiveScale: {
+          minScale: 0.38,
+          maxScale: 0.47,
+          minViewportWidth: 375,
+          maxViewportWidth: 1920,
+        },
+        basePosition: new THREE.Vector3(0.0, 0.0, 0),
+        rotationAnimation: (mesh, time, initialOffset = 1.55) => {
+          mesh.rotation.y =
+            -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+        },
+        floatAnimation: (mesh, time) => {
+          mesh.position.y = 0.18 + Math.cos(time * 0.6) * 0.03;
+        },
+      },
+      mobile: {
+        gltfPath: '/Flask.glb',
+        scale: 0.47,
+        responsiveScale: {
+          minScale: 0.04,
+          maxScale: 0.07,
+          minViewportWidth: 375,
+          maxViewportWidth: 1920,
+        },
+        basePosition: new THREE.Vector3(0.0, 0.0, 0),
+        rotationAnimation: (mesh, time, initialOffset = 1) => {
+          mesh.rotation.y =
+            -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
+        },
+        floatAnimation: (mesh, time) => {
+          mesh.position.y = +Math.cos(time * 0.6) * 0.03;
+        },
+      },
+    },
     page: Pages.Software,
-    scale: 0.47,
-    responsiveScale: {
-      minScale: 0.38,
-      maxScale: 0.47,
-      minViewportWidth: 375,
-      maxViewportWidth: 1920,
-    },
-    basePosition: new THREE.Vector3(0.0, 0.0, 0),
-    rotationAnimation: (mesh, time, initialOffset = 1.55) => {
-      mesh.rotation.y =
-        -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
-    },
-    floatAnimation: (mesh, time) => {
-      mesh.position.y = 0.18 + Math.cos(time * 0.6) * 0.03;
-    },
-    isReflective: true,
   },
   // {
   //   id: DisplayedObject.PostedLetter,
@@ -122,5 +169,3 @@ export const objectConfigurations: ObjectConfig[] = [
 
 // Animation constants for transitions
 export const ANIMATION_DURATION = 0.8; // seconds
-export const FLY_OUT_Y_POSITION = 4; // units to fly up/out
-export const FLY_IN_Y_START_POSITION = -4; // units to fly in from below

@@ -39,7 +39,7 @@ export const SoundButtonContainer = styled.button`
   }
 
   &:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
     animation: ${pulse} 1.5s infinite alternate;
   }
 

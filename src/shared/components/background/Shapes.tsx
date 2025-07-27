@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Preload } from '@react-three/drei';
@@ -7,25 +7,24 @@ import type { GLTF } from 'three-stdlib';
 import {
   fragmentShader as wavesFragment,
   vertexShader as wavesVertex,
-} from './shaders/BackgroundWaves'; // Adjust path if needed
+} from './shaders/BackgroundWaves';
 import {
   fragmentShader as reflectiveFragment,
   vertexShader as reflectiveVertex,
-} from './shaders/FresnelReflection'; // Adjust path if needed
+} from './shaders/FresnelReflection';
 
 import {
   DisplayedObject,
-  ObjectConfig,
   objectConfigurations,
-} from './ShapeConfig'; // Adjust path if needed
+  ObjectModelConfig,
+} from './ShapeConfig';
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
 
 const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
   format: THREE.RGBAFormat,
   generateMipmaps: false,
-  // minFilter: THREE.LinearMipmapLinearFilter,
-  minFilter: THREE.LinearFilter, // Use LinearFilter for better performance
+  minFilter: THREE.LinearFilter,
   colorSpace: THREE.SRGBColorSpace,
 });
 
@@ -42,7 +41,7 @@ const X_OFFSET_SPACING = 5.5;
 const ModelInstance = React.forwardRef<
   THREE.Group,
   {
-    config: ObjectConfig;
+    config: ObjectModelConfig;
     gltf: GLTF;
     reflectiveMaterial: THREE.ShaderMaterial | null;
   }
@@ -83,21 +82,44 @@ export default function Shapes({
   selectedObjectKey = DisplayedObject.Boombox,
 }: ShapesSwitcherProps) {
   const { amplitude } = useMediaPlayerContext();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 558);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 558);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const outerSphereRef = useRef<THREE.ShaderMaterial>(null);
   const modelRefs = useRef(
     objectConfigurations.map(() => React.createRef<THREE.Group>()),
   );
 
-  const gltfPaths = objectConfigurations.map((config) => config.gltfPath);
+  const gltfPaths = useMemo(() => {
+    const paths = new Set<string>();
+    objectConfigurations.forEach((config) => {
+      paths.add(config.models.desktop.gltfPath);
+      if (config.models.mobile) {
+        paths.add(config.models.mobile.gltfPath);
+      }
+    });
+    return Array.from(paths);
+  }, []);
+
   const gltfs = useGLTF(gltfPaths) as GLTF[];
 
   const gltfMap = useMemo(() => {
     const map: Record<string, GLTF> = {};
-    objectConfigurations.forEach((config, index) => {
-      map[config.id] = gltfs[index];
+    gltfs.forEach((gltf, index) => {
+      // This mapping assumes the order of gltfPaths matches the order of gltfs.
+      // It's better to map by path.
+      const path = gltfPaths[index];
+      map[path] = gltf;
     });
     return map;
-  }, [gltfs]);
+  }, [gltfs, gltfPaths]);
 
   useEffect(() => {
     console.log('gltf map:', gltfMap);
@@ -114,7 +136,8 @@ export default function Shapes({
       const carouselOffsetX = (index - initialSelectedIndex) * X_OFFSET_SPACING;
 
       // Use the object's basePosition from the config as the starting point
-      const initialPos = config.basePosition.clone();
+      const modelConfig = config.models.mobile ?? config.models.desktop;
+      const initialPos = modelConfig.basePosition.clone();
       initialPos.x += carouselOffsetX;
 
       return {
@@ -166,13 +189,17 @@ export default function Shapes({
       const config = objectConfigurations[index];
       const carouselOffsetX = (index - newSelectedIndex) * X_OFFSET_SPACING;
 
-      const basePos = config.basePosition.clone();
+      const modelConfig =
+        isMobile && config.models.mobile
+          ? config.models.mobile
+          : config.models.desktop;
+      const basePos = modelConfig.basePosition.clone();
 
       // Update the entire target position vector
       state.targetPos.copy(basePos);
       state.targetPos.x = carouselOffsetX;
     });
-  }, [selectedObjectKey]);
+  }, [selectedObjectKey, isMobile]);
 
   // This effect sets the initial position for each model to prevent a flicker
   // from [0,0,0] on the first frame.
@@ -190,6 +217,7 @@ export default function Shapes({
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
+    // controls the speed of the wave animation
     if (outerSphereRef.current) {
       outerSphereRef.current.uniforms.time.value += delta * 0.2;
       outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
@@ -205,7 +233,7 @@ export default function Shapes({
 
     camera.position.x = Math.cos(t) * radius;
     camera.position.z = Math.sin(t) * radius;
-    camera.position.y = 0.3; // Keep your scroll effect if needed
+    camera.position.y = 0.3;
 
     camera.lookAt(0, 0.3, 0); // Always look at the center
 
@@ -223,20 +251,6 @@ export default function Shapes({
     reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = false));
     cubeCamera.update(gl, scene);
     reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = true));
-
-    // Handle model transitions and animations
-    // if (transitionState.isTransitioning) {
-    //   const newProgress = Math.min(transitionState.progress + delta / ANIMATION_DURATION, 1);
-    //   setTransitionState((prev) => ({ ...prev, progress: newProgress }));
-
-    //   if (newProgress >= 1) {
-    //     setTransitionState((prev) => ({
-    //       ...prev,
-    //       isTransitioning: false,
-    //       previousKey: undefined, // Clear previous key once transition is complete
-    //     }));
-    //   }
-    // }
 
     // Animate objects
     animationStates.current.forEach((animState, idx) => {
@@ -267,70 +281,19 @@ export default function Shapes({
       }
     });
 
-    objectConfigurations.forEach((key, idx) => {
-      // Get the ref to the root group of the model
+    objectConfigurations.forEach((config, idx) => {
       const groupRef = modelRefs.current[idx]?.current;
-
-      // If the ref isn't available yet, skip
       if (!groupRef) return;
 
+      const modelConfig =
+        isMobile && config.models.mobile
+          ? config.models.mobile
+          : config.models.desktop;
+
       // Apply animations directly to the entire group object
-      key.rotationAnimation(groupRef, time);
-      key.floatAnimation(groupRef, time);
+      modelConfig.rotationAnimation(groupRef, time);
+      modelConfig.floatAnimation(groupRef, time);
     });
-
-    // // Orbit parameters
-    // const radius = 1.3; // Distance from center
-    // const speed = 0.06; // Radians per second
-    // const t = time * speed;
-
-    // camera.position.x = Math.cos(t) * radius;
-    // camera.position.z = Math.sin(t) * radius;
-    // camera.position.y = 0.3; // Keep your scroll effect if needed
-
-    // camera.lookAt(0, 0.3, 0); // Always look at the center
-
-    // if (reflectiveShapeRef.current) {
-    //   // Temporarily hide all objects that use the reflective material before updating the cube camera
-    //   // to prevent a visual feedback loop.
-    //   const meshesToHide: THREE.Mesh[] = [];
-    //   if (
-    //     boomboxMeshRef.current &&
-    //     boomboxMeshRef.current.material === reflectiveShapeRef.current
-    //   ) {
-    //     meshesToHide.push(boomboxMeshRef.current);
-    //   }
-    //   if (
-    //     laptopMeshRef.current &&
-    //     laptopMeshRef.current.material === reflectiveShapeRef.current
-    //   ) {
-    //     meshesToHide.push(laptopMeshRef.current);
-    //   }
-
-    //   meshesToHide.forEach((mesh) => (mesh.visible = false));
-
-    //   cubeCamera.update(gl, scene);
-
-    //   meshesToHide.forEach((mesh) => (mesh.visible = true));
-    //   reflectiveShapeRef.current.uniforms.tCube.value =
-    //     cubeRenderTarget.texture;
-    // }
-    // const orbitCenter = new THREE.Vector3(0, 0, 0); // --- Boombox Animation: Orbit, Rotation, Floating ---
-
-    // const orbitRadius = 1;
-
-    // if (boomboxMeshRef.current) {
-    //   boomboxMeshRef.current.position.y =
-    //     orbitCenter.y + Math.sin(time * 0.7) * 0.02; // Rotation
-
-    //   boomboxMeshRef.current.rotation.y = -t - (4.73 + Math.sin(time * 2) * 0.01); // 4.73 is the initial rotation offset
-    //   // boomboxMeshRef.current.position.z = Math.sin(t) * radius;
-    // }
-
-    // if (laptopMeshRef.current) {
-    //   laptopMeshRef.current.position.y =
-    //     orbitCenter.y + Math.sin(time * 0.6 + Math.PI / 2) * 0.12; // Rotation
-    // }
   });
 
   return (
@@ -348,17 +311,21 @@ export default function Shapes({
 
       {/* Render current model */}
       {objectConfigurations.map((config, index) => {
-        const gltf = gltfMap[config.id];
+        const modelConfig =
+          isMobile && config.models.mobile
+            ? config.models.mobile
+            : config.models.desktop;
+
+        const gltf = gltfMap[modelConfig.gltfPath];
         if (!gltf) {
-          console.warn(`GLTF data not found for ${config.id}`);
+          console.warn(`GLTF data not found for ${modelConfig.gltfPath}`);
           return null;
         }
-        // The object's visibility is controlled within the useFrame loop now
         return (
           <ModelInstance
             key={config.id}
             ref={modelRefs.current[index]}
-            config={config}
+            config={modelConfig}
             gltf={gltf}
             reflectiveMaterial={reflectiveMaterial}
           />

@@ -27,7 +27,7 @@ export const WAVE_STROKE_WIDTH = '2.5';
 export const PULSE_ANIMATION_NAME = 'pulse';
 export const PULSE_ANIMATION = `${PULSE_ANIMATION_NAME} 1.5s infinite alternate`;
 export const TRANSFORM_SCALE_DEFAULT = 'scale(1)';
-export const TRANSFORM_SCALE_HOVER = 'scale(1.2)';
+export const TRANSFORM_SCALE_HOVER = 'scale(1.1)';
 export const TRANSFORM_TRANSITION_DURATION = '0.5s';
 
 // IDs
