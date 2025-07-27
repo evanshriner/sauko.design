@@ -28,10 +28,10 @@ const NeonText = styled(FlexBox)<NeonTextProps>(
       animation: 'hoverX 6s ease-in-out infinite',
     }),
     ...(disableSelection && {
-      '-webkit-user-select': 'none',
-      '-moz-user-select': 'none',
-      '-ms-user-select': 'none',
-      'user-select': 'none',
+      webkitUserSelect: 'none',
+      mozUserSelect: 'none',
+      msUserSelect: 'none',
+      userSelect: 'none',
     }),
   }),
 );
