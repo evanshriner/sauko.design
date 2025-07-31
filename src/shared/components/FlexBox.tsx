@@ -16,6 +16,7 @@ export interface FlexboxProps {
   gap?: string;
   height?: string;
   padding?: string;
+  clickable?: boolean; // since we use three.js in multiple areas of the app, we need to explicitly 'enable' pointer events.
 }
 
 const FlexBox = styled.div<FlexboxProps>((props) => ({
@@ -30,6 +31,7 @@ const FlexBox = styled.div<FlexboxProps>((props) => ({
   flexWrap: props.flexWrap || 'nowrap',
   gap: props.gap || 'none',
   padding: props.padding || 'none',
+  pointerEvents: props.clickable ? 'auto' : 'none',
 }));
 
 export default FlexBox;

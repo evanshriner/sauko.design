@@ -70,7 +70,7 @@ export const ChevronButton: React.FC<ChevronButtonProps> = ({
 }) => {
   const Icon = direction === 'left' ? MdChevronLeft : MdChevronRight;
   return (
-    <StyledChevronButton onClick={onClick}>
+    <StyledChevronButton onClick={onClick} clickable>
       <Icon
         size={size}
         color={`rgba(255, 255, 255, 0.73)`}

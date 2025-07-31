@@ -106,6 +106,7 @@ function App() {
               ref={scrollContainerRef}
               data-scroll-container
               alignItems="center"
+              clickable
             >
               <Home
                 data-scroll-section

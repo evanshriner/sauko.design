@@ -191,6 +191,7 @@ const MediaPlayer: React.FC = () => {
       justifyContent="space-around"
       alignItems="center"
       gap={C.MEDIA_PLAYER_GAP}
+      clickable
     >
       <PlayPauseButton onClick={isPlaying ? pause : play}>
         {isPlaying ? (
@@ -219,12 +220,12 @@ const MediaPlayer: React.FC = () => {
             <FaExternalLinkAlt />
           </ControlButton> */}
         </FlexBox>
-        <FlexBox justifyContent="space-around" width="100%" alignItems="center">
+        <FlexBox justifyContent="space-around" width="100%" alignItems="center" clickable>
           <ControlButton onClick={skipBackward}>
             <FaBackwardStep />
           </ControlButton>
 
-          <ScrubberContainer ref={scrubberRef} onClick={handleScrubberClick}>
+          <ScrubberContainer ref={scrubberRef} onClick={handleScrubberClick} clickable>
             {/* SVG container for the wave visuals */}
             <svg
               width={scrubberWidth}
@@ -277,6 +278,7 @@ const MediaPlayer: React.FC = () => {
       <FlexBox gap="8px" alignItems="center" width="auto" height="100%">
         <MediaControlContainer
           ref={intensityControlRef}
+          clickable
           onMouseDown={handleIntensityMouseDown}
           intensity={intensity}
         >
@@ -284,6 +286,7 @@ const MediaPlayer: React.FC = () => {
         </MediaControlContainer>
         <MediaControlContainer
           ref={volumeControlRef}
+          clickable
           onMouseDown={handleVolumeMouseDown}
           intensity={volume}
         >

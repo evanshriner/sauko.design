@@ -47,7 +47,7 @@ const MenuToggleButton = styled('button')(({ theme }) => ({
 }));
 
 const MenuToggle = ({ onClick }: MenuToggleProps) => (
-  <MenuToggleContainer>
+  <MenuToggleContainer clickable>
     <MenuToggleButton onClick={onClick}>
       <LuAudioLines />
     </MenuToggleButton>

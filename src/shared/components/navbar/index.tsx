@@ -23,8 +23,9 @@ export default function NavBar({
   };
 
   return (
-    <NavBarContainer>
+    <NavBarContainer clickable>
       <Logo
+        clickable
         onClick={() => onMenuItemClick(Pages.Home)}
         onMouseEnter={() => onHoverChange(true)}
         onMouseLeave={() => onHoverChange(false)}
@@ -33,7 +34,7 @@ export default function NavBar({
         sauko
       </Logo>
       <MenuToggle onClick={toggleMenu} />
-      <Menu show={showMenu}>
+      <Menu show={showMenu} clickable>
         <MediaPlayer />
       </Menu>
     </NavBarContainer>

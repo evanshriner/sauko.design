@@ -147,6 +147,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           justifyContent="flex-end"
           alignItems="flex-end"
           height="100vh"
+          clickable
           id="loading-screen-sound-selection"
           flexDirection="column"
         >
