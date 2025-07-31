@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Preload } from '@react-three/drei';
 import type { GLTF } from 'three-stdlib';
@@ -32,6 +32,8 @@ const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
 
 interface ShapesSwitcherProps {
   selectedObjectKey: DisplayedObject;
+  onObjectClick?: (objectId: DisplayedObject) => void;
+  onObjectHover?: (objectId: DisplayedObject | null) => void;
 }
 
 const X_OFFSET_SPACING = 5.5;
@@ -44,42 +46,64 @@ const ModelInstance = React.forwardRef<
     config: ObjectModelConfig;
     gltf: GLTF;
     reflectiveMaterial: THREE.ShaderMaterial | null;
+    onClick?: (event: ThreeEvent<MouseEvent>) => void;
+    onPointerOver?: (event: ThreeEvent<MouseEvent>) => void;
+    onPointerOut?: (event: ThreeEvent<MouseEvent>) => void;
   }
->(({ config, gltf, reflectiveMaterial }, ref) => {
-  const responsiveScale = useResponsiveScale(
-    config.responsiveScale,
-    config.scale,
-  );
+>(
+  (
+    { config, gltf, reflectiveMaterial, onClick, onPointerOver, onPointerOut },
+    ref,
+  ) => {
+    const responsiveScale = useResponsiveScale(
+      config.responsiveScale,
+      config.scale,
+    );
 
-  const modelScene = useMemo(() => {
-    const clonedScene = gltf.scene.clone();
-    clonedScene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        if (!child.geometry.attributes.normal) {
-          // this needs to be done for some models that
-          // done have pre-calculated normals.
-          child.geometry.computeVertexNormals();
+    const modelScene = useMemo(() => {
+      const clonedScene = gltf.scene.clone();
+      clonedScene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          if (!child.geometry.attributes.normal) {
+            // this needs to be done for some models that
+            // done have pre-calculated normals.
+            child.geometry.computeVertexNormals();
+          }
+
+          if (reflectiveMaterial) {
+            child.material = reflectiveMaterial;
+          }
         }
+      });
+      return clonedScene;
+    }, [gltf, reflectiveMaterial]);
 
-        if (reflectiveMaterial) {
-          child.material = reflectiveMaterial;
-        }
-      }
-    });
-    return clonedScene;
-  }, [gltf, reflectiveMaterial]);
-
-  return (
-    <primitive
-      ref={ref} // Attach the ref here
-      object={modelScene}
-      scale={responsiveScale} // Pass scale declaratively
-    />
-  );
-});
+    return (
+      <primitive
+        ref={ref}
+        object={modelScene}
+        scale={responsiveScale}
+        onClick={(e: ThreeEvent<MouseEvent>) => {
+          e.stopPropagation();
+          onClick?.(e);
+        }}
+        onPointerOver={(e: ThreeEvent<MouseEvent>) => {
+          e.stopPropagation();
+          onPointerOver?.(e);
+        }}
+        onPointerOut={(e: ThreeEvent<MouseEvent>) => {
+          e.stopPropagation();
+          onPointerOut?.(e);
+        }}
+      />
+    );
+  },
+);
 
 export default function Shapes({
   selectedObjectKey = DisplayedObject.Boombox,
+  onObjectClick,
+  onObjectHover,
 }: ShapesSwitcherProps) {
   const { amplitude } = useMediaPlayerContext();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 558);
@@ -93,6 +117,7 @@ export default function Shapes({
   }, []);
 
   const outerSphereRef = useRef<THREE.ShaderMaterial>(null);
+  const outerSphereMeshRef = useRef<THREE.Mesh>(null);
   const modelRefs = useRef(
     objectConfigurations.map(() => React.createRef<THREE.Group>()),
   );
@@ -206,10 +231,20 @@ export default function Shapes({
   useEffect(() => {
     modelRefs.current.forEach((ref, index) => {
       if (ref.current) {
+        const config = objectConfigurations[index];
+        const modelConfig =
+          isMobile && config.models.mobile
+            ? config.models.mobile
+            : config.models.desktop;
+
         ref.current.position.copy(animationStates.current[index].currentPos);
+
+        if (modelConfig.initialRotationOffset) {
+          ref.current.rotation.y = modelConfig.initialRotationOffset;
+        }
       }
     });
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     console.log(modelRefs.current);
@@ -227,15 +262,15 @@ export default function Shapes({
 
     ///////////// camera adjustments /////////////
 
-    const radius = 1.3; // Distance from center
-    const speed = 0.06; // Radians per second
-    const t = time * speed;
-
-    camera.position.x = Math.cos(t) * radius;
-    camera.position.z = Math.sin(t) * radius;
-    camera.position.y = 0.3;
-
+    // Set a fixed position for the camera
+    camera.position.set(0, 0.3, 1.3);
     camera.lookAt(0, 0.3, 0); // Always look at the center
+
+    // Rotate the outer sphere
+    if (outerSphereMeshRef.current) {
+      const speed = 0.03;
+      outerSphereMeshRef.current.rotation.y = -time * speed;
+    }
 
     ///////////// ensure reflections on shapes are updated /////////////
     const reflectiveMeshesInScene: THREE.Mesh[] = [];
@@ -248,8 +283,23 @@ export default function Shapes({
         reflectiveMeshesInScene.push(object);
       }
     });
+
+    // Hide the objects that will receive the reflection
     reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = false));
-    cubeCamera.update(gl, scene);
+
+    // To capture a static reflection, we temporarily reset the sphere's rotation,
+    // render the reflection, and then restore the rotation.
+    const sphere = outerSphereMeshRef.current;
+    if (sphere) {
+      const originalRotationY = sphere.rotation.y;
+      sphere.rotation.y = 0; // Reset rotation for capture
+      cubeCamera.update(gl, scene);
+      sphere.rotation.y = originalRotationY; // Restore rotation
+    } else {
+      cubeCamera.update(gl, scene);
+    }
+
+    // Restore visibility for the main render
     reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = true));
 
     // Animate objects
@@ -291,7 +341,7 @@ export default function Shapes({
           : config.models.desktop;
 
       // Apply animations directly to the entire group object
-      modelConfig.rotationAnimation(groupRef, time);
+      // modelConfig.rotationAnimation(groupRef, time);
       modelConfig.floatAnimation(groupRef, time);
     });
   });
@@ -299,7 +349,7 @@ export default function Shapes({
   return (
     <>
       {/* render background / surrounding sphere */}
-      <mesh geometry={sphereGeometry}>
+      <mesh ref={outerSphereMeshRef} geometry={sphereGeometry}>
         <shaderMaterial
           ref={outerSphereRef}
           side={THREE.BackSide}
@@ -328,6 +378,9 @@ export default function Shapes({
             config={modelConfig}
             gltf={gltf}
             reflectiveMaterial={reflectiveMaterial}
+            onClick={() => onObjectClick?.(config.id)}
+            onPointerOver={() => onObjectHover?.(config.id)}
+            onPointerOut={() => onObjectHover?.(null)}
           />
         );
       })}

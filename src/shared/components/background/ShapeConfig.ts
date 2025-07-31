@@ -22,6 +22,7 @@ export interface ObjectModelConfig {
   scale: THREE.Vector3 | number; // Uniform scale or per-axis
   responsiveScale?: ResponsiveScale; // Optional responsive scaling configuration
   basePosition: THREE.Vector3; // spawn in position, helps to center the object
+  initialRotationOffset?: number;
   // Animation function for rotation
   rotationAnimation: (
     mesh: THREE.Group,
@@ -97,8 +98,9 @@ export const objectConfigurations: ObjectConfig[] = [
           minViewportWidth: 375,
           maxViewportWidth: 1920,
         },
+        initialRotationOffset: -1.53,
         basePosition: new THREE.Vector3(0.0, 0.0, 0),
-        rotationAnimation: (mesh, time, initialOffset = 0) => {
+        rotationAnimation: (mesh, time, initialOffset = 3) => {
           mesh.rotation.y =
             -time * 0.06 - (initialOffset + Math.sin(time * 0.5) * 0.05);
         },
@@ -120,6 +122,7 @@ export const objectConfigurations: ObjectConfig[] = [
           minViewportWidth: 375,
           maxViewportWidth: 1920,
         },
+        initialRotationOffset: 3.2,
         basePosition: new THREE.Vector3(0.0, 0.0, 0),
         rotationAnimation: (mesh, time, initialOffset = 1.55) => {
           mesh.rotation.y =
