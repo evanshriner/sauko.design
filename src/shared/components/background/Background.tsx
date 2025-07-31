@@ -7,7 +7,15 @@ import { Pages } from '@/shared/interfaces/pages';
 import { BlendFunction } from 'postprocessing';
 import CustomDotScreen from './shaders/CustomDotScreen';
 
-export default function Background({ currentPage }: { currentPage?: Pages }) {
+export default function Background({
+  currentPage,
+  onObjectClick,
+  onObjectHover,
+}: {
+  currentPage?: Pages;
+  onObjectClick: (page: Pages) => void;
+  onObjectHover: (isHovering: boolean) => void;
+}) {
   return (
     <Canvas
       camera={{
@@ -29,8 +37,16 @@ export default function Background({ currentPage }: { currentPage?: Pages }) {
             objectConfigurations.find((config) => config.page === currentPage)
               ?.id || DisplayedObject.Boombox
           }
-          onObjectClick={(object) => {
-            console.log('Object clicked:', object);
+          onObjectClick={(id) => {
+            const config = objectConfigurations.find((c) => c.id === id);
+            console.log('clicked object:', id, 'config:', config);
+            if (config) {
+              onObjectClick(config.page);
+            }
+          }}
+          onObjectHover={(id) => {
+            console.log('hovered object:', id);
+            onObjectHover(id !== null);
           }}
         />
       </group>

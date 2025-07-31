@@ -81,6 +81,10 @@ function App() {
     }, 1000); // this matches the bloom animation durations found in the wrapping components
   };
 
+  const handlePageChange = (page: Pages) => {
+    setCurrentPage(page);
+  };
+
   return (
     <ThemeProvider theme={theme}>
     <MediaPlayerProvider>
@@ -94,7 +98,11 @@ function App() {
       <AppContainer isTransitioning={isTransitioning}>
           <CustomCursor isHoveringNav={isHoveringNav} />
           <BackgroundContainer>
-            <Background currentPage={currentPage} />
+            <Background
+              currentPage={currentPage}
+              onObjectClick={handlePageChange}
+              onObjectHover={setIsHoveringNav}
+            />
           </BackgroundContainer>
           <FlexBox flexDirection="column">
             <NavBar
@@ -106,7 +114,8 @@ function App() {
               ref={scrollContainerRef}
               data-scroll-container
               alignItems="center"
-              clickable
+              // this will need to be dynamic, based on whether or not we are doing scroll
+              style={ { pointerEvents: 'none'}}
             >
               <Home
                 data-scroll-section
