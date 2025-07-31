@@ -1,15 +1,5 @@
-import { OrbitControls } from '@react-three/drei';
-import { Perf } from 'r3f-perf';
 import { Canvas } from '@react-three/fiber';
-import {
-  Bloom,
-  DepthOfField,
-  DotScreen,
-  EffectComposer,
-  Sepia,
-  Vignette,
-} from '@react-three/postprocessing';
-import { useEffect, useRef, useState } from 'react';
+import { EffectComposer, Sepia, Vignette } from '@react-three/postprocessing';
 
 import Shapes from './Shapes';
 import { DisplayedObject, objectConfigurations } from './ShapeConfig';
@@ -33,24 +23,19 @@ export default function Background({ currentPage }: { currentPage?: Pages }) {
 
       <OrbitControls makeDefault /> */}
 
-      <Shapes
-        selectedObjectKey={
-          objectConfigurations.find((config) => config.page === currentPage)
-            ?.id || DisplayedObject.Boombox
-        }
-      />
+      <group>
+        <Shapes
+          selectedObjectKey={
+            objectConfigurations.find((config) => config.page === currentPage)
+              ?.id || DisplayedObject.Boombox
+          }
+          onObjectClick={(object) => {
+            console.log('Object clicked:', object);
+          }}
+        />
+      </group>
       <EffectComposer>
-        {/* <DotScreen
-          blendFunction={BlendFunction.NORMAL} // Try other modes like ADD, SCREEN, OVERLAY
-          angle={Math.PI / 12} // A different angle
-          // TODO: possible adjust scale based on music visualization?
-          // settings like 0.1 and 0.03 look really cool here as well.
-          scale={0.1} // Adjust scale
-        /> */}
         <CustomDotScreen />
-        {/* <Pixelation
-    granularity={20} // pixel granularity
-  /> could have this follow mouse */}
         <Sepia
           intensity={0.1} // sepia intensity
           blendFunction={BlendFunction.NORMAL} // blend mode
