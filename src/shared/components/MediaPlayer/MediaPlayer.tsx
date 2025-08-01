@@ -210,6 +210,7 @@ const MediaPlayer: React.FC = () => {
             fontSize={C.TRACK_INFO_FONT_SIZE}
             justifyContent="center"
             alignItems="center"
+            disableSelection
           >
             {currentTrack
               ? `${currentTrack.title} | ${currentTrack.artist}`
