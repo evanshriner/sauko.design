@@ -1,11 +1,33 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Sepia, Vignette } from '@react-three/postprocessing';
+import { Vector3 } from 'three';
 
 import Shapes from './Shapes';
 import { DisplayedObject, objectConfigurations } from './ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
 import { BlendFunction } from 'postprocessing';
 import CustomDotScreen from './shaders/CustomDotScreen';
+
+// Define target positions
+const mainPageCameraPosition = new Vector3(0, 0.3, 1.3);
+const subPageCameraPosition = new Vector3(0, -1, 1.3); // Lowered position
+
+function CameraControl({ currentPage }: { currentPage?: Pages }) {
+  const { camera } = useThree();
+
+  useFrame(() => {
+    const targetPosition =
+      currentPage === Pages.Home || currentPage === undefined
+        ? mainPageCameraPosition
+        : subPageCameraPosition;
+
+    // Smoothly interpolate the camera's position
+    camera.position.lerp(targetPosition, 0.1); // Adjust the lerp factor (0.1) for speed
+    camera.lookAt(0, camera.position.y, 0); // Keep looking at the center, but adjust for y change
+  });
+
+  return null;
+}
 
 export default function Background({
   currentPage,
@@ -22,14 +44,12 @@ export default function Background({
         fov: 70,
         near: 0.01,
         far: 100,
-        // position is being interpolated in the Shapes component
-        position: [0, 0, 0],
       }}
     >
+      <CameraControl currentPage={currentPage} />
       {/* <Perf position="top-left" /> */}
-      {/*
 
-      <OrbitControls makeDefault /> */}
+      {/* <OrbitControls makeDefault /> */}
 
       <group>
         <Shapes

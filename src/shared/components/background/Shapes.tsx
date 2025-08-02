@@ -258,13 +258,7 @@ export default function Shapes({
       outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
     }
 
-    const { gl, scene, camera } = state; // Get gl, scene, camera from state
-
-    ///////////// camera adjustments /////////////
-
-    // Set a fixed position for the camera
-    camera.position.set(0, 0.3, 1.3);
-    camera.lookAt(0, 0.3, 0); // Always look at the center
+    const { gl, scene } = state;
 
     // Rotate the outer sphere
     if (outerSphereMeshRef.current) {
@@ -292,9 +286,9 @@ export default function Shapes({
     const sphere = outerSphereMeshRef.current;
     if (sphere) {
       const originalRotationY = sphere.rotation.y;
-      sphere.rotation.y = 0; // Reset rotation for capture
+      sphere.rotation.y = 0;
       cubeCamera.update(gl, scene);
-      sphere.rotation.y = originalRotationY; // Restore rotation
+      sphere.rotation.y = originalRotationY;
     } else {
       cubeCamera.update(gl, scene);
     }
@@ -306,7 +300,6 @@ export default function Shapes({
     animationStates.current.forEach((animState, idx) => {
       const groupRef = modelRefs.current[idx];
       if (groupRef?.current) {
-        // Animate the x position using an easing function
         groupRef.current.position.x = THREE.MathUtils.damp(
           groupRef.current.position.x,
           animState.targetPos.x,
