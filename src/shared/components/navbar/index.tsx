@@ -8,7 +8,6 @@ import { Pages } from '@/shared/interfaces/pages';
 
 export interface NavBarProps {
   onMenuItemClick: (menuItem: Pages) => void;
-  currentPage: string;
   onHoverChange: (isHovering: boolean) => void;
 }
 

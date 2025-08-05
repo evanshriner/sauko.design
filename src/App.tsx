@@ -24,7 +24,9 @@ function App() {
   const { progress } = useProgress();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
-  const [currentPage, setCurrentPage] = useState<Pages>(Pages.AudioEngineering);
+  const [currentSelectableSubPage, setCurrentSelectableSubPage] =
+    useState<Pages>(Pages.AudioEngineering);
+  const [currentPage, setCurrentPage] = useState<Pages>(Pages.Home);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
   // Ref for the scroll container element
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -82,32 +84,38 @@ function App() {
   };
 
   const handlePageChange = (page: Pages) => {
+    setCurrentSelectableSubPage(page);
     setCurrentPage(page);
+    // this is necessary since the raycaster is not updated until the mouse moves (just an aesthetic improvement)
+    setIsHoveringNav(false);
   };
 
   return (
     <ThemeProvider theme={theme}>
-    <MediaPlayerProvider>
-      {showLoadingScreen && (
-        <LoadingScreen
-          progress={progress}
-          isTransitioning={isTransitioning}
-          onStarted={handleStarted}
-        />
-      )}
-      <AppContainer isTransitioning={isTransitioning}>
+      <MediaPlayerProvider>
+        {showLoadingScreen && (
+          <LoadingScreen
+            progress={progress}
+            isTransitioning={isTransitioning}
+            onStarted={handleStarted}
+          />
+        )}
+        <AppContainer isTransitioning={isTransitioning}>
           <CustomCursor isHoveringNav={isHoveringNav} />
           <BackgroundContainer>
             <Background
               currentPage={currentPage}
+              currentSelectableSubPage={currentSelectableSubPage}
               onObjectClick={handlePageChange}
               onObjectHover={setIsHoveringNav}
             />
           </BackgroundContainer>
           <FlexBox flexDirection="column">
             <NavBar
-              onMenuItemClick={() => {}}
-              currentPage={currentPage.toString()}
+              onMenuItemClick={(page) => {
+                // this will always be home for now
+                setCurrentPage(page);
+              }}
               onHoverChange={setIsHoveringNav}
             />
             <ContentContainer
@@ -115,19 +123,19 @@ function App() {
               data-scroll-container
               alignItems="center"
               // this will need to be dynamic, based on whether or not we are doing scroll
-              style={ { pointerEvents: 'none'}}
+              style={{ pointerEvents: 'none' }}
             >
               <Home
                 data-scroll-section
-                setPage={setCurrentPage}
-                currentPage={currentPage}
+                setPage={setCurrentSelectableSubPage}
+                currentPage={currentSelectableSubPage}
               />
 
               <Services data-scroll-section />
             </ContentContainer>
           </FlexBox>
-      </AppContainer>
-    </MediaPlayerProvider>
+        </AppContainer>
+      </MediaPlayerProvider>
     </ThemeProvider>
   );
 }

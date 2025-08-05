@@ -1,4 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useRef } from 'react';
 import { EffectComposer, Sepia, Vignette } from '@react-three/postprocessing';
 import { Vector3 } from 'three';
 
@@ -7,23 +8,21 @@ import { DisplayedObject, objectConfigurations } from './ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
 import { BlendFunction } from 'postprocessing';
 import CustomDotScreen from './shaders/CustomDotScreen';
+import { cameraConfigurations } from './CameraConfig';
 
-// Define target positions
-const mainPageCameraPosition = new Vector3(0, 0.3, 1.3);
-const subPageCameraPosition = new Vector3(0, -1, 1.3); // Lowered position
-
-function CameraControl({ currentPage }: { currentPage?: Pages }) {
+function CameraControl({ currentPage }: { currentPage: Pages }) {
   const { camera } = useThree();
+  // used to lerp between menu and subpage camera positions
+  const currentLookAt = useRef(new Vector3(0, 0, 0));
 
   useFrame(() => {
-    const targetPosition =
-      currentPage === Pages.Home || currentPage === undefined
-        ? mainPageCameraPosition
-        : subPageCameraPosition;
+    const config = cameraConfigurations.find((c) => c.page === currentPage);
 
-    // Smoothly interpolate the camera's position
-    camera.position.lerp(targetPosition, 0.1); // Adjust the lerp factor (0.1) for speed
-    camera.lookAt(0, camera.position.y, 0); // Keep looking at the center, but adjust for y change
+    if (config) {
+      camera.position.lerp(config.position, 0.05);
+      currentLookAt.current.lerp(config.lookAt, 0.05);
+      camera.lookAt(currentLookAt.current);
+    }
   });
 
   return null;
@@ -31,10 +30,12 @@ function CameraControl({ currentPage }: { currentPage?: Pages }) {
 
 export default function Background({
   currentPage,
+  currentSelectableSubPage,
   onObjectClick,
   onObjectHover,
 }: {
-  currentPage?: Pages;
+  currentPage: Pages;
+  currentSelectableSubPage?: Pages; // this is the subpage that is currently displayed at the menu 'home'
   onObjectClick: (page: Pages) => void;
   onObjectHover: (isHovering: boolean) => void;
 }) {
@@ -54,8 +55,9 @@ export default function Background({
       <group>
         <Shapes
           selectedObjectKey={
-            objectConfigurations.find((config) => config.page === currentPage)
-              ?.id || DisplayedObject.Boombox
+            objectConfigurations.find(
+              (config) => config.page === currentSelectableSubPage,
+            )?.id || DisplayedObject.Boombox
           }
           onObjectClick={(id) => {
             const config = objectConfigurations.find((c) => c.id === id);
