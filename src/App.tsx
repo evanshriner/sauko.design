@@ -3,9 +3,10 @@ import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
 import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
-import Services from './modules/services';
 import { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useProgress } from '@react-three/drei';
+import { AnimatePresence, motion } from 'framer-motion';
 import FlexBox from '@/shared/components/FlexBox';
 import Background from '@/shared/components/background/Background';
 import BackgroundContainer from '@/shared/components/background/BackgroundContainer';
@@ -19,6 +20,9 @@ import 'locomotive-scroll/dist/locomotive-scroll.css';
 import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
 import { AppContainer } from './App.styles';
+import AudioEngineering from './modules/audioEngineering';
+import Software from './modules/software';
+import AIAugmentation from './modules/aiAugmentation';
 
 function App() {
   const { progress } = useProgress();
@@ -32,6 +36,18 @@ function App() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   // Ref to store the Locomotive Scroll instance
   const locomotiveScrollRef = useRef<LocomotiveScroll | null>(null);
+
+  const pageComponents: { [key in Pages]: React.ReactElement } = {
+    [Pages.Home]: (
+      <Home
+        setPage={setCurrentSelectableSubPage}
+        currentPage={currentSelectableSubPage}
+      />
+    ),
+    [Pages.AudioEngineering]: <AudioEngineering />,
+    [Pages.Software]: <Software />,
+    [Pages.AIAugmentation]: <AIAugmentation />,
+  };
 
   // Effect for Initialization and Cleanup
   useEffect(() => {
@@ -110,7 +126,7 @@ function App() {
               onObjectHover={setIsHoveringNav}
             />
           </BackgroundContainer>
-          <FlexBox flexDirection="column">
+          <FlexBox flexDirection="column" id="dom-content">
             <NavBar
               onMenuItemClick={(page) => {
                 // this will always be home for now
@@ -122,16 +138,26 @@ function App() {
               ref={scrollContainerRef}
               data-scroll-container
               alignItems="center"
-              // this will need to be dynamic, based on whether or not we are doing scroll
-              style={{ pointerEvents: 'none' }}
+              // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
+              style={{
+                pointerEvents: currentPage === Pages.Home ? 'none' : 'all',
+              }}
             >
-              <Home
-                data-scroll-section
-                setPage={setCurrentSelectableSubPage}
-                currentPage={currentSelectableSubPage}
-              />
-
-              <Services data-scroll-section />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentPage}
+                  style={{ width: '100%' }}
+                  data-scroll-section
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {React.cloneElement(pageComponents[currentPage], {
+                    'data-scroll-section': true,
+                  })}
+                </motion.div>
+              </AnimatePresence>
             </ContentContainer>
           </FlexBox>
         </AppContainer>

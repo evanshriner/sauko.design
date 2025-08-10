@@ -16,7 +16,7 @@ const CardText = styled(FlexBox)(({ theme }) => ({
   zIndex: '1',
 }));
 
-function Services() {
+function AudioEngineering() {
   const controls = useAnimation();
 
   useEffect(() => {
@@ -32,20 +32,20 @@ function Services() {
   return (
     <FlexBox
       flexDirection="column"
-      height="100vh"
+      height="200vh"
       padding="1rem 3rem"
       id="services"
     >
-      <Title>services</Title>
+      <Title>AudioEngineering</Title>
       <FlexBox flexDirection="column" gap="12px" height="100%">
         <ContentBox>
           <CardText>
-            <NeonText fontSize="2em">audio engineering</NeonText>
+            <NeonText fontSize="2em">AudioEngineering</NeonText>
           </CardText>
         </ContentBox>
         <ContentBox>
           <CardText>
-            <NeonText fontSize="2em">prototyping / mvp development</NeonText>
+            <NeonText fontSize="2em">AudioEngineering</NeonText>
           </CardText>
         </ContentBox>
       </FlexBox>
@@ -53,4 +53,4 @@ function Services() {
   );
 }
 
-export default Services;
+export default AudioEngineering;
