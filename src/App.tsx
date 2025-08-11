@@ -14,9 +14,6 @@ import NavBar from '@/shared/components/navbar/index';
 import ContentContainer from '@/shared/components/contentContainer';
 import LoadingScreen from '@/shared/components/loading/LoadingScreen';
 
-// Import Locomotive Scroll CSS and JS directly
-import LocomotiveScroll from 'locomotive-scroll';
-import 'locomotive-scroll/dist/locomotive-scroll.css';
 import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
 import { AppContainer } from './App.styles';
@@ -32,10 +29,7 @@ function App() {
     useState<Pages>(Pages.AudioEngineering);
   const [currentPage, setCurrentPage] = useState<Pages>(Pages.Home);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
-  // Ref for the scroll container element
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   // Ref to store the Locomotive Scroll instance
-  const locomotiveScrollRef = useRef<LocomotiveScroll | null>(null);
 
   const pageComponents: { [key in Pages]: React.ReactElement } = {
     [Pages.Home]: (
@@ -49,44 +43,9 @@ function App() {
     [Pages.AIAugmentation]: <AIAugmentation />,
   };
 
-  // Effect for Initialization and Cleanup
   useEffect(() => {
-    let scroll: LocomotiveScroll | null = null;
-    let resizeObserver: ResizeObserver | null = null;
-
-    if (scrollContainerRef.current) {
-      // Initialize Locomotive Scroll
-      scroll = new LocomotiveScroll({
-        el: scrollContainerRef.current,
-        smooth: true,
-        // Add other options as needed
-      });
-
-      locomotiveScrollRef.current = scroll; // Store instance
-
-      // forces navigation to only be clickable items
-      // locomotiveScrollRef.current.stop();
-
-      // Listen for scroll events
-      scroll.on('scroll', () => {});
-
-      // --- Update on Resize ---
-      resizeObserver = new ResizeObserver(() => {
-        scroll?.update();
-      });
-      resizeObserver.observe(scrollContainerRef.current);
-
-      console.log('Locomotive Scroll initialized');
-    }
-
-    // --- Cleanup function ---
-    return () => {
-      resizeObserver?.disconnect(); // Stop observing
-      scroll?.destroy(); // Use the 'scroll' variable captured in the closure
-      locomotiveScrollRef.current = null; // Clear the ref
-      console.log('Locomotive Scroll destroyed');
-    };
-  }, []);
+    console.log('Current Page:', currentPage);
+  }, [currentPage]);
 
   // effect to handle transition between loading screen and main content
   const handleStarted = () => {
@@ -116,6 +75,7 @@ function App() {
             onStarted={handleStarted}
           />
         )}
+        {/* this container likely needs the conditional logic on pointer events. */}
         <AppContainer isTransitioning={isTransitioning}>
           <CustomCursor isHoveringNav={isHoveringNav} />
           <BackgroundContainer>
@@ -126,7 +86,12 @@ function App() {
               onObjectHover={setIsHoveringNav}
             />
           </BackgroundContainer>
-          <FlexBox flexDirection="column" id="dom-content">
+          <FlexBox
+            flexDirection="column"
+            id="dom-content"
+            height="100vh"
+            style={{ overflow: 'scroll' }}
+          >
             <NavBar
               onMenuItemClick={(page) => {
                 // this will always be home for now
@@ -135,27 +100,28 @@ function App() {
               onHoverChange={setIsHoveringNav}
             />
             <ContentContainer
-              ref={scrollContainerRef}
-              data-scroll-container
+              // ref={scrollContainerRef}
+              // data-scroll-container
               alignItems="center"
               // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
               style={{
-                pointerEvents: currentPage === Pages.Home ? 'none' : 'all',
+                pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
               }}
             >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentPage}
-                  style={{ width: '100%' }}
-                  data-scroll-section
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
+                  }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {React.cloneElement(pageComponents[currentPage], {
-                    'data-scroll-section': true,
-                  })}
+                  {pageComponents[currentPage]}
                 </motion.div>
               </AnimatePresence>
             </ContentContainer>

@@ -4,7 +4,7 @@ import FlexBox from '../FlexBox';
 const ContentContainer = styled(FlexBox)({
   height: '100%',
   flexDirection: 'column',
-  overflow: 'hidden',
+  overflow: 'visible',
 });
 
 export default ContentContainer;

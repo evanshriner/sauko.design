@@ -17,33 +17,22 @@ const CardText = styled(FlexBox)(({ theme }) => ({
 }));
 
 function AudioEngineering() {
-  const controls = useAnimation();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const x = Math.floor(Math.random() * 50);
-      const y = Math.floor(Math.random() * 50);
-      controls.start({ backgroundPosition: `${x}% ${y}%` });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [controls]);
-
   return (
     <FlexBox
       flexDirection="column"
       height="200vh"
-      padding="1rem 3rem"
+      style={{ overflow: 'scroll' }}
+      padding="0 3rem"
       id="services"
     >
       <Title>AudioEngineering</Title>
       <FlexBox flexDirection="column" gap="12px" height="100%">
-        <ContentBox>
+        <ContentBox clickable>
           <CardText>
             <NeonText fontSize="2em">AudioEngineering</NeonText>
           </CardText>
         </ContentBox>
-        <ContentBox>
+        <ContentBox clickable>
           <CardText>
             <NeonText fontSize="2em">AudioEngineering</NeonText>
           </CardText>

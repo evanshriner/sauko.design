@@ -17,7 +17,6 @@
     "@react-three/postprocessing": "^2.19.1",
     "framer-motion": "^10.16.4",
     "jsmediatags": "^3.9.7",
-    "locomotive-scroll": "^4.1.4",
     "postprocessing": "^6.37.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -26,7 +25,6 @@
   },
   "devDependencies": {
     "@types/jsmediatags": "^3.9.6",
-    "@types/locomotive-scroll": "^4.1.4",
     "@types/node": "^22.15.3",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
