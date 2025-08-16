@@ -3,7 +3,7 @@ import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
 import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import React from 'react';
 import { useProgress } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -99,12 +99,7 @@ function App() {
                   onObjectHover={setIsHoveringNav}
                 />
               </BackgroundContainer>
-              <FlexBox
-                flexDirection="column"
-                id="dom-content"
-                height="100vh"
-                style={{ overflow: 'scroll' }}
-              >
+              <FlexBox flexDirection="column" id="dom-content">
                 <NavBar
                   onMenuItemClick={(page) => {
                     // this will always be home for now
