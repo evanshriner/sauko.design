@@ -5,6 +5,7 @@ const BackgroundContainer = styled(FlexBox)({
   height: '100vh',
   zIndex: -1,
   position: 'fixed',
+  // pointerEvents: 'none',
   top: 0,
   left: 0,
 });

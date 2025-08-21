@@ -50,7 +50,7 @@ function App() {
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
     // This effect runs once on mount to set the initial page
     ScrollSmoother.create({
-      smooth: 3,
+      smooth: 1.5,
       effects: true,
     });
   }, []);
@@ -87,57 +87,57 @@ function App() {
             onStarted={handleStarted}
           />
         )}
-        <div id="smooth-wrapper">
-          <div id="smooth-content">
-            <AppContainer isTransitioning={isTransitioning}>
-              <CustomCursor isHoveringNav={isHoveringNav} />
-              <BackgroundContainer>
-                <Background
-                  currentPage={currentPage}
-                  currentSelectableSubPage={currentSelectableSubPage}
-                  onObjectClick={handlePageChange}
-                  onObjectHover={setIsHoveringNav}
-                />
-              </BackgroundContainer>
-              <FlexBox flexDirection="column" id="dom-content">
-                <NavBar
-                  onMenuItemClick={(page) => {
-                    // this will always be home for now
-                    setCurrentPage(page);
-                  }}
-                  onHoverChange={setIsHoveringNav}
-                />
-                <ContentContainer
-                  // ref={scrollContainerRef}
-                  // data-scroll-container
-                  alignItems="center"
-                  // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
-                  style={{
-                    pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
-                  }}
-                >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentPage}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        pointerEvents:
-                          currentPage === Pages.Home ? 'none' : 'auto',
-                      }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {pageComponents[currentPage]}
-                    </motion.div>
-                  </AnimatePresence>
-                </ContentContainer>
-              </FlexBox>
-            </AppContainer>
+        {/* <AppContainer isTransitioning={isTransitioning}> */}
+        <CustomCursor isHoveringNav={isHoveringNav} />
+        <BackgroundContainer>
+          <Background
+            currentPage={currentPage}
+            currentSelectableSubPage={currentSelectableSubPage}
+            onObjectClick={handlePageChange}
+            onObjectHover={setIsHoveringNav}
+          />
+        </BackgroundContainer>
+        <div id="smooth-wrapper" style={{ pointerEvents: 'none' }}>
+          <div id="smooth-content" style={{ pointerEvents: 'none' }}>
+            <FlexBox flexDirection="column" id="dom-content">
+              <NavBar
+                onMenuItemClick={(page) => {
+                  // this will always be home for now
+                  setCurrentPage(page);
+                }}
+                onHoverChange={setIsHoveringNav}
+              />
+              <ContentContainer
+                // ref={scrollContainerRef}
+                // data-scroll-container
+                alignItems="center"
+                // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
+                style={{
+                  pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
+                }}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentPage}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents:
+                        currentPage === Pages.Home ? 'none' : 'auto',
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {pageComponents[currentPage]}
+                  </motion.div>
+                </AnimatePresence>
+              </ContentContainer>
+            </FlexBox>
           </div>
         </div>
+        {/* </AppContainer> */}
       </MediaPlayerProvider>
     </ThemeProvider>
   );
