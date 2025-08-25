@@ -4,6 +4,7 @@ body,
   top: 0;
   margin: 0;
   left: 0;
+  pointer-events: none;
   font-family: 'Zen Kaku Gothic New', sans-serif;
   background: transparent;
 }

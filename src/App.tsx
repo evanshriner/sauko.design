@@ -16,7 +16,6 @@ import LoadingScreen from '@/shared/components/loading/LoadingScreen';
 
 import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
-import { AppContainer } from './App.styles';
 import AudioEngineering from './modules/audioEngineering';
 import Software from './modules/software';
 import AIAugmentation from './modules/aiAugmentation';
@@ -99,7 +98,7 @@ function App() {
         </BackgroundContainer>
         <div id="smooth-wrapper" style={{ pointerEvents: 'none' }}>
           <div id="smooth-content" style={{ pointerEvents: 'none' }}>
-            <FlexBox flexDirection="column" id="dom-content">
+            <FlexBox flexDirection="column" id="dom-content" minHeight="100vh">
               <NavBar
                 onMenuItemClick={(page) => {
                   // this will always be home for now
@@ -114,6 +113,7 @@ function App() {
                 // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
                 style={{
                   pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
+                  flexGrow: 1,
                 }}
               >
                 <AnimatePresence mode="wait">
@@ -122,6 +122,10 @@ function App() {
                     style={{
                       width: '100%',
                       height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      flexGrow: 1,
                       pointerEvents:
                         currentPage === Pages.Home ? 'none' : 'auto',
                     }}

@@ -45,14 +45,16 @@ function Home({ setPage, currentPage }: HomeProps) {
   return (
     <ContentContainer
       id="home"
-      justifyContent={'center'}
       flexDirection="column"
       maxWidth="1800px"
+      justifyContent="center"
+      height="100%"
     >
       <FlexBox
         justifyContent="space-between"
         padding="0 0.1vw"
         height="50%"
+        flexGrow={1}
         alignItems="flex-end"
       >
         <ChevronButton direction="left" onClick={handlePreviousPage} />
@@ -60,9 +62,17 @@ function Home({ setPage, currentPage }: HomeProps) {
       </FlexBox>
       {/* this vw isnt bad, but im curious if there is a better way to scale text, as well as other items (like the chevron) depending on screen size.
          since the REM size is not consistent with screen size between phones (i.e. iphone SE has huge default REM,), it seems like pixels is the best option.*/}
-      <TitleText animatedHover disableSelection>
-        {animatedText}
-      </TitleText>
+      <FlexBox
+        justifyContent="center"
+        padding="0 5vw"
+        height="50%"
+        alignItems="center"
+        flexGrow={0.7}
+      >
+        <TitleText animatedHover disableSelection>
+          {animatedText}
+        </TitleText>
+      </FlexBox>
     </ContentContainer>
   );
 }

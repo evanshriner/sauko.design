@@ -6,6 +6,7 @@ const TitleText = styled(NeonText)({
   height: '30%',
   justifyContent: 'center',
   alignItems: 'flex-end',
+  padding: '5vw 0 1vw',
 });
 
 export default TitleText;
