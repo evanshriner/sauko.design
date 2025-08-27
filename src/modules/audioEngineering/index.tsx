@@ -5,6 +5,7 @@ import { motion, useAnimation } from 'framer-motion';
 import Title from '@/shared/styles/Title';
 import ContentBox from '@/shared/styles/ContentBox';
 import NeonText from '@/shared/styles/NeonText';
+import GlassPane from '@/shared/components/glassPane/GlassPane';
 
 const CardText = styled(FlexBox)(({ theme }) => ({
   padding: '24px',
@@ -21,11 +22,12 @@ function AudioEngineering() {
     <FlexBox
       flexDirection="column"
       height="200vh"
-      style={{ overflow: 'scroll' }}
-      padding="0 3rem"
+      maxWidth="1800px"
+      padding="3rem 3rem"
       id="services"
     >
-      <Title>AudioEngineering</Title>
+      <GlassPane>we specialize in all formats of analogue and digital mastering, providing high-end audio services to the motor city music industry.
+      </GlassPane>
       <FlexBox flexDirection="column" gap="12px" height="100%">
         <ContentBox clickable>
           <CardText>
