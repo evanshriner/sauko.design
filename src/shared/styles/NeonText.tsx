@@ -16,7 +16,7 @@ const NeonText = styled(FlexBox)<NeonTextProps>(
     animatedHover = false,
     disableSelection = false,
   }) => ({
-    color: `rgba(255, 255, 255, ${darken ? 0.5 : 0.73})`,
+    color: `rgba(255, 255, 255, ${darken ? 0.5 : 0.85})`,
     fontSize,
     filter: 'url(#neonGlow)',
     ...(animatedHover && {

@@ -45,7 +45,6 @@ function Home({ setPage, currentPage }: HomeProps) {
   return (
     <ContentContainer
       id="home"
-      flexDirection="column"
       maxWidth="1800px"
       justifyContent="center"
       height="100%"

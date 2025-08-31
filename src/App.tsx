@@ -124,7 +124,7 @@ function App() {
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'stretch',
+                      alignItems: 'center',
                       flexGrow: 1,
                       pointerEvents:
                         currentPage === Pages.Home ? 'none' : 'auto',
