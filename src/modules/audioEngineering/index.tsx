@@ -3,9 +3,9 @@ import FlexBox from '../../shared/components/FlexBox';
 import { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import Title from '@/shared/styles/Title';
-import ContentBox from '@/shared/styles/ContentBox';
 import NeonText from '@/shared/styles/NeonText';
-import GlassPane from '@/shared/components/glassPane/GlassPane';
+import AnimatedText from '@/shared/components/AnimatedText';
+import ServiceList from './ServiceList';
 
 const CardText = styled(FlexBox)(({ theme }) => ({
   padding: '24px',
@@ -20,8 +20,9 @@ const CardText = styled(FlexBox)(({ theme }) => ({
 const SizzleReel = styled.video`
   position: absolute;
   top: 0;
-  opacity: 0.5;
+  opacity: 0.7;
   left: 0;
+  filter: grayscale(70%) sepia(20%) saturate(50%) brightness(1.8);
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -37,7 +38,7 @@ const SizzleReelContainer = styled(FlexBox)`
 
 function AudioEngineering() {
   return (
-    <FlexBox flexDirection="column" height="auto" id="services">
+    <FlexBox flexDirection="column" id="services">
       <FlexBox
         gap="12px"
         height="135vh"
@@ -78,41 +79,23 @@ function AudioEngineering() {
         </SizzleReelContainer>
       </FlexBox>
       <FlexBox
-        height="100vh"
         style={{ backgroundColor: 'black', opacity: 0.9 }}
-        alignItems="center"
-        justifyContent="center"
-        padding="3rem 3rem"
+        height='150vh'
       >
-        <FlexBox>
-          <Title fontSize="3em" padding="0 0 1rem">
-            Our Services
-          </Title>
-          <NeonText fontSize="1.5em" maxWidth="800px">
-            We offer a range of audio engineering services to meet your needs,
-            including:
-          </NeonText>
-          <ul style={{ listStyleType: 'none', padding: 0, marginTop: '1rem' }}>
-            <li>
-              <NeonText fontSize="1.2em">
-                - Analog and Digital Mastering
-              </NeonText>
-            </li>
-            <li>
-              <NeonText fontSize="1.2em">- Mixing and Remixing</NeonText>
-            </li>
-            <li>
-              <NeonText fontSize="1.2em">
-                - Audio Restoration and Enhancement
-              </NeonText>
-            </li>
-            <li>
-              <NeonText fontSize="1.2em">- Vinyl Cutting and Lacquers</NeonText>
-            </li>
-            <li>
-              <NeonText fontSize="1.2em">- Custom Audio Solutions</NeonText>
-            </li>
-          </ul>
+        <FlexBox  flexDirection='column'>
+<FlexBox width='auto' height='auto' gap="3rem" padding="3rem">
+<AnimatedText>
+            <NeonText fontSize="5em" width="auto">
+              services
+            </NeonText>
+          </AnimatedText>
+          <AnimatedText>
+            <NeonText fontSize="1em" maxWidth="800px" width="auto">
+              what do we offer?
+            </NeonText>
+          </AnimatedText>
+</FlexBox>
+          <ServiceList />
         </FlexBox>
       </FlexBox>
     </FlexBox>

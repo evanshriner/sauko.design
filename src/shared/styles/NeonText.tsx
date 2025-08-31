@@ -4,6 +4,7 @@ import FlexBox from '../components/FlexBox';
 export interface NeonTextProps {
   fontSize?: string;
   darken?: boolean;
+  inverted?: boolean
   animatedHover?: boolean;
   disableSelection?: boolean;
 }
@@ -13,10 +14,11 @@ const NeonText = styled(FlexBox)<NeonTextProps>(
   ({
     fontSize = '2rem',
     darken = false,
+    inverted = false,
     animatedHover = false,
     disableSelection = false,
   }) => ({
-    color: `rgba(255, 255, 255, ${darken ? 0.5 : 0.85})`,
+    color: `rgba(${inverted ? 0 : 255}, ${inverted ? 0 : 255}, ${inverted ? 0 : 255}, ${darken ? 0.5 : 0.85})`,
     fontSize,
     filter: 'url(#neonGlow)',
     ...(animatedHover && {
