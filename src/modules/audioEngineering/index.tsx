@@ -6,6 +6,7 @@ import Title from '@/shared/styles/Title';
 import NeonText from '@/shared/styles/NeonText';
 import AnimatedText from '@/shared/components/AnimatedText';
 import ServiceList from './ServiceList';
+import ArtistCarousel from './ArtistCarousel';
 
 const CardText = styled(FlexBox)(({ theme }) => ({
   padding: '24px',
@@ -121,7 +122,7 @@ function AudioEngineering() {
             </NeonText>
           </AnimatedText>
         </FlexBox>
-        <ServiceList />
+        <ArtistCarousel />
       </FlexBox>
     </FlexBox>
   );
