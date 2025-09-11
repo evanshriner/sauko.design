@@ -80,23 +80,48 @@ function AudioEngineering() {
       </FlexBox>
       <FlexBox
         style={{ backgroundColor: 'black', opacity: 0.9 }}
-        height='150vh'
+        height="170vh"
       >
-        <FlexBox  flexDirection='column'>
-<FlexBox width='auto' height='auto' gap="3rem" padding="3rem">
-<AnimatedText>
-            <NeonText fontSize="5em" width="auto">
-              services
-            </NeonText>
-          </AnimatedText>
-          <AnimatedText>
-            <NeonText fontSize="1em" maxWidth="800px" width="auto">
-              what do we offer?
-            </NeonText>
-          </AnimatedText>
-</FlexBox>
+        <FlexBox flexDirection="column">
+          <FlexBox width="auto" height="auto" gap="3rem" padding="3rem">
+            <AnimatedText>
+              <NeonText fontSize="5em" width="auto">
+                services
+              </NeonText>
+            </AnimatedText>
+            <AnimatedText>
+              <NeonText fontSize="1em" maxWidth="800px" width="auto">
+                what do we offer?
+              </NeonText>
+            </AnimatedText>
+          </FlexBox>
           <ServiceList />
         </FlexBox>
+      </FlexBox>
+      <FlexBox flexDirection="column">
+        <FlexBox
+          height="auto"
+          gap="3rem"
+          padding="3rem"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <AnimatedText>
+            <NeonText fontSize="5em" width="auto">
+              projects
+            </NeonText>
+            <NeonText
+              fontSize="1em"
+              maxWidth="800px"
+              width="auto"
+              justifyContent="center"
+              alignItems="center"
+            >
+              {"artists we've worked with"}
+            </NeonText>
+          </AnimatedText>
+        </FlexBox>
+        <ServiceList />
       </FlexBox>
     </FlexBox>
   );
