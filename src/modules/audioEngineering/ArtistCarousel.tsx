@@ -37,11 +37,8 @@ const NavButton = styled.button`
 `;
 
 const artistImages = [
-  'https://picsum.photos/800/600?random=1',
-  'https://picsum.photos/800/600?random=2',
-  'https://picsum.photos/800/600?random=3',
-  'https://picsum.photos/800/600?random=4',
-  'https://picsum.photos/800/600?random=5',
+  'images/artist1.jpg',
+  'images/artist2.jpg',
 ];
 
 const ArtistCarousel: React.FC = () => {
@@ -59,13 +56,16 @@ const ArtistCarousel: React.FC = () => {
       await app.init({
         width: 800,
         height: 600,
+        // TODO: should be transparent
         backgroundColor: 0xffffff,
       });
       appRef.current = app;
       canvasRef.current.appendChild(app.view as unknown as Node);
 
-      // texturesRef.current = await Promise.all(artistImages.map(url => PIXI.Assets.load(url)));
-      texturesRef.current = await PIXI.Assets.load('https://i.imgur.com/2yYayZk.png');
+      const textureMap = await PIXI.Assets.load(artistImages);
+      texturesRef.current = artistImages.map(url => textureMap[url]);
+
+      // texturesRef.current = await PIXI.Assets.load('https://i.imgur.com/2yYayZk.png');
       console.log('Loaded textures:', texturesRef.current);
       if (texturesRef.current.length > 0) {
         const sprite = new PIXI.Sprite(texturesRef.current[0]);
@@ -78,13 +78,23 @@ const ArtistCarousel: React.FC = () => {
         spriteRef.current = sprite;
       }
 
-      const displacementSprite = await PIXI.Sprite.from('https://i.imgur.com/2yYayZk.png');
-      displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-      const displacementFilter = new PIXI.DisplacementFilter(displacementSprite);
-      displacementFilter.scale.x = 0;
-      displacementFilter.scale.y = 0;
-      app.stage.filters = [displacementFilter];
+      const displacementSprite = await PIXI.Sprite.from('images/displacement_smoke.png');
+      displacementSprite.texture.source.addressMode = 'repeat';
+      displacementSprite.width = 800;
+      displacementSprite.height = 600;
+      displacementSprite.anchor.set(0.5);
+      displacementSprite.x = 400;
+      displacementSprite.y = 300;
       app.stage.addChild(displacementSprite);
+      displacementSprite.visible = false;
+
+      const displacementFilter = new PIXI.DisplacementFilter(displacementSprite);
+      displacementFilter.scale.x = 10;
+      displacementFilter.scale.y = 10;
+
+      if (spriteRef.current) {
+        spriteRef.current.filters = [displacementFilter];
+      }
 
       app.stage.interactive = true;
       app.stage.on('pointermove', (event) => {
