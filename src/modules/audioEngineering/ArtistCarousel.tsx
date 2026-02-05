@@ -36,10 +36,7 @@ const NavButton = styled.button`
   }
 `;
 
-const artistImages = [
-  'images/artist1.jpg',
-  'images/artist2.jpg',
-];
+const artistImages = ['images/artist1.jpg', 'images/artist2.jpg'];
 
 const ArtistCarousel: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -63,7 +60,7 @@ const ArtistCarousel: React.FC = () => {
       canvasRef.current.appendChild(app.view as unknown as Node);
 
       const textureMap = await PIXI.Assets.load(artistImages);
-      texturesRef.current = artistImages.map(url => textureMap[url]);
+      texturesRef.current = artistImages.map((url) => textureMap[url]);
 
       // texturesRef.current = await PIXI.Assets.load('https://i.imgur.com/2yYayZk.png');
       console.log('Loaded textures:', texturesRef.current);
@@ -78,38 +75,98 @@ const ArtistCarousel: React.FC = () => {
         spriteRef.current = sprite;
       }
 
-      const displacementSprite = await PIXI.Sprite.from('images/displacement_smoke.png');
-      displacementSprite.texture.source.addressMode = 'repeat';
-      displacementSprite.width = 800;
-      displacementSprite.height = 600;
-      displacementSprite.anchor.set(0.5);
-      displacementSprite.x = 400;
-      displacementSprite.y = 300;
-      app.stage.addChild(displacementSprite);
-      displacementSprite.visible = false;
+      const vertexSrc = `
+            attribute vec2 aVertexPosition;
+            attribute vec2 aTextureCoord;
 
-      const displacementFilter = new PIXI.DisplacementFilter(displacementSprite);
-      displacementFilter.scale.x = 10;
-      displacementFilter.scale.y = 10;
+            uniform mat3 projectionMatrix;
+
+            varying vec2 vTextureCoord;
+
+            void main(void) {
+              gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+              vTextureCoord = aTextureCoord;
+            }
+          `;
+
+      const fragmentSrc = `
+        precision mediump float;
+        varying vec2 vTextureCoord;
+        uniform sampler2D uSampler;
+        uniform vec2 u_resolution;
+        uniform vec2 u_mouse;
+
+        const float charSize = 8.0;
+
+        float luminance(vec3 color) {
+          return dot(color, vec3(0.299, 0.587, 0.114));
+        }
+
+        void main() {
+          float mouseFactor = 1.0 + u_mouse.x * 2.0;
+          vec2 cellSize = vec2(charSize * mouseFactor, charSize * mouseFactor);
+
+          vec2 cellCoord = floor(vTextureCoord * u_resolution / cellSize);
+          vec2 cellCenter = (cellCoord + 0.5) * cellSize / u_resolution;
+          vec3 cellColor = texture2D(uSampler, cellCenter).rgb;
+
+          float lum = luminance(cellColor);
+
+          // Simple character selection
+          vec3 finalColor;
+          if (lum > 0.8) {
+            finalColor = vec3(1.0); // @
+          } else if (lum > 0.6) {
+            finalColor = vec3(0.8); // #
+          } else if (lum > 0.4) {
+            finalColor = vec3(0.6); // &
+          } else if (lum > 0.2) {
+            finalColor = vec3(0.4); // :
+          } else {
+            finalColor = vec3(0.2); // .
+          }
+
+          gl_FragColor = vec4(finalColor * cellColor, 1.0);
+        }
+      `;
+
+      const program = new PIXI.GlProgram({
+        vertex: vertexSrc,
+        fragment: fragmentSrc,
+      });
+
+      const asciiFilter = new PIXI.Filter({
+        glProgram: program,
+        resources: {
+          u_resolution: { value: [800, 600], type: 'v2' },
+          u_mouse: { value: [0, 0], type: 'v2' },
+        },
+      });
 
       if (spriteRef.current) {
-        spriteRef.current.filters = [displacementFilter];
+        spriteRef.current.filters = [asciiFilter];
       }
 
       app.stage.interactive = true;
       app.stage.on('pointermove', (event) => {
-        gsap.to(displacementFilter.scale, {
-          duration: 0.5,
-          x: Math.abs(event.global.x - 400) / 40,
-          y: Math.abs(event.global.y - 300) / 30,
-        });
+        if (asciiFilter) {
+          const { x, y } = event.global;
+          gsap.to(asciiFilter.resources.u_mouse, {
+            duration: 0.5,
+            x: x / 800,
+            y: y / 600,
+          });
+        }
       });
+
       app.stage.on('pointerout', () => {
-        gsap.to(displacementFilter.scale, {
-          duration: 0.5,
-          x: 0,
-          y: 0,
-        });
+        if (asciiFilter) {
+          gsap.to(asciiFilter.resources.u_mouse, {
+            duration: 0.5,
+            x: 0,
+            y: 0,
+          });
+        }
       });
     };
 
