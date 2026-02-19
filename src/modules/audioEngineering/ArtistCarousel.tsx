@@ -1,214 +1,277 @@
-import React, { useRef, useEffect } from 'react';
-import * as PIXI from 'pixi.js';
-import { gsap } from 'gsap';
+import React, { useRef, useEffect, useState } from 'react';
+import { Canvas, useFrame, extend, useThree } from '@react-three/fiber';
+import { shaderMaterial, useTexture } from '@react-three/drei';
+import * as THREE from 'three';
 import styled from '@emotion/styled';
+import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
 
 const CarouselContainer = styled.div`
   position: relative;
-  width: 800px;
-  height: 600px;
+  width: 100%;
+  height: 1000px;
   margin: auto;
   overflow: hidden;
+  background: transparent;
 `;
 
-const CanvasContainer = styled.div`
-  width: 100%;
-  height: 100%;
-`;
+// Define the ASCII Shader Material
+// Character set: 亜哀挨愛曖悪圧
+const AsciiShaderMaterial = shaderMaterial(
+  {
+    uTexture: new THREE.Texture(),
+    uMouse: new THREE.Vector2(0, 0),
+    uTime: 0,
+    uVelocity: 0.0, // New uniform to track movement intensity
+    uResolution: new THREE.Vector2(0, 0),
+  },
+  // Vertex Shader
+  `
+  varying vec2 vUv;
+  uniform vec2 uMouse;
+  uniform float uTime;
+  uniform float uVelocity;
 
-const NavButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  z-index: 10;
-
-  &.prev {
-    left: 10px;
-  }
-
-  &.next {
-    right: 10px;
-  }
-`;
-
-const artistImages = ['images/artist1.jpg', 'images/artist2.jpg'];
-
-const ArtistCarousel: React.FC = () => {
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const appRef = useRef<PIXI.Application | null>(null);
-  const texturesRef = useRef<PIXI.Texture[]>([]);
-  const spriteRef = useRef<PIXI.Sprite | null>(null);
-  const currentIndexRef = useRef(0);
-
-  useEffect(() => {
-    const initPixi = async () => {
-      if (!canvasRef.current) return;
-
-      const app = new PIXI.Application();
-      await app.init({
-        width: 800,
-        height: 600,
-        backgroundColor: 0xffffff,
-      });
-      appRef.current = app;
-      canvasRef.current.appendChild(app.canvas);
-
-      const textureMap = await PIXI.Assets.load(artistImages);
-      texturesRef.current = artistImages.map((url) => textureMap[url]);
-
-      console.log('Loaded textures:', texturesRef.current);
-      if (texturesRef.current.length > 0) {
-        const sprite = new PIXI.Sprite(texturesRef.current[0]);
-        sprite.width = 800;
-        sprite.height = 600;
-        sprite.anchor.set(0.5);
-        sprite.x = 400;
-        sprite.y = 300;
-        app.stage.addChild(sprite);
-        spriteRef.current = sprite;
-      }
-
-      const fragmentSrc = `
-        varying vec2 vTextureCoord;
-        uniform sampler2D uTexture;
-        uniform vec2 u_resolution;
-        uniform vec2 u_mouse;
-
-        const float charSize = 9.0;
-
-        float luminance(vec3 color) {
-          return dot(color, vec3(0.299, 0.587, 0.114));
-        }
-
-        void main() {
-          float mouseFactor = 1.0 + u_mouse.x * 2.0;
-          vec2 cellSize = vec2(charSize * mouseFactor, charSize * mouseFactor);
-
-          vec2 cellCoord = floor(vTextureCoord * u_resolution / cellSize);
-          vec2 cellCenter = (cellCoord + 0.5) * cellSize / u_resolution;
-          vec3 cellColor = texture2D(uTexture, cellCenter).rgb;
-
-          float lum = luminance(cellColor);
-
-          // Simple character selection
-          vec3 asciiColor;
-          if (lum > 0.8) {
-            asciiColor = vec3(1.0); // @
-          } else if (lum > 0.6) {
-            asciiColor = vec3(0.8); // #
-          } else if (lum > 0.4) {
-            asciiColor = vec3(0.6); // &
-          } else if (lum > 0.2) {
-            asciiColor = vec3(0.4); // :
-          } else {
-            asciiColor = vec3(0.2); // .
-          }
-
-          finalColor = vec4(asciiColor * cellColor, 1.0);
-        }
-      `;
-
-      const vertexSrc = `
-        attribute vec2 aPosition;
-        varying vec2 vTextureCoord;
-
-        void main(void) {
-          gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);
-          vTextureCoord = vec2(aPosition.x, 1.0 - aPosition.y);
-        }
-      `;              
-
-                 
-              
-                    const asciiFilter = PIXI.Filter.from({
-                      gl: {
-                        vertex: vertexSrc,
-                        fragment: fragmentSrc,
-                      },
-                      resources: {
-                        filterUniforms: new PIXI.UniformGroup({
-                          u_resolution: { value: [1200, 900], type: 'vec2<f32>' },
-                          u_mouse: { value: [0, 0], type: 'vec2<f32>' },
-                        }),
-                      },
-                    });
-              
-                    if (spriteRef.current) {
-                      spriteRef.current.filters = [asciiFilter];
-                    }
-              
-                    app.stage.eventMode = 'static';
-                    app.stage.on('pointermove', (event) => {
-                      if (asciiFilter) {
-                        const { x, y } = event.global;
-                        gsap.to(asciiFilter.resources.filterUniforms.uniforms.u_mouse, {
-                          duration: 0.5,
-                          0: x / 800,
-                          1: y / 600,
-                        });
-                      }
-                    });
-              
-                    app.stage.on('pointerout', () => {
-                      if (asciiFilter) {
-                        gsap.to(asciiFilter.resources.filterUniforms.uniforms.u_mouse, {
-                          duration: 0.5,
-                          0: 0,
-                          1: 0,
-                        });
-                      }
-                    });
-    };
-
-    initPixi();
-
-    return () => {
-      if (appRef.current) {
-        appRef.current.destroy(true, { children: true, texture: true });
-        appRef.current = null;
-      }
-    };
-  }, [canvasRef]);
-
-  const moveCarousel = (direction: 'next' | 'prev') => {
-    const textures = texturesRef.current;
-    if (!spriteRef.current || textures.length === 0) return;
-
-    const oldIndex = currentIndexRef.current;
-    let newIndex = oldIndex;
-
-    if (direction === 'next') {
-      newIndex = (oldIndex + 1) % textures.length;
-    } else {
-      newIndex = (oldIndex - 1 + textures.length) % textures.length;
+  void main() {
+    vUv = uv;
+    vec3 pos = position;
+    
+    // Calculate distance from mouse to vertex (normalized coordinates)
+    float dist = distance(uv * 2.0 - 1.0, uMouse);
+    
+    // Only apply displacement if the mouse is moving (uVelocity > 0)
+    if (dist < 0.8 && uVelocity > 0.01) {
+      float strength = (0.8 - dist) * 0.5 * uVelocity;
+      pos.x += sin(uTime * 30.0 + pos.y * 15.0) * strength;
+      pos.y += cos(uTime * 35.0 + pos.x * 18.0) * strength;
+      pos.z += sin(uTime * 40.0 + (pos.x + pos.y) * 10.0) * strength * 0.5;
     }
 
-    currentIndexRef.current = newIndex;
-    const sprite = spriteRef.current;
-    gsap.to(sprite, {
-      alpha: 0,
-      duration: 0.5,
-      onComplete: () => {
-        sprite.texture = textures[newIndex];
-        gsap.to(sprite, { alpha: 1, duration: 0.5 });
-      },
-    });
-  };
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+  `,
+  // Fragment Shader
+  `
+  varying vec2 vUv;
+  uniform sampler2D uTexture;
+  uniform vec2 uMouse;
+  uniform float uTime;
+  uniform float uVelocity;
+
+  float getChar(float brightness, vec2 uv) {
+    vec2 grid = fract(uv * 50.0);
+    float char = 0.0;
+    if (brightness > 0.8) {
+        char = step(0.1, grid.x) * step(grid.x, 0.9) * step(0.1, grid.y) * step(grid.y, 0.9);
+        char -= step(0.3, grid.x) * step(grid.x, 0.7) * step(0.3, grid.y) * step(grid.y, 0.7);
+    } else if (brightness > 0.6) {
+        char = step(0.2, grid.x) * step(grid.x, 0.8) * step(0.4, grid.y) * step(grid.y, 0.6);
+        char += step(0.4, grid.x) * step(grid.x, 0.6) * step(0.2, grid.y) * step(grid.y, 0.8);
+    } else if (brightness > 0.4) {
+        char = step(0.3, grid.x) * step(grid.x, 0.7) * step(0.1, grid.y) * step(grid.y, 0.9);
+    } else if (brightness > 0.2) {
+        char = step(0.45, grid.x) * step(grid.x, 0.55);
+    }
+    return char;
+  }
+
+  void main() {
+    vec2 asciiUv = floor(vUv * 80.0) / 80.0;
+    float dist = distance(vUv * 2.0 - 1.0, uMouse);
+    
+    // Glitch response scaled by velocity
+    if (dist < 0.5 && uVelocity > 0.01) {
+        float glitch = sin(uTime * 60.0) * 0.05 * (0.5 - dist) * uVelocity;
+        asciiUv.x += glitch;
+        asciiUv.y += glitch * 0.5;
+    }
+
+    vec4 tex = texture2D(uTexture, asciiUv);
+    float brightness = (tex.r + tex.g + tex.b) / 3.0;
+
+    if (dist < 0.4 && uVelocity > 0.01) {
+        brightness += sin(uTime * 70.0) * 0.2 * (0.4 - dist) * uVelocity;
+    }
+
+    float charVisibility = getChar(brightness, vUv);
+    vec3 asciiColor = vec3(0.0, 1.0, 0.4) * charVisibility * brightness;
+    asciiColor += tex.rgb * 0.1;
+    gl_FragColor = vec4(asciiColor, 1.0);
+  }
+  `
+);
+
+extend({ AsciiShaderMaterial });
+
+const ArtistImage = ({ url, position, rotation, scale }: { url: string, position: [number, number, number], rotation: [number, number, number], scale: number }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<any>(null);
+  const texture = useTexture(url);
+  const mouse = useRef(new THREE.Vector2(0, 0));
+  const velocity = useRef(0);
+  const lastMouse = useRef(new THREE.Vector2(0, 0));
+
+  useEffect(() => {
+    const updateMouse = (x: number, y: number) => {
+      mouse.current.x = (x / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(y / window.innerHeight) * 2 + 1;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => updateMouse(e.clientX, e.clientY);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      // Calculate mouse velocity for the glitch effect
+      const currentDist = mouse.current.distanceTo(lastMouse.current);
+      velocity.current = THREE.MathUtils.lerp(velocity.current, currentDist * 50.0, 0.1);
+      lastMouse.current.copy(mouse.current);
+
+      materialRef.current.uTime = state.clock.elapsedTime;
+      materialRef.current.uMouse.lerp(mouse.current, 0.1);
+      materialRef.current.uVelocity = THREE.MathUtils.clamp(velocity.current, 0, 1);
+    }
+  });
 
   return (
+    <mesh ref={meshRef} position={position} rotation={rotation} scale={scale}>
+      <planeGeometry args={[6, 6, 48, 48]} />
+      <asciiShaderMaterial 
+        ref={materialRef} 
+        uTexture={texture} 
+        transparent 
+      />
+    </mesh>
+  );
+};
+
+const CarouselScene = () => {
+  const { viewport } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  
+  // Further reduced maxScale to keep images within the 600px container height
+  const responsiveScale = useResponsiveScale(
+    {
+      minScale: 0.4,
+      maxScale: 0.7,
+      minViewportWidth: 375,
+      maxViewportWidth: 1920,
+    },
+    0.6
+  ) as number;
+  
+  const artistImages = [
+    'images/artist1.jpg', 'images/artist2.jpg', 
+    'images/artist1.jpg', 'images/artist2.jpg',
+    'images/artist1.jpg', 'images/artist2.jpg',
+    'images/artist1.jpg', 'images/artist2.jpg'
+  ];
+  
+  // INCREASED: Larger radius to ensure images aren't overlapping too much or out of view
+  // Capped at 11 to keep it compact on screens wider than ~900px
+  const radius = THREE.MathUtils.clamp(viewport.width * 0.4, 8, 9);
+  
+  const rotationY = useRef(0);
+  const targetRotationY = useRef(0);
+  const isDragging = useRef(false);
+  const previousMouseX = useRef(0);
+
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging.current = true;
+      previousMouseX.current = e.clientX;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging.current) {
+        const deltaX = e.clientX - previousMouseX.current;
+        targetRotationY.current += deltaX * 0.005;
+        previousMouseX.current = e.clientX;
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      isDragging.current = true;
+      previousMouseX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging.current) {
+        const deltaX = e.touches[0].clientX - previousMouseX.current;
+        targetRotationY.current += deltaX * 0.005;
+        previousMouseX.current = e.touches[0].clientX;
+      }
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, []);
+
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      if (!isDragging.current) {
+        targetRotationY.current += delta * 0.1;
+      }
+      rotationY.current = THREE.MathUtils.damp(rotationY.current, targetRotationY.current, 4, delta);
+      groupRef.current.rotation.y = rotationY.current;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {artistImages.map((url, i) => {
+        const angle = (i / artistImages.length) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        return (
+          <ArtistImage 
+            key={i} 
+            url={url} 
+            position={[x, 0, z]} 
+            rotation={[0, -angle + Math.PI / 2, 0]}
+            scale={responsiveScale}
+          />
+        );
+      })}
+    </group>
+  );
+};
+
+const ArtistCarousel: React.FC = () => {
+  return (
     <CarouselContainer>
-      <CanvasContainer ref={canvasRef} />
-      <NavButton className="prev" onClick={() => moveCarousel('prev')}>
-        Prev
-      </NavButton>
-      <NavButton className="next" onClick={() => moveCarousel('next')}>
-        Next
-      </NavButton>
+      <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
+        <ambientLight intensity={0.5} />
+        <CarouselScene />
+      </Canvas>
     </CarouselContainer>
   );
 };
