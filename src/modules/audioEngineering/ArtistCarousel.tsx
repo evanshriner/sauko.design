@@ -53,16 +53,14 @@ const ArtistCarousel: React.FC = () => {
       await app.init({
         width: 800,
         height: 600,
-        // TODO: should be transparent
         backgroundColor: 0xffffff,
       });
       appRef.current = app;
-      canvasRef.current.appendChild(app.view as unknown as Node);
+      canvasRef.current.appendChild(app.canvas);
 
       const textureMap = await PIXI.Assets.load(artistImages);
       texturesRef.current = artistImages.map((url) => textureMap[url]);
 
-      // texturesRef.current = await PIXI.Assets.load('https://i.imgur.com/2yYayZk.png');
       console.log('Loaded textures:', texturesRef.current);
       if (texturesRef.current.length > 0) {
         const sprite = new PIXI.Sprite(texturesRef.current[0]);
@@ -75,24 +73,9 @@ const ArtistCarousel: React.FC = () => {
         spriteRef.current = sprite;
       }
 
-      const vertexSrc = `
-            attribute vec2 aVertexPosition;
-            attribute vec2 aTextureCoord;
-
-            uniform mat3 projectionMatrix;
-
-            varying vec2 vTextureCoord;
-
-            void main(void) {
-              gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
-              vTextureCoord = aTextureCoord;
-            }
-          `;
-
       const fragmentSrc = `
-        precision mediump float;
         varying vec2 vTextureCoord;
-        uniform sampler2D uSampler;
+        uniform sampler2D uTexture;
         uniform vec2 u_resolution;
         uniform vec2 u_mouse;
 
@@ -108,66 +91,78 @@ const ArtistCarousel: React.FC = () => {
 
           vec2 cellCoord = floor(vTextureCoord * u_resolution / cellSize);
           vec2 cellCenter = (cellCoord + 0.5) * cellSize / u_resolution;
-          vec3 cellColor = texture2D(uSampler, cellCenter).rgb;
+          vec3 cellColor = texture2D(uTexture, cellCenter).rgb;
 
           float lum = luminance(cellColor);
 
           // Simple character selection
-          vec3 finalColor;
+          vec3 asciiColor;
           if (lum > 0.8) {
-            finalColor = vec3(1.0); // @
+            asciiColor = vec3(1.0); // @
           } else if (lum > 0.6) {
-            finalColor = vec3(0.8); // #
+            asciiColor = vec3(0.8); // #
           } else if (lum > 0.4) {
-            finalColor = vec3(0.6); // &
+            asciiColor = vec3(0.6); // &
           } else if (lum > 0.2) {
-            finalColor = vec3(0.4); // :
+            asciiColor = vec3(0.4); // :
           } else {
-            finalColor = vec3(0.2); // .
+            asciiColor = vec3(0.2); // .
           }
 
-          gl_FragColor = vec4(finalColor * cellColor, 1.0);
+          finalColor = vec4(asciiColor * cellColor, 1.0);
         }
       `;
 
-      const program = new PIXI.GlProgram({
-        vertex: vertexSrc,
-        fragment: fragmentSrc,
-      });
-
-      const asciiFilter = new PIXI.Filter({
-        glProgram: program,
-        resources: {
-          u_resolution: { value: [800, 600], type: 'v2' },
-          u_mouse: { value: [0, 0], type: 'v2' },
-        },
-      });
-
-      if (spriteRef.current) {
-        spriteRef.current.filters = [asciiFilter];
-      }
-
-      app.stage.interactive = true;
-      app.stage.on('pointermove', (event) => {
-        if (asciiFilter) {
-          const { x, y } = event.global;
-          gsap.to(asciiFilter.resources.u_mouse, {
-            duration: 0.5,
-            x: x / 800,
-            y: y / 600,
-          });
-        }
-      });
-
-      app.stage.on('pointerout', () => {
-        if (asciiFilter) {
-          gsap.to(asciiFilter.resources.u_mouse, {
-            duration: 0.5,
-            x: 0,
-            y: 0,
-          });
-        }
-      });
+                          const vertexSrc = `
+                            attribute vec2 aPosition;
+                            varying vec2 vTextureCoord;
+                    
+                            void main(void) {
+                              gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);
+                              vTextureCoord = aPosition;
+                            }
+                          `;              
+            
+                 
+              
+                    const asciiFilter = PIXI.Filter.from({
+                      gl: {
+                        vertex: vertexSrc,
+                        fragment: fragmentSrc,
+                      },
+                      resources: {
+                        filterUniforms: new PIXI.UniformGroup({
+                          u_resolution: { value: [800, 600], type: 'vec2<f32>' },
+                          u_mouse: { value: [0, 0], type: 'vec2<f32>' },
+                        }),
+                      },
+                    });
+              
+                    if (spriteRef.current) {
+                      spriteRef.current.filters = [asciiFilter];
+                    }
+              
+                    app.stage.eventMode = 'static';
+                    app.stage.on('pointermove', (event) => {
+                      if (asciiFilter) {
+                        const { x, y } = event.global;
+                        gsap.to(asciiFilter.resources.filterUniforms.uniforms.u_mouse, {
+                          duration: 0.5,
+                          0: x / 800,
+                          1: y / 600,
+                        });
+                      }
+                    });
+              
+                    app.stage.on('pointerout', () => {
+                      if (asciiFilter) {
+                        gsap.to(asciiFilter.resources.filterUniforms.uniforms.u_mouse, {
+                          duration: 0.5,
+                          0: 0,
+                          1: 0,
+                        });
+                      }
+                    });
     };
 
     initPixi();
