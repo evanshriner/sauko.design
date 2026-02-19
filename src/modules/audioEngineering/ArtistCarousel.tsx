@@ -79,7 +79,7 @@ const ArtistCarousel: React.FC = () => {
         uniform vec2 u_resolution;
         uniform vec2 u_mouse;
 
-        const float charSize = 8.0;
+        const float charSize = 9.0;
 
         float luminance(vec3 color) {
           return dot(color, vec3(0.299, 0.587, 0.114));
@@ -113,16 +113,16 @@ const ArtistCarousel: React.FC = () => {
         }
       `;
 
-                          const vertexSrc = `
-                            attribute vec2 aPosition;
-                            varying vec2 vTextureCoord;
-                    
-                            void main(void) {
-                              gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);
-                              vTextureCoord = aPosition;
-                            }
-                          `;              
-            
+      const vertexSrc = `
+        attribute vec2 aPosition;
+        varying vec2 vTextureCoord;
+
+        void main(void) {
+          gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);
+          vTextureCoord = vec2(aPosition.x, 1.0 - aPosition.y);
+        }
+      `;              
+
                  
               
                     const asciiFilter = PIXI.Filter.from({
@@ -132,7 +132,7 @@ const ArtistCarousel: React.FC = () => {
                       },
                       resources: {
                         filterUniforms: new PIXI.UniformGroup({
-                          u_resolution: { value: [800, 600], type: 'vec2<f32>' },
+                          u_resolution: { value: [1200, 900], type: 'vec2<f32>' },
                           u_mouse: { value: [0, 0], type: 'vec2<f32>' },
                         }),
                       },
