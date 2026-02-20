@@ -147,11 +147,11 @@ const ArtistImage = ({ url, position, rotation, scale }: { url: string, position
   return (
     <mesh ref={meshRef} position={position} rotation={rotation} scale={scale}>
       <planeGeometry args={[6, 6, 48, 48]} />
-      <asciiShaderMaterial 
+      {/* <asciiShaderMaterial 
         ref={materialRef} 
         uTexture={texture} 
         transparent 
-      />
+      /> */}
     </mesh>
   );
 };
