@@ -1,22 +1,14 @@
-import styled from '@emotion/styled';
 import FlexBox from '../../shared/components/FlexBox';
+import NeonText from '@/shared/styles/NeonText';
+
 
 function AudioEngineering() {
+
   return (
-    <FlexBox flexDirection="column" id="services">
-      <FlexBox
-        gap="12px"
-        height="135vh"
-        flexDirection="column"
-        padding="3rem 0rem 0rem"
-        alignItems="center"
-        justifyContent="center"
-        style={{
-          background:
-            'linear-gradient(to bottom, transparent 95%, rgba(0, 0, 0, 0.9))',
-        }}
-      >
-      </FlexBox>
+    <FlexBox width="100%" height="100vh" justifyContent="center" alignItems="center">
+      <NeonText fontSize="3rem" darken animatedHover disableSelection justifyContent='center'>
+        Audio Engineering Services Coming Soon
+      </NeonText>
     </FlexBox>
   );
 }
