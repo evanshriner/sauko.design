@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import FlexBox from '../FlexBox';
 
 const ContentContainer = styled(FlexBox)({
-  height: '100%',
+  minHeight: '100%',
   flexDirection: 'column',
   overflow: 'visible',
 });

@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import FlexBox from '@/shared/components/FlexBox';
 import { keyframes } from '@emotion/react';
 
-export interface BentoBlockProps {
+export interface BentoBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   gridColumn?: string;
   gridRow?: string;
   transparent?: boolean;
@@ -43,7 +43,7 @@ const StyledBentoBlock = styled(FlexBox)<BentoBlockProps>(({ theme, gridColumn, 
   gridRow: gridRow || 'auto',
   position: 'relative',
   overflow: 'hidden',
-  transition: 'transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease',
+  transition: 'background-color 0.3s ease, border-color 0.3s ease',
   
   '&:hover': {
     backgroundColor: transparent ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 1)',
