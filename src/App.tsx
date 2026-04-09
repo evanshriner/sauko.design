@@ -56,6 +56,11 @@ function App() {
 
   useEffect(() => {
     console.log('Current Page:', currentPage);
+    // Refresh ScrollTrigger when page changes to recalculate heights for ScrollSmoother
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [currentPage]);
 
   // effect to handle transition between loading screen and main content
@@ -66,6 +71,7 @@ function App() {
     setTimeout(() => {
       setShowLoadingScreen(false);
       setIsTransitioning(false);
+      ScrollTrigger.refresh();
     }, 1000); // this matches the bloom animation durations found in the wrapping components
   };
 
@@ -75,6 +81,8 @@ function App() {
     // this is necessary since the raycaster is not updated until the mouse moves (just an aesthetic improvement)
     setIsHoveringNav(false);
   };
+
+  const isHome = currentPage === Pages.Home;
 
   return (
     <ThemeProvider theme={theme}>
@@ -96,8 +104,14 @@ function App() {
             onObjectHover={setIsHoveringNav}
           />
         </BackgroundContainer>
-        <div id="smooth-wrapper" style={{ pointerEvents: 'none' }}>
-          <div id="smooth-content" style={{ pointerEvents: 'none' }}>
+        <div 
+          id="smooth-wrapper" 
+          style={{ pointerEvents: isHome ? 'none' : 'auto' }}
+        >
+          <div 
+            id="smooth-content" 
+            style={{ pointerEvents: isHome ? 'none' : 'auto' }}
+          >
             <FlexBox flexDirection="column" id="dom-content" minHeight="100vh">
               <NavBar
                 onMenuItemClick={(page) => {
@@ -112,7 +126,7 @@ function App() {
                 alignItems="center"
                 // this will need to be dynamic, based on whether or not we are scrolling (currently only subpages scroll)
                 style={{
-                  pointerEvents: currentPage === Pages.Home ? 'none' : 'auto',
+                  pointerEvents: isHome ? 'none' : 'auto',
                   flexGrow: 1,
                 }}
               >
@@ -121,13 +135,12 @@ function App() {
                     key={currentPage}
                     style={{
                       width: '100%',
-                      height: '100%',
+                      minHeight: '100%',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       flexGrow: 1,
-                      pointerEvents:
-                        currentPage === Pages.Home ? 'none' : 'auto',
+                      pointerEvents: isHome ? 'none' : 'auto',
                     }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

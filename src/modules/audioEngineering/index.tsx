@@ -1,14 +1,12 @@
-import { useRef, useLayoutEffect, useState, useMemo } from 'react';
+import { useRef, useLayoutEffect, useState, useMemo, useEffect } from 'react';
 import styled from '@emotion/styled';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FlexBox from '../../shared/components/FlexBox';
-import SignalSource from './sections/SignalSource';
-import CorrectionStage from './sections/CorrectionStage';
-import DefinitionStage from './sections/DefinitionStage';
-import OutputStage from './sections/OutputStage';
+import CinematicSection from './components/CinematicSection';
 import EngineeringConsole from './sections/EngineeringConsole';
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
+import NeonText from '@/shared/styles/NeonText';
 
 const Container = styled(FlexBox)`
   width: 100%;
@@ -16,15 +14,7 @@ const Container = styled(FlexBox)`
   flex-direction: column;
   z-index: 10;
   pointer-events: auto;
-`;
-
-const SectionWrapper = styled(FlexBox)`
-  width: 100%;
-  min-height: 100vh;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  pointer-events: auto;
+  background: transparent;
 `;
 
 const NoiseOverlay = styled.div`
@@ -50,6 +40,59 @@ const SignalPathSVG = styled.svg`
   z-index: 2;
 `;
 
+const ConsoleWrapper = styled(FlexBox)`
+  width: 100%;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 4rem 0;
+`;
+
+const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
+  position: absolute;
+  top: ${({ top }) => top};
+  ${({ left }) => left && `left: ${left};`}
+  ${({ right }) => right && `right: ${right};`}
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const TechnicalUIOverlay = () => {
+  const [coords, setCoords] = useState({ x: '000', y: '000' });
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCoords({
+        x: Math.floor(Math.random() * 999).toString().padStart(3, '0'),
+        y: Math.floor(Math.random() * 999).toString().padStart(3, '0'),
+      });
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <>
+      <FloatingUI top="15vh" left="5%">[SCAN_MODE: ACTIVE]</FloatingUI>
+      <FloatingUI top="45vh" right="8%">[BIT_DEPTH: 32_FLOAT]</FloatingUI>
+      <FloatingUI top="75vh" left="10%">[XY_COORD: {coords.x}.{coords.y}]</FloatingUI>
+      <FloatingUI top="120vh" right="5%">[SAMPLE_RATE: 96KHZ]</FloatingUI>
+      <FloatingUI top="180vh" left="4%">[BUFFER: 1024_SAMPLES]</FloatingUI>
+      <FloatingUI top="240vh" right="12%">[DYNAMIC_RANGE: +118DB]</FloatingUI>
+      <FloatingUI top="310vh" left="6%">[PHASE: ALIGNED]</FloatingUI>
+    </>
+  );
+};
+
 function AudioEngineering() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
@@ -63,18 +106,16 @@ function AudioEngineering() {
     skipForwardRef.current = skipForward;
   }, [skipForward]);
 
-  // Generate a path that is noisy at the top and smooth at the bottom
+  // Generate a thinner, more elegant path
   const signalPath = useMemo(() => {
     let path = "M 500 0";
-    const totalPoints = 300; 
-    const sectionHeight = 5000 / totalPoints;
+    const totalPoints = 400; 
+    const sectionHeight = 6000 / totalPoints; 
     
     for (let i = 1; i <= totalPoints; i++) {
       const y = i * sectionHeight;
-      // Noise decreases as we go down
-      // Strong noise at the top (Roots), zero noise by section 3 (Mastering)
-      const noiseIntensity = Math.max(0, 150 - (i / totalPoints) * 200); 
-      const noise = (Math.random() - 0.5) * noiseIntensity;
+      const noiseIntensity = Math.max(0, 30 - (i / totalPoints) * 40); 
+      const noise = Math.sin(i * 0.05) * noiseIntensity + (Math.random() - 0.5) * (noiseIntensity * 0.3);
       const x = 500 + noise;
       path += ` L ${x} ${y}`;
     }
@@ -84,16 +125,12 @@ function AudioEngineering() {
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     
-    // Ensure ScrollTrigger refreshes after page transition
-    // and after everything is rendered
     const refreshTimer = setTimeout(() => {
-        console.log('Refreshing ScrollTrigger for AudioEngineering');
         ScrollTrigger.refresh();
-    }, 1500);
+    }, 1200);
 
     let ctx = gsap.context(() => {
-        const sections = gsap.utils.toArray('.section-wrapper') as HTMLElement[];
-        console.log(`AudioEngineering: found ${sections.length} sections`);
+        const sections = gsap.utils.toArray('.cinematic-section, .console-section') as HTMLElement[];
         
         sections.forEach((section, i) => {
             ScrollTrigger.create({
@@ -114,30 +151,6 @@ function AudioEngineering() {
                     }
                 }
             });
-
-            // Parallax/Entrance animations
-            if (section.firstChild) {
-              gsap.fromTo(section.firstChild, 
-                  {
-                    opacity: 0,
-                    y: 100,
-                    filter: "blur(10px)",
-                  },
-                  {
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 95%",
-                        end: "top 25%",
-                        scrub: 1,
-                    },
-                    ease: "power2.out",
-                    immediateRender: false
-                  }
-              );
-            }
         });
 
         // Animate the signal line drawing
@@ -150,23 +163,23 @@ function AudioEngineering() {
                 ease: "none",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top top",
+                    start: "top 10%",
                     end: "bottom bottom",
-                    scrub: 0.1, 
+                    scrub: 0.5, 
                 }
             });
         }
 
-        // Mobile "Stacked" layout handling
         let mm = gsap.matchMedia();
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+          if (pathRef.current) {
+            gsap.set(pathRef.current, { display: 'none' });
+          }
+        });
+
         mm.add("(max-width: 768px)", () => {
-            sections.forEach((section) => {
-                if (section.firstChild) {
-                  gsap.set(section.firstChild, { opacity: 1, y: 0, filter: "none" });
-                }
-            });
             if (pathRef.current) {
-              gsap.set(pathRef.current, { display: 'none' });
+              gsap.set(pathRef.current, { opacity: 0.2 });
             }
         });
 
@@ -177,36 +190,68 @@ function AudioEngineering() {
         ctx.revert();
     }
   }, []); 
- // Run once
 
   return (
     <Container ref={containerRef}>
       <NoiseOverlay />
-      <SignalPathSVG viewBox="0 0 1000 5000" preserveAspectRatio="none">
+      <TechnicalUIOverlay />
+      
+      <SignalPathSVG viewBox="0 0 1000 6000" preserveAspectRatio="none">
         <path 
           ref={pathRef}
           d={signalPath}
-          stroke="rgba(255, 255, 255, 0.6)" 
-          strokeWidth="3" 
+          stroke="rgba(255, 255, 255, 0.2)" 
+          strokeWidth="1.2" 
           fill="none"
         />
       </SignalPathSVG>
       
-      <SectionWrapper id="source" className="section-wrapper">
-        <SignalSource />
-      </SectionWrapper>
-      <SectionWrapper id="correction" className="section-wrapper">
-        <CorrectionStage />
-      </SectionWrapper>
-      <SectionWrapper id="definition" className="section-wrapper">
-        <DefinitionStage />
-      </SectionWrapper>
-      <SectionWrapper id="output" className="section-wrapper">
-        <OutputStage />
-      </SectionWrapper>
-      <SectionWrapper id="console" className="section-wrapper">
+      <CinematicSection 
+        id="source"
+        layout="center"
+        subtitle="SIGNAL_ORIGIN // FOUNDATION"
+        title={<>DETROIT BORN.<br/>ANALOGUE BRED.</>}
+        content={
+          <>
+            Over a decade of engineering, mixing, and producing experience distilled into a surgical precision workflow. Sauko is the new standard for the Motor City's high-fidelity output.
+          </>
+        }
+      />
+
+      <CinematicSection 
+        id="correction"
+        layout="left"
+        subtitle="CORRECTION_STAGE // RESTORATION"
+        title={<>ANALOGUE RESCUE &<br/>DIGITIZATION.</>}
+        content="Preserving the heritage of sound. We specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
+        image="/images/artist1.jpg"
+      />
+
+      <CinematicSection 
+        id="definition"
+        layout="right"
+        subtitle="DEFINITION_STAGE // CHARACTER"
+        title={<>REFINEMENT.<br/>DEPTH. SPACE.</>}
+        content={
+          <>
+            More than just volume. We shape the acoustic landscape, providing the warmth of analogue circuitry with the clinical precision of digital mastering.
+            <NeonText fontSize="1rem" padding="1rem 0 0 0">[CHARACTER_DRIVE_ACTIVE]</NeonText>
+          </>
+        }
+        image="/images/artist2.jpg"
+      />
+
+      <CinematicSection 
+        id="output"
+        layout="center"
+        subtitle="OUTPUT_STAGE // FINAL_BIT"
+        title={<>TRANSPARENT.<br/>LOUD. LIMITLESS.</>}
+        content="The final stage of the sonic journey. Translated perfectly across all playback systems, from the club to the headphones. Loudness with zero compromise on integrity."
+      />
+
+      <ConsoleWrapper id="console" className="console-section">
         <EngineeringConsole />
-      </SectionWrapper>
+      </ConsoleWrapper>
     </Container>
   );
 }
