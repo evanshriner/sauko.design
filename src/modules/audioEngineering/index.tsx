@@ -218,7 +218,7 @@ function AudioEngineering() {
         subtitle="STAGE_01 // RESTORATION & DIGITIZATION"
         title={<>ANALOGUE RESCUE.<br/>DIGITAL PRECISION.</>}
         content="preserving the heritage of sound. we specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
-        image="/images/artist1.jpg"
+        image="/images/restoration_equipment.png"
       />
 
       <CinematicSection 

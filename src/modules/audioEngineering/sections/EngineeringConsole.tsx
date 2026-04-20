@@ -127,10 +127,10 @@ const EngineeringConsole = () => {
             value={formData.service}
             onChange={(e) => setFormData({...formData, service: e.target.value})}
           >
-            <option>Mastering (Stereo)</option>
-            <option>Stem Mastering</option>
-            <option>Restoration</option>
-            <option>Production / Sound Design</option>
+            <option>Mastering (Stereo/Stem)</option>
+            <option>Mixing & Production</option>
+            <option>Restoration & Digitization</option>
+            <option>Sound Design</option>
           </Select>
         </FormGroup>
 
@@ -148,7 +148,7 @@ const EngineeringConsole = () => {
         <FormGroup>
           <Label>ADDITIONAL_NOTES</Label>
           <TextArea 
-            placeholder="TECHNICAL SPECS, TARGET LUFS, REFERENCE TRACKS..." 
+            placeholder="TECHNICAL SPECS, REFERENCE TRACKS, ETC..." 
             value={formData.notes}
             onChange={(e) => setFormData({...formData, notes: e.target.value})}
           />
