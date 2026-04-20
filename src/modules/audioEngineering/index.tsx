@@ -6,6 +6,7 @@ import FlexBox from '../../shared/components/FlexBox';
 import CinematicSection from './components/CinematicSection';
 import EngineeringConsole from './sections/EngineeringConsole';
 import NeonText from '@/shared/styles/NeonText';
+import { DetroitSkyline } from './components/DetroitSkyline';
 
 const Container = styled(FlexBox)`
   width: 100%;
@@ -121,7 +122,7 @@ function AudioEngineering() {
         ScrollTrigger.refresh();
     }, 1200);
 
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
         const sections = gsap.utils.toArray('.cinematic-section, .console-section') as HTMLElement[];
         
         sections.forEach((section, i) => {
@@ -161,7 +162,7 @@ function AudioEngineering() {
             });
         }
 
-        let mm = gsap.matchMedia();
+        const mm = gsap.matchMedia();
         mm.add("(prefers-reduced-motion: reduce)", () => {
           if (pathRef.current) {
             gsap.set(pathRef.current, { display: 'none' });
@@ -208,6 +209,7 @@ function AudioEngineering() {
             industry.
           </>
         }
+        background={<DetroitSkyline />}
       />
 
       <CinematicSection 

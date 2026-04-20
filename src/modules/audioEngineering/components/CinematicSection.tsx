@@ -10,6 +10,7 @@ interface CinematicSectionProps {
   subtitle?: string | React.ReactNode;
   content?: string | React.ReactNode;
   image?: string;
+  background?: React.ReactNode;
   layout?: 'left' | 'right' | 'center';
   className?: string;
 }
@@ -27,6 +28,16 @@ const SectionContainer = styled(FlexBox)`
     padding: 4rem 5%;
     flex-direction: column !important;
   }
+`;
+
+const BackgroundWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 `;
 
 const ContentWrapper = styled(FlexBox)<{ layout: string }>`
@@ -114,6 +125,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
   subtitle,
   content,
   image,
+  background,
   layout = 'center',
   className,
 }) => {
@@ -185,6 +197,8 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
       className={`cinematic-section ${className || ''}`}
       flexDirection={layout === 'right' ? 'row-reverse' : 'row'}
     >
+      {background && <BackgroundWrapper>{background}</BackgroundWrapper>}
+      
       <ContentWrapper ref={contentRef} layout={layout}>
         {subtitle && <Subtitle>{subtitle}</Subtitle>}
         <Title>{title}</Title>
