@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FlexBox from '../../shared/components/FlexBox';
 import CinematicSection from './components/CinematicSection';
 import EngineeringConsole from './sections/EngineeringConsole';
-import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 import NeonText from '@/shared/styles/NeonText';
 
 const Container = styled(FlexBox)`
@@ -37,7 +36,7 @@ const SignalPathSVG = styled.svg`
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 `;
 
 const ConsoleWrapper = styled(FlexBox)`
@@ -96,26 +95,19 @@ const TechnicalUIOverlay = () => {
 function AudioEngineering() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
-  const { skipForward } = useMediaPlayerContext();
   const [activeSection, setActiveSection] = useState(0);
   const lastSectionRef = useRef(-1);
-  const skipForwardRef = useRef(skipForward);
 
-  // Sync the skipForward ref
-  useLayoutEffect(() => {
-    skipForwardRef.current = skipForward;
-  }, [skipForward]);
-
-  // Generate a thinner, more elegant path
+  // signal path down the center of the page
   const signalPath = useMemo(() => {
     let path = "M 500 0";
-    const totalPoints = 400; 
+    const totalPoints = 700; 
     const sectionHeight = 6000 / totalPoints; 
     
     for (let i = 1; i <= totalPoints; i++) {
       const y = i * sectionHeight;
       const noiseIntensity = Math.max(0, 30 - (i / totalPoints) * 40); 
-      const noise = Math.sin(i * 0.05) * noiseIntensity + (Math.random() - 0.5) * (noiseIntensity * 0.3);
+      const noise = Math.sin(i * 0.20) * noiseIntensity + (Math.random() - 0.5) * (noiseIntensity * 0.6);
       const x = 500 + noise;
       path += ` L ${x} ${y}`;
     }
@@ -141,7 +133,6 @@ function AudioEngineering() {
                     if (i !== lastSectionRef.current) {
                         lastSectionRef.current = i;
                         setActiveSection(i);
-                        skipForwardRef.current();
                     }
                 },
                 onEnterBack: () => {
@@ -210,31 +201,32 @@ function AudioEngineering() {
         id="source"
         layout="center"
         subtitle="SIGNAL_ORIGIN // FOUNDATION"
-        title={<>DETROIT BORN.<br/>ANALOGUE BRED.</>}
+        title={<>DETROIT SOUL,<br/>WITHOUT COMPROMISE.</>}
         content={
           <>
-            Over a decade of engineering, mixing, and producing experience distilled into a surgical precision workflow. Sauko is the new standard for the Motor City's high-fidelity output.
+            with over a decade of engineering, mixing, and producing experience, sauko specializes in providing high-end audio services to the motor city music
+            industry.
           </>
         }
       />
 
       <CinematicSection 
-        id="correction"
+        id="restoration"
         layout="left"
-        subtitle="CORRECTION_STAGE // RESTORATION"
-        title={<>ANALOGUE RESCUE &<br/>DIGITIZATION.</>}
-        content="Preserving the heritage of sound. We specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
+        subtitle="STAGE_01 // RESTORATION & DIGITIZATION"
+        title={<>ANALOGUE RESCUE.<br/>DIGITAL PRECISION.</>}
+        content="preserving the heritage of sound. we specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
         image="/images/artist1.jpg"
       />
 
       <CinematicSection 
-        id="definition"
+        id="mixing"
         layout="right"
-        subtitle="DEFINITION_STAGE // CHARACTER"
-        title={<>REFINEMENT.<br/>DEPTH. SPACE.</>}
+        subtitle="STAGE_02 // MIXING & PRODUCTION"
+        title={<>SONIC ARCHITECTURE.<br/>CREATIVE DEPTH.</>}
         content={
           <>
-            More than just volume. We shape the acoustic landscape, providing the warmth of analogue circuitry with the clinical precision of digital mastering.
+            shaping the acoustic landscape. we balance clarity with character, blending the warmth of analogue circuitry with modern production techniques to define your signature sound.
             <NeonText fontSize="1rem" padding="1rem 0 0 0">[CHARACTER_DRIVE_ACTIVE]</NeonText>
           </>
         }
@@ -242,11 +234,11 @@ function AudioEngineering() {
       />
 
       <CinematicSection 
-        id="output"
+        id="mastering"
         layout="center"
-        subtitle="OUTPUT_STAGE // FINAL_BIT"
-        title={<>TRANSPARENT.<br/>LOUD. LIMITLESS.</>}
-        content="The final stage of the sonic journey. Translated perfectly across all playback systems, from the club to the headphones. Loudness with zero compromise on integrity."
+        subtitle="STAGE_03 // THE FINAL MASTER"
+        title={<>TRANSPARENT LOUDNESS.<br/>GLOBAL TRANSLATION.</>}
+        content="the final stage of the sonic journey. we ensure your sound translates perfectly across all playback systems, from the club to headphones. commercial loudness with zero compromise on dynamic integrity."
       />
 
       <ConsoleWrapper id="console" className="console-section">
