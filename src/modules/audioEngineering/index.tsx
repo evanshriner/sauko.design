@@ -7,6 +7,7 @@ import CinematicSection from './components/CinematicSection';
 import EngineeringConsole from './sections/EngineeringConsole';
 import NeonText from '@/shared/styles/NeonText';
 import { DetroitSkyline } from './components/DetroitSkyline';
+import ProjectCarousel from './components/ProjectCarousel';
 
 const Container = styled(FlexBox)`
   width: 100%;
@@ -15,6 +16,7 @@ const Container = styled(FlexBox)`
   z-index: 10;
   pointer-events: auto;
   background: transparent;
+  overflow-x: hidden;
 `;
 
 const NoiseOverlay = styled.div`
@@ -33,8 +35,10 @@ const NoiseOverlay = styled.div`
 const SignalPathSVG = styled.svg`
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  min-width: 2460px;
   height: 100%;
   pointer-events: none;
   z-index: 0;
@@ -96,7 +100,6 @@ const TechnicalUIOverlay = () => {
 function AudioEngineering() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
-  const [activeSection, setActiveSection] = useState(0);
   const lastSectionRef = useRef(-1);
 
   // signal path down the center of the page
@@ -123,7 +126,7 @@ function AudioEngineering() {
     }, 1200);
 
     const ctx = gsap.context(() => {
-        const sections = gsap.utils.toArray('.cinematic-section, .console-section') as HTMLElement[];
+        const sections = gsap.utils.toArray('.cinematic-section, .pin-section, .console-section') as HTMLElement[];
         
         sections.forEach((section, i) => {
             ScrollTrigger.create({
@@ -133,13 +136,11 @@ function AudioEngineering() {
                 onEnter: () => {
                     if (i !== lastSectionRef.current) {
                         lastSectionRef.current = i;
-                        setActiveSection(i);
                     }
                 },
                 onEnterBack: () => {
                     if (i !== lastSectionRef.current) {
                         lastSectionRef.current = i;
-                        setActiveSection(i);
                     }
                 }
             });
@@ -167,12 +168,6 @@ function AudioEngineering() {
           if (pathRef.current) {
             gsap.set(pathRef.current, { display: 'none' });
           }
-        });
-
-        mm.add("(max-width: 768px)", () => {
-            if (pathRef.current) {
-              gsap.set(pathRef.current, { opacity: 0.2 });
-            }
         });
 
     }, containerRef);
@@ -232,7 +227,7 @@ function AudioEngineering() {
             <NeonText fontSize="1rem" padding="1rem 0 0 0">[CHARACTER_DRIVE_ACTIVE]</NeonText>
           </>
         }
-        image="/images/artist2.jpg"
+        image="/images/modular_rack.png"
       />
 
       <CinematicSection 
@@ -242,6 +237,8 @@ function AudioEngineering() {
         title={<>TRANSPARENT LOUDNESS.<br/>GLOBAL TRANSLATION.</>}
         content="the final stage of the sonic journey. we ensure your sound translates perfectly across all playback systems, from the club to headphones. commercial loudness with zero compromise on dynamic integrity."
       />
+
+      <ProjectCarousel id="projects" />
 
       <ConsoleWrapper id="console" className="console-section">
         <EngineeringConsole />

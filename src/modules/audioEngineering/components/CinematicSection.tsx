@@ -62,8 +62,13 @@ const Title = styled.h2`
   line-height: 0.9;
   margin: 0;
   text-transform: uppercase;
-  color: #ffffff;
   letter-spacing: -0.02em;
+`;
+
+const TitleInner = styled.span`
+  color: rgba(255, 255, 255, 0.85);
+  filter: url(#neonGlow);
+  display: block;
 `;
 
 const Subtitle = styled.div`
@@ -201,7 +206,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
       
       <ContentWrapper ref={contentRef} layout={layout}>
         {subtitle && <Subtitle>{subtitle}</Subtitle>}
-        <Title>{title}</Title>
+        <Title><TitleInner>{title}</TitleInner></Title>
         {content && <ContentBody>{content}</ContentBody>}
       </ContentWrapper>
       

@@ -15,6 +15,8 @@ const Title = styled.h2`
   font-weight: 800;
   margin: 0.5rem 0;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  filter: url(#neonGlow);
 `;
 
 const Form = styled.form`
