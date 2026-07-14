@@ -87,7 +87,7 @@ export const objectConfigurations: ObjectConfig[] = [
   },
   {
     id: DisplayedObject.Robot,
-    page: Pages.AIAugmentation,
+    page: Pages.AIDesloppification,
     models: {
       desktop: {
         gltfPath: '/Robot.glb',

@@ -16,7 +16,8 @@ export interface HomeProps {
 const pageTitles = {
   [Pages.AudioEngineering]: 'audio engineering',
   [Pages.Software]: 'software prototyping',
-  [Pages.AIAugmentation]: 'ai augmentation',
+  [Pages.AIDesloppification]: 'ai desloppification',
+  [Pages.Home]: 'home',
 };
 
 function Home({ setPage, currentPage }: HomeProps) {

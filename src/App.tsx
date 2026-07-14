@@ -18,7 +18,7 @@ import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
 import AudioEngineering from './modules/audioEngineering';
 import Software from './modules/software';
-import AIAugmentation from './modules/aiAugmentation';
+import AIDesloppification from './modules/aiDesloppification';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -42,7 +42,7 @@ function App() {
     ),
     [Pages.AudioEngineering]: <AudioEngineering />,
     [Pages.Software]: <Software />,
-    [Pages.AIAugmentation]: <AIAugmentation />,
+    [Pages.AIDesloppification]: <AIDesloppification />,
   };
 
   useLayoutEffect(() => {

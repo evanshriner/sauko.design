@@ -25,7 +25,7 @@ export const cameraConfigurations: CameraConfig[] = [
     lookAt: new THREE.Vector3(0, 0, 0),
   },
   {
-    page: Pages.AIAugmentation,
+    page: Pages.AIDesloppification,
     position: new THREE.Vector3(0, -0.5, 1.5),
     lookAt: new THREE.Vector3(0, 0, 0),
   },
