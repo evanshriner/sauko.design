@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FlexBox from '../../shared/components/FlexBox';
 import CinematicSection from '../audioEngineering/components/CinematicSection';
 import NeonText from '@/shared/styles/NeonText';
-import DiagnosticDashboard from './components/DiagnosticDashboard';
+import FailureTrace from './components/FailureTrace';
 import DeliveryModel from './components/DeliveryModel';
 import AuditConsole from './sections/AuditConsole';
 
@@ -48,29 +48,6 @@ const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
   @media (max-width: 768px) {
     display: none;
   }
-`;
-
-const SectionLabel = styled.div`
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 6rem 2rem 1rem;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: rgba(255, 255, 255, 0.3);
-  z-index: 10;
-`;
-
-const DashboardWrapper = styled(FlexBox)`
-  width: 100%;
-  min-height: 100vh;
-  padding: 2rem 0 4rem;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  z-index: 10;
 `;
 
 const ConsoleWrapper = styled(FlexBox)`
@@ -179,11 +156,8 @@ export default function AIDesloppification() {
         }
       />
 
-      {/* Section 2: Diagnostic Dashboard (The Problem) */}
-      <SectionLabel>SECTION_02 // THE PROBLEM</SectionLabel>
-      <DashboardWrapper>
-        <DiagnosticDashboard />
-      </DashboardWrapper>
+      {/* Section 2: The failure trace */}
+      <FailureTrace />
 
       {/* Section 3: Methodology (The Solution) */}
       <CinematicSection
