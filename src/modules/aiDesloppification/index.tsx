@@ -9,19 +9,19 @@ import SystemTopology from './components/SystemTopology';
 const risks = [
   {
     number: '01',
-    title: 'CHANGE ANXIETY',
+    title: 'Change anxiety',
     body: 'A feature that should take an afternoon needs a week of archaeology. Every change carries a question nobody can answer with confidence: what breaks next?',
     signal: 'UNCLEAR BOUNDARIES',
   },
   {
     number: '02',
-    title: 'INVISIBLE DECISIONS',
+    title: 'Invisible decisions',
     body: 'Business logic, model output, and customer data blur together. The product appears useful, but its decisions cannot be traced, reviewed, or defended.',
     signal: 'NO REVIEW PATH',
   },
   {
     number: '03',
-    title: 'FRAGILE DELIVERY',
+    title: 'Fragile delivery',
     body: 'Deployments rely on memory, workarounds, and the person who made it work once. The first incident reveals there is no reliable path back.',
     signal: 'MISSING OPERATIONS',
   },
@@ -30,17 +30,17 @@ const risks = [
 const outcomes = [
   {
     number: 'A',
-    title: 'KEEP THE PROOF',
+    title: 'Keep the proof',
     body: 'We preserve the useful product insight and separate it from the shortcuts that made the first version fast.',
   },
   {
     number: 'B',
-    title: 'MAKE RISK VISIBLE',
+    title: 'Make risk visible',
     body: 'Clear boundaries, tests around the behavior that matters, and review points where a system needs human judgment.',
   },
   {
     number: 'C',
-    title: 'RESTORE MOMENTUM',
+    title: 'Restore momentum',
     body: 'Your team inherits a system it can explain, operate, and extend without rebuilding trust on every release.',
   },
 ];
@@ -49,21 +49,21 @@ const engagement = [
   {
     number: '01',
     timing: 'FIRST · 1–2 WEEKS',
-    title: 'MAP THE REAL SYSTEM',
+    title: 'Map the real system',
     body: 'We follow the workflows your business depends on, inspect how the application behaves in production, and identify what is safe to keep.',
     deliverable: 'Risk map + prioritized repair plan',
   },
   {
     number: '02',
     timing: 'FIXED SCOPE',
-    title: 'STABILIZE THE FOUNDATION',
+    title: 'Stabilize the foundation',
     body: 'We replace brittle paths, clarify responsibilities, add safeguards around AI behavior, and prove the critical flows with tests.',
     deliverable: 'Reliable release path + documented decisions',
   },
   {
     number: '03',
     timing: 'OPTIONAL · ONGOING',
-    title: 'SHIP WITHOUT RELAPSING',
+    title: 'Ship without relapsing',
     body: 'We stay close through the next features and handoff, so the team has the conventions and context to move quickly without rebuilding the mess.',
     deliverable: 'Working rhythm for safe weekly delivery',
   },
@@ -131,7 +131,7 @@ const FloatingReadout = styled.span<{
   ${({ left }) => left && `left: ${left};`}
   ${({ right }) => right && `right: ${right};`}
   color: rgba(224, 207, 173, 0.55);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.59rem;
   letter-spacing: 0.15em;
   pointer-events: none;
@@ -156,7 +156,7 @@ const Shell = styled.div`
 const TerminalLabel = styled.p`
   margin: 0;
   color: rgba(224, 207, 173, 0.72);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.67rem;
   font-weight: 400;
   letter-spacing: 0.16em;
@@ -192,11 +192,11 @@ const HeroTitle = styled.h1`
   max-width: 720px;
   margin: clamp(1.35rem, 3vw, 2.2rem) 0 0;
   color: rgba(241, 237, 232, 0.96);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(3.5rem, 7.5vw, 7.25rem);
   font-weight: 700;
   letter-spacing: -0.07em;
   line-height: 0.88;
-  text-transform: uppercase;
   filter: url(#neonGlow);
 
   em {
@@ -217,7 +217,7 @@ const HeroFootnote = styled(NeonText)`
   width: auto;
   margin-top: 2rem;
   color: rgba(224, 207, 173, 0.7);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   line-height: 1.55;
@@ -252,11 +252,11 @@ const SectionTitle = styled.h2`
   max-width: 800px;
   margin: 1rem 0 0;
   color: rgba(241, 237, 232, 0.94);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2.4rem, 5.2vw, 4.75rem);
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: -0.06em;
   line-height: 0.93;
-  text-transform: uppercase;
   filter: url(#neonGlow);
 `;
 
@@ -299,7 +299,7 @@ const ScanCard = styled.article`
 const CardIndex = styled.p`
   margin: 0;
   color: rgba(224, 207, 173, 0.68);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.12em;
 `;
@@ -307,6 +307,7 @@ const CardIndex = styled.p`
 const CardTitle = styled.h3`
   margin: 3.4rem 0 0;
   color: rgba(241, 237, 232, 0.9);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.2rem, 2vw, 1.55rem);
   font-weight: 600;
   letter-spacing: -0.035em;
@@ -324,7 +325,7 @@ const CardBody = styled.p`
 const CardSignal = styled.p`
   margin: 2rem 0 0;
   color: rgba(224, 207, 173, 0.7);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.58rem;
   letter-spacing: 0.09em;
 `;
@@ -354,6 +355,7 @@ const Outcome = styled.article`
 const OutcomeTitle = styled.h3`
   margin: 2.2rem 0 0;
   color: rgba(224, 207, 173, 0.9);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.35rem, 2.3vw, 1.8rem);
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -450,7 +452,7 @@ const StepMeta = styled.div`
   flex-wrap: wrap;
   gap: 0.6rem 1rem;
   color: rgba(224, 207, 173, 0.66);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.1em;
 `;
@@ -458,6 +460,7 @@ const StepMeta = styled.div`
 const StepTitle = styled.h3`
   margin: 0.85rem 0 0;
   color: rgba(241, 237, 232, 0.93);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.4rem, 2.8vw, 2.15rem);
   font-weight: 600;
   letter-spacing: -0.045em;
@@ -482,7 +485,7 @@ const Deliverable = styled.p`
   strong {
     margin-right: 0.45rem;
     color: rgba(224, 207, 173, 0.76);
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Orbit', sans-serif;
     font-size: 0.58rem;
     font-weight: 400;
     letter-spacing: 0.1em;
@@ -520,11 +523,11 @@ const InvitationTitle = styled.h2`
   max-width: 680px;
   margin: 1.4rem 0 0;
   color: rgba(224, 207, 173, 0.94);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2.45rem, 5.8vw, 5.4rem);
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: -0.065em;
   line-height: 0.9;
-  text-transform: uppercase;
   filter: url(#neonGlow) drop-shadow(0 0 0.5em rgba(224, 207, 173, 0.3));
 `;
 
@@ -552,7 +555,7 @@ const InvitationBody = styled.div`
     gap: 0.7rem;
     align-items: baseline;
     color: rgba(224, 207, 173, 0.72);
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Orbit', sans-serif;
     font-size: 0.61rem;
     letter-spacing: 0.075em;
     text-transform: uppercase;

@@ -45,9 +45,12 @@ const ContentWrapper = styled(FlexBox)<{ layout: string }>`
   z-index: 2;
   max-width: ${({ layout }) => (layout === 'center' ? '900px' : '50%')};
   text-align: ${({ layout }) => layout};
-  align-items: ${({ layout }) => 
-    layout === 'left' ? 'flex-start' : 
-    layout === 'right' ? 'flex-end' : 'center'};
+  align-items: ${({ layout }) =>
+    layout === 'left'
+      ? 'flex-start'
+      : layout === 'right'
+      ? 'flex-end'
+      : 'center'};
 
   @media (max-width: 768px) {
     max-width: 100%;
@@ -57,23 +60,23 @@ const ContentWrapper = styled(FlexBox)<{ layout: string }>`
 `;
 
 const Title = styled.h2`
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 0.9;
   margin: 0;
-  text-transform: uppercase;
   letter-spacing: -0.02em;
 `;
 
 const TitleInner = styled.span`
+  font-family: 'Space Grotesk', sans-serif;
   color: rgba(255, 255, 255, 0.85);
   filter: url(#neonGlow);
   display: block;
 `;
-
-const Subtitle = styled.div`
+const Subtitle = styled.p`
   margin-top: 1.5rem;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: clamp(0.7rem, 2vw, 0.9rem);
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -140,16 +143,17 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const ctx = gsap.context(() => {
       // Title & Text animations
       if (contentRef.current) {
         const elements = contentRef.current.children;
-        gsap.fromTo(elements, 
-          { 
-            y: 100, 
-            opacity: 0, 
-            filter: 'blur(10px)' 
+        gsap.fromTo(
+          elements,
+          {
+            y: 100,
+            opacity: 0,
+            filter: 'blur(10px)',
           },
           {
             y: 0,
@@ -162,8 +166,8 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
               trigger: containerRef.current,
               start: 'top 80%',
               toggleActions: 'play none none reverse',
-            }
-          }
+            },
+          },
         );
       }
 
@@ -177,7 +181,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
             start: 'top bottom',
             end: 'bottom top',
             scrub: true,
-          }
+          },
         });
 
         gsap.to(imageRef.current, {
@@ -187,7 +191,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
             start: 'top 60%',
             end: 'center center',
             scrub: true,
-          }
+          },
         });
       }
     }, containerRef);
@@ -196,26 +200,28 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
   }, []);
 
   return (
-    <SectionContainer 
-      id={id} 
-      ref={containerRef} 
+    <SectionContainer
+      id={id}
+      ref={containerRef}
       className={`cinematic-section ${className || ''}`}
       flexDirection={layout === 'right' ? 'row-reverse' : 'row'}
     >
       {background && <BackgroundWrapper>{background}</BackgroundWrapper>}
-      
+
       <ContentWrapper ref={contentRef} layout={layout}>
         {subtitle && <Subtitle>{subtitle}</Subtitle>}
-        <Title><TitleInner>{title}</TitleInner></Title>
+        <Title>
+          <TitleInner>{title}</TitleInner>
+        </Title>
         {content && <ContentBody>{content}</ContentBody>}
       </ContentWrapper>
-      
+
       {image && (
         <ImageWrapper layout={layout}>
-          <StyledImage 
-            ref={imageRef} 
-            src={image} 
-            alt={typeof title === 'string' ? title : 'Section Image'} 
+          <StyledImage
+            ref={imageRef}
+            src={image}
+            alt={typeof title === 'string' ? title : 'Section Image'}
           />
         </ImageWrapper>
       )}

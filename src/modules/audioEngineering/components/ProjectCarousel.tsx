@@ -14,43 +14,46 @@ interface Project {
 
 const projects: Project[] = [
   {
-    artist: "DETROIT TECHNO COLLECTIVE",
-    title: "VIBRATIONS FROM THE UNDERGROUND",
-    year: "2024",
-    description: "Meticulous stem mastering for a 12-track vinyl release. Focused on maintaining sub-bass integrity while achieving commercial loudness.",
-    image: "/images/artist1.jpg",
-    type: "STEM_MASTERING"
+    artist: 'DETROIT TECHNO COLLECTIVE',
+    title: 'Vibrations from the Underground',
+    year: '2024',
+    description:
+      'Meticulous stem mastering for a 12-track vinyl release. Focused on maintaining sub-bass integrity while achieving commercial loudness.',
+    image: '/images/artist1.jpg',
+    type: 'STEM_MASTERING',
   },
   {
-    artist: "SARAH LUV",
-    title: "ETHEREAL ECHOES",
-    year: "2023",
-    description: "Full production and mixing. Blending organic vocal textures with industrial modular synthesis.",
-    image: "/images/artist2.jpg",
-    type: "PRODUCTION // MIXING"
+    artist: 'SARAH LUV',
+    title: 'Ethereal Echoes',
+    year: '2023',
+    description:
+      'Full production and mixing. Blending organic vocal textures with industrial modular synthesis.',
+    image: '/images/artist2.jpg',
+    type: 'PRODUCTION // MIXING',
   },
   {
-    artist: "THE ARCHIVIST",
-    title: "REEL-TO-REEL RESTORATION",
-    year: "2023",
-    description: "Restoration of lost 1970s jazz tapes. Noise floor reduction and frequency balancing for digital archival.",
-    image: "/images/artist1.jpg",
-    type: "RESTORATION"
+    artist: 'THE ARCHIVIST',
+    title: 'Reel-to-Reel Restoration',
+    year: '2023',
+    description:
+      'Restoration of lost 1970s jazz tapes. Noise floor reduction and frequency balancing for digital archival.',
+    image: '/images/artist1.jpg',
+    type: 'RESTORATION',
   },
   {
-    artist: "URBAN RHYTHM",
-    title: "CONCRETE JUNGLE",
-    year: "2022",
-    description: "Stereo mastering for global streaming. Optimized for maximum translation across club systems and mobile devices.",
-    image: "/images/artist2.jpg",
-    type: "STEREO_MASTERING"
-  }
+    artist: 'URBAN RHYTHM',
+    title: 'Concrete Jungle',
+    year: '2022',
+    description:
+      'Stereo mastering for global streaming. Optimized for maximum translation across club systems and mobile devices.',
+    image: '/images/artist2.jpg',
+    type: 'STEREO_MASTERING',
+  },
 ];
 
 const SectionContainer = styled.section`
   width: 100%;
   min-height: 100vh;
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-start; /* Align to top so pinning is more predictable */
@@ -93,7 +96,6 @@ const TitleColumn = styled.div`
     padding-top: 0;
   }
 `;
-
 const ProjectsColumn = styled.div`
   flex: 1.2;
   display: flex;
@@ -105,8 +107,8 @@ const ProjectsColumn = styled.div`
 
 const SectionTitle = styled.h2`
   font-size: clamp(2.5rem, 6vw, 5rem);
-  font-weight: 800;
-  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.85);
   line-height: 0.9;
   margin: 0;
@@ -114,7 +116,7 @@ const SectionTitle = styled.h2`
 `;
 
 const TechnicalLabel = styled.div`
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -166,7 +168,11 @@ const ImageWrapper = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.95));
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      rgba(0, 0, 0, 0.95)
+    );
     pointer-events: none;
   }
 `;
@@ -195,7 +201,7 @@ const InfoOverlay = styled.div`
 `;
 
 const ProjectArtist = styled.div`
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -207,9 +213,9 @@ const ProjectArtist = styled.div`
 
 const ProjectTitle = styled.h3`
   font-size: clamp(1.2rem, 3vw, 1.8rem);
-  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
   margin: 0.5rem 0;
-  text-transform: uppercase;
   line-height: 1;
 `;
 
@@ -228,7 +234,7 @@ const Description = styled.p`
 `;
 
 const TechnicalMeta = styled.div`
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.55rem;
   margin-top: 1rem;
   color: #00ff66;
@@ -242,10 +248,16 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
   return (
     <CardContainer className="project-card">
       <ImageWrapper className="project-image-wrapper">
-        <ProjectImage src={project.image} alt={project.title} className="project-image" />
+        <ProjectImage
+          src={project.image}
+          alt={project.title}
+          className="project-image"
+        />
       </ImageWrapper>
       <InfoOverlay>
-        <ProjectArtist>{project.artist} {"//"} {project.year}</ProjectArtist>
+        <ProjectArtist>
+          {project.artist} {'//'} {project.year}
+        </ProjectArtist>
         <ProjectTitle>{project.title}</ProjectTitle>
         <HoverContent className="hover-content">
           <Description>{project.description}</Description>
@@ -265,41 +277,41 @@ const ProjectCarousel: React.FC<{ id: string }> = ({ id }) => {
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const ctx = gsap.context(() => {
       // Reveal project cards on scroll
       const cards = gsap.utils.toArray('.project-card') as HTMLElement[];
       cards.forEach((card) => {
-        gsap.fromTo(card,
+        gsap.fromTo(
+          card,
           { y: 50, opacity: 0, filter: 'blur(10px)' },
           {
             y: 0,
             opacity: 1,
             filter: 'blur(0px)',
             duration: 1,
-            ease: "power3.out",
+            ease: 'power3.out',
             scrollTrigger: {
               trigger: card,
-              start: "top 95%",
-              toggleActions: "play none none reverse"
-            }
-          }
+              start: 'top 95%',
+              toggleActions: 'play none none reverse',
+            },
+          },
         );
       });
 
       // Pin the title column on desktop
       const mm = gsap.matchMedia();
-      mm.add("(min-width: 769px)", () => {
+      mm.add('(min-width: 769px)', () => {
         ScrollTrigger.create({
           trigger: containerRef.current,
-          start: "top 15%", // Pin 15% from top of viewport
-          end: "bottom 85%", // Unpin 15% from bottom of viewport
+          start: 'top 15%', // Pin 15% from top of viewport
+          end: 'bottom 85%', // Unpin 15% from bottom of viewport
           pin: titleRef.current,
           pinSpacing: false,
           invalidateOnRefresh: true,
         });
       });
-
     }, containerRef);
 
     return () => ctx.revert();
@@ -310,7 +322,11 @@ const ProjectCarousel: React.FC<{ id: string }> = ({ id }) => {
       <ContentWrapper>
         <TitleColumn ref={titleRef}>
           <TechnicalLabel>CLIENT_HISTORY // ARCHIVE</TechnicalLabel>
-          <SectionTitle>SELECTED<br/>PROJECTS.</SectionTitle>
+          <SectionTitle>
+            Selected
+            <br />
+            projects.
+          </SectionTitle>
         </TitleColumn>
         <ProjectsColumn>
           {projects.map((project, i) => (

@@ -60,7 +60,7 @@ const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
   ${({ right }) => right && `right: ${right};`}
   z-index: 3;
   pointer-events: none;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
@@ -73,12 +73,16 @@ const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
 
 const TechnicalUIOverlay = () => {
   const [coords, setCoords] = useState({ x: '000', y: '000' });
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCoords({
-        x: Math.floor(Math.random() * 999).toString().padStart(3, '0'),
-        y: Math.floor(Math.random() * 999).toString().padStart(3, '0'),
+        x: Math.floor(Math.random() * 999)
+          .toString()
+          .padStart(3, '0'),
+        y: Math.floor(Math.random() * 999)
+          .toString()
+          .padStart(3, '0'),
       });
     }, 3000);
     return () => clearInterval(timer);
@@ -86,13 +90,27 @@ const TechnicalUIOverlay = () => {
 
   return (
     <>
-      <FloatingUI top="15vh" left="5%">[SCAN_MODE: ACTIVE]</FloatingUI>
-      <FloatingUI top="45vh" right="8%">[BIT_DEPTH: 32_FLOAT]</FloatingUI>
-      <FloatingUI top="75vh" left="10%">[XY_COORD: {coords.x}.{coords.y}]</FloatingUI>
-      <FloatingUI top="120vh" right="5%">[SAMPLE_RATE: 96KHZ]</FloatingUI>
-      <FloatingUI top="180vh" left="4%">[BUFFER: 1024_SAMPLES]</FloatingUI>
-      <FloatingUI top="240vh" right="12%">[DYNAMIC_RANGE: +118DB]</FloatingUI>
-      <FloatingUI top="310vh" left="6%">[PHASE: ALIGNED]</FloatingUI>
+      <FloatingUI top="15vh" left="5%">
+        [SCAN_MODE: ACTIVE]
+      </FloatingUI>
+      <FloatingUI top="45vh" right="8%">
+        [BIT_DEPTH: 32_FLOAT]
+      </FloatingUI>
+      <FloatingUI top="75vh" left="10%">
+        [XY_COORD: {coords.x}.{coords.y}]
+      </FloatingUI>
+      <FloatingUI top="120vh" right="5%">
+        [SAMPLE_RATE: 96KHZ]
+      </FloatingUI>
+      <FloatingUI top="180vh" left="4%">
+        [BUFFER: 1024_SAMPLES]
+      </FloatingUI>
+      <FloatingUI top="240vh" right="12%">
+        [DYNAMIC_RANGE: +118DB]
+      </FloatingUI>
+      <FloatingUI top="310vh" left="6%">
+        [PHASE: ALIGNED]
+      </FloatingUI>
     </>
   );
 };
@@ -104,14 +122,16 @@ function AudioEngineering() {
 
   // signal path down the center of the page
   const signalPath = useMemo(() => {
-    let path = "M 500 0";
-    const totalPoints = 700; 
-    const sectionHeight = 6000 / totalPoints; 
-    
+    let path = 'M 500 0';
+    const totalPoints = 700;
+    const sectionHeight = 6000 / totalPoints;
+
     for (let i = 1; i <= totalPoints; i++) {
       const y = i * sectionHeight;
-      const noiseIntensity = Math.max(0, 30 - (i / totalPoints) * 40); 
-      const noise = Math.sin(i * 0.20) * noiseIntensity + (Math.random() - 0.5) * (noiseIntensity * 0.6);
+      const noiseIntensity = Math.max(0, 30 - (i / totalPoints) * 40);
+      const noise =
+        Math.sin(i * 0.2) * noiseIntensity +
+        (Math.random() - 0.5) * (noiseIntensity * 0.6);
       const x = 500 + noise;
       path += ` L ${x} ${y}`;
     }
@@ -120,121 +140,154 @@ function AudioEngineering() {
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const refreshTimer = setTimeout(() => {
-        ScrollTrigger.refresh();
+      ScrollTrigger.refresh();
     }, 1200);
 
     const ctx = gsap.context(() => {
-        const sections = gsap.utils.toArray('.cinematic-section, .pin-section, .console-section') as HTMLElement[];
-        
-        sections.forEach((section, i) => {
-            ScrollTrigger.create({
-                trigger: section,
-                start: "top center",
-                end: "bottom center",
-                onEnter: () => {
-                    if (i !== lastSectionRef.current) {
-                        lastSectionRef.current = i;
-                    }
-                },
-                onEnterBack: () => {
-                    if (i !== lastSectionRef.current) {
-                        lastSectionRef.current = i;
-                    }
-                }
-            });
+      const sections = gsap.utils.toArray(
+        '.cinematic-section, .pin-section, .console-section',
+      ) as HTMLElement[];
+
+      sections.forEach((section, i) => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top center',
+          end: 'bottom center',
+          onEnter: () => {
+            if (i !== lastSectionRef.current) {
+              lastSectionRef.current = i;
+            }
+          },
+          onEnterBack: () => {
+            if (i !== lastSectionRef.current) {
+              lastSectionRef.current = i;
+            }
+          },
+        });
+      });
+
+      // Animate the signal line drawing
+      if (pathRef.current) {
+        const length = pathRef.current.getTotalLength();
+        gsap.set(pathRef.current, {
+          strokeDasharray: length,
+          strokeDashoffset: length,
         });
 
-        // Animate the signal line drawing
+        gsap.to(pathRef.current, {
+          strokeDashoffset: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top 10%',
+            end: 'bottom bottom',
+            scrub: 0.5,
+          },
+        });
+      }
+
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: reduce)', () => {
         if (pathRef.current) {
-            const length = pathRef.current.getTotalLength();
-            gsap.set(pathRef.current, { strokeDasharray: length, strokeDashoffset: length });
-            
-            gsap.to(pathRef.current, {
-                strokeDashoffset: 0,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top 10%",
-                    end: "bottom bottom",
-                    scrub: 0.5, 
-                }
-            });
+          gsap.set(pathRef.current, { display: 'none' });
         }
-
-        const mm = gsap.matchMedia();
-        mm.add("(prefers-reduced-motion: reduce)", () => {
-          if (pathRef.current) {
-            gsap.set(pathRef.current, { display: 'none' });
-          }
-        });
-
+      });
     }, containerRef);
 
     return () => {
-        clearTimeout(refreshTimer);
-        ctx.revert();
-    }
-  }, []); 
+      clearTimeout(refreshTimer);
+      ctx.revert();
+    };
+  }, []);
 
   return (
     <Container ref={containerRef}>
       <NoiseOverlay />
       <TechnicalUIOverlay />
-      
+
       <SignalPathSVG viewBox="0 0 1000 6000" preserveAspectRatio="none">
-        <path 
+        <path
           ref={pathRef}
           d={signalPath}
-          stroke="rgba(255, 255, 255, 0.2)" 
-          strokeWidth="1.2" 
+          stroke="rgba(255, 255, 255, 0.2)"
+          strokeWidth="1.2"
           fill="none"
         />
       </SignalPathSVG>
-      
-      <CinematicSection 
+
+      <CinematicSection
         id="source"
         layout="center"
         subtitle="SIGNAL_ORIGIN // FOUNDATION"
-        title={<>DETROIT SOUL,<br/>WITHOUT COMPROMISE.</>}
+        title={
+          <>
+            Detroit soul,
+            <br />
+            without compromise.
+          </>
+        }
         content={
           <>
-            with over a decade of engineering, mixing, and producing experience, sauko specializes in providing high-end audio services to the motor city music
-            industry.
+            with over a decade of engineering, mixing, and producing experience,
+            sauko specializes in providing high-end audio services to the motor
+            city music industry.
           </>
         }
         background={<DetroitSkyline />}
       />
 
-      <CinematicSection 
+      <CinematicSection
         id="restoration"
         layout="left"
         subtitle="STAGE_01 // RESTORATION & DIGITIZATION"
-        title={<>ANALOGUE RESCUE.<br/>DIGITAL PRECISION.</>}
+        title={
+          <>
+            Analogue rescue.
+            <br />
+            Digital precision.
+          </>
+        }
         content="preserving the heritage of sound. we specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
         image="/images/restoration_equipment.png"
       />
 
-      <CinematicSection 
+      <CinematicSection
         id="mixing"
         layout="right"
         subtitle="STAGE_02 // MIXING & PRODUCTION"
-        title={<>SONIC ARCHITECTURE.<br/>CREATIVE DEPTH.</>}
+        title={
+          <>
+            Sonic architecture.
+            <br />
+            Creative depth.
+          </>
+        }
         content={
           <>
-            shaping the acoustic landscape. we balance clarity with character, blending the warmth of analogue circuitry with modern production techniques to define your signature sound.
-            <NeonText fontSize="1rem" padding="1rem 0 0 0">[CHARACTER_DRIVE_ACTIVE]</NeonText>
+            shaping the acoustic landscape. we balance clarity with character,
+            blending the warmth of analogue circuitry with modern production
+            techniques to define your signature sound.
+            <NeonText fontSize="1rem" padding="1rem 0 0 0">
+              [CHARACTER_DRIVE_ACTIVE]
+            </NeonText>
           </>
         }
         image="/images/modular_rack.png"
       />
 
-      <CinematicSection 
+      <CinematicSection
         id="mastering"
         layout="center"
         subtitle="STAGE_03 // THE FINAL MASTER"
-        title={<>TRANSPARENT LOUDNESS.<br/>GLOBAL TRANSLATION.</>}
+        title={
+          <>
+            Transparent loudness.
+            <br />
+            Global translation.
+          </>
+        }
         content="the final stage of the sonic journey. we ensure your sound translates perfectly across all playback systems, from the club to headphones. commercial loudness with zero compromise on dynamic integrity."
       />
 

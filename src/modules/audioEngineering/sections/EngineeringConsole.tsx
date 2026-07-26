@@ -3,7 +3,7 @@ import BentoBlock from '../../blog/BentoBlock';
 import styled from '@emotion/styled';
 
 const TechnicalLabel = styled.div`
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
@@ -12,9 +12,9 @@ const TechnicalLabel = styled.div`
 
 const Title = styled.h2`
   font-size: 2.5rem;
-  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
   margin: 0.5rem 0;
-  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.85);
   filter: url(#neonGlow);
 `;
@@ -34,7 +34,7 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Orbit', sans-serif;
   font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.4);
 `;
@@ -78,6 +78,7 @@ const TextArea = styled.textarea`
 `;
 
 const SubmitButton = styled.button`
+  font-family: 'Orbit', sans-serif;
   background: white;
   color: black;
   border: none;
@@ -97,7 +98,7 @@ const EngineeringConsole = () => {
     name: '',
     service: 'Mastering',
     link: '',
-    notes: ''
+    notes: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -109,25 +110,27 @@ const EngineeringConsole = () => {
   return (
     <BentoBlock transparent gridColumn="span 3" style={{ maxWidth: '600px' }}>
       <TechnicalLabel>TERMINAL_INTERFACE // REQUEST</TechnicalLabel>
-      <Title>INITIATE SIGNAL.</Title>
-      
+      <Title>Initiate signal.</Title>
+
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label>CLIENT_NAME</Label>
-          <Input 
-            type="text" 
-            placeholder="ENTER NAME..." 
+          <Input
+            type="text"
+            placeholder="ENTER NAME..."
             value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            required 
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
           />
         </FormGroup>
 
         <FormGroup>
           <Label>SERVICE_TYPE</Label>
-          <Select 
+          <Select
             value={formData.service}
-            onChange={(e) => setFormData({...formData, service: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, service: e.target.value })
+            }
           >
             <option>Mastering (Stereo/Stem)</option>
             <option>Mixing & Production</option>
@@ -138,21 +141,23 @@ const EngineeringConsole = () => {
 
         <FormGroup>
           <Label>PROJECT_LINK (DROPBOX/WETRANSFER)</Label>
-          <Input 
-            type="url" 
-            placeholder="HTTPS://..." 
+          <Input
+            type="url"
+            placeholder="HTTPS://..."
             value={formData.link}
-            onChange={(e) => setFormData({...formData, link: e.target.value})}
-            required 
+            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+            required
           />
         </FormGroup>
 
         <FormGroup>
           <Label>ADDITIONAL_NOTES</Label>
-          <TextArea 
-            placeholder="TECHNICAL SPECS, REFERENCE TRACKS, ETC..." 
+          <TextArea
+            placeholder="TECHNICAL SPECS, REFERENCE TRACKS, ETC..."
             value={formData.notes}
-            onChange={(e) => setFormData({...formData, notes: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, notes: e.target.value })
+            }
           />
         </FormGroup>
 
