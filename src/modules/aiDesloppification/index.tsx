@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import NeonText from '@/shared/styles/NeonText';
+import SystemTopology from './components/SystemTopology';
 
 const risks = [
   {
@@ -164,24 +165,27 @@ const TerminalLabel = styled.p`
 `;
 
 const Hero = styled.section`
-  display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(290px, 0.8fr);
-  gap: clamp(3rem, 9vw, 9rem);
+  position: relative;
+  display: flex;
   min-height: 100svh;
   padding: clamp(9rem, 17vh, 13rem) 0 clamp(5.5rem, 10vh, 8rem);
-  align-items: end;
+  align-items: center;
   box-sizing: border-box;
 
   @media (max-width: 800px) {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    min-height: auto;
-    padding-top: 8rem;
+    min-height: 100svh;
+    padding: 8rem 0 5rem;
   }
 `;
 
 const HeroContent = styled.div`
-  max-width: 760px;
+  position: relative;
+  z-index: 2;
+  width: min(760px, 72%);
+
+  @media (max-width: 800px) {
+    width: 100%;
+  }
 `;
 
 const HeroTitle = styled.h1`
@@ -217,77 +221,6 @@ const HeroFootnote = styled(NeonText)`
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   line-height: 1.55;
-`;
-
-const FieldNote = styled.aside`
-  align-self: center;
-  padding: clamp(1.4rem, 2.8vw, 2rem);
-  border: 1px solid rgba(224, 207, 173, 0.22);
-  background: rgba(18, 17, 15, 0.62);
-  box-shadow:
-    18px 24px 70px rgba(0, 0, 0, 0.22),
-    inset 0 1px rgba(255, 255, 255, 0.035);
-
-  @media (max-width: 800px) {
-    max-width: 520px;
-  }
-`;
-
-const NoteChrome = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(224, 207, 173, 0.16);
-  color: rgba(224, 207, 173, 0.52);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.11em;
-`;
-
-const NoteTitle = styled.h2`
-  margin: 1.8rem 0 1rem;
-  color: rgba(241, 237, 232, 0.92);
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
-  filter: url(#neonGlow);
-`;
-
-const NoteBody = styled.p`
-  margin: 0;
-  color: rgba(241, 237, 232, 0.66);
-  font-size: 0.94rem;
-  line-height: 1.6;
-`;
-
-const NoteSignals = styled.ul`
-  display: grid;
-  gap: 0.7rem;
-  margin: 1.7rem 0 0;
-  padding: 1.15rem 0 0;
-  border-top: 1px solid rgba(224, 207, 173, 0.16);
-  list-style: none;
-`;
-
-const NoteSignal = styled.li`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: rgba(224, 207, 173, 0.76);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.075em;
-
-  &::before {
-    width: 0.38rem;
-    height: 0.38rem;
-    content: '';
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(224, 207, 173, 0.35);
-  }
 `;
 
 const Section = styled.section`
@@ -644,7 +577,6 @@ const ReducedMotion = styled.div`
 
 export default function AIDesloppification() {
   const pageRef = useRef<HTMLElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -731,24 +663,6 @@ export default function AIDesloppification() {
             },
           );
         });
-
-        if (pathRef.current) {
-          const length = pathRef.current.getTotalLength();
-          gsap.set(pathRef.current, {
-            strokeDasharray: length,
-            strokeDashoffset: length,
-          });
-          gsap.to(pathRef.current, {
-            strokeDashoffset: 0,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: pageRef.current,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 0.65,
-            },
-          });
-        }
       });
     }, pageRef);
 
@@ -797,29 +711,7 @@ export default function AIDesloppification() {
                 ASSESS · STABILIZE · ENABLE // NO BLIND REWRITE
               </HeroFootnote>
             </HeroContent>
-
-            <FieldNote
-              className="stage-reveal"
-              aria-label="Diagnostic field note"
-            >
-              <NoteChrome>
-                <span>SYS.AUDIT / 01</span>
-                <span>FRAGILITY: HIGH</span>
-              </NoteChrome>
-              <NoteTitle>
-                The prototype did its job. It got the idea into the room.
-              </NoteTitle>
-              <NoteBody>
-                The next job is different: make the product dependable when
-                customers, teammates, and the next release arrive at the same
-                time.
-              </NoteBody>
-              <NoteSignals>
-                <NoteSignal>BEHAVIOR CAN BE EXPLAINED</NoteSignal>
-                <NoteSignal>FAILURES CAN BE RECOVERED</NoteSignal>
-                <NoteSignal>CHANGES CAN BE SHIPPED SAFELY</NoteSignal>
-              </NoteSignals>
-            </FieldNote>
+            <SystemTopology />
           </Hero>
         </Shell>
 
