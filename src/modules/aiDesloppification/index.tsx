@@ -1,47 +1,46 @@
-import { useLayoutEffect, useRef } from 'react';
-import { keyframes } from '@emotion/react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type MouseEventHandler,
+} from 'react';
 import styled from '@emotion/styled';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import NeonText from '@/shared/styles/NeonText';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import SystemTopology from './components/SystemTopology';
+const useIsomorphicLayoutEffect =
+  typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-const risks = [
+const assessmentUrl =
+  'https://calendar.google.com/calendar/u/0/r/month/2026/8/12';
+
+const diagnostics = [
   {
-    number: '01',
     title: 'Change anxiety',
-    body: 'A feature that should take an afternoon needs a week of archaeology. Every change carries a question nobody can answer with confidence: what breaks next?',
-    signal: 'UNCLEAR BOUNDARIES',
+    symptom:
+      'Every change starts with archaeology and the same unanswered question: what breaks next?',
+    intervention:
+      'Map the product workflow and separate the valuable product insight from the shortcuts around it.',
+    result:
+      'The team can change bounded behavior without rebuilding trust from scratch.',
   },
   {
-    number: '02',
     title: 'Invisible decisions',
-    body: 'Business logic, model output, and customer data blur together. The product appears useful, but its decisions cannot be traced, reviewed, or defended.',
-    signal: 'NO REVIEW PATH',
+    symptom:
+      'Business logic, model output, and customer data blur together until no decision is easy to explain.',
+    intervention:
+      'Isolate model behavior behind a stable boundary, make data contracts explicit, and put review and test seams where the system needs judgment.',
+    result:
+      'Important decisions gain an owner, a review path, and a clear explanation.',
   },
   {
-    number: '03',
     title: 'Fragile delivery',
-    body: 'Deployments rely on memory, workarounds, and the person who made it work once. The first incident reveals there is no reliable path back.',
-    signal: 'MISSING OPERATIONS',
-  },
-];
-
-const outcomes = [
-  {
-    number: 'A',
-    title: 'Keep the proof',
-    body: 'We preserve the useful product insight and separate it from the shortcuts that made the first version fast.',
-  },
-  {
-    number: 'B',
-    title: 'Make risk visible',
-    body: 'Clear boundaries, tests around the behavior that matters, and review points where a system needs human judgment.',
-  },
-  {
-    number: 'C',
-    title: 'Restore momentum',
-    body: 'Your team inherits a system it can explain, operate, and extend without rebuilding trust on every release.',
+    symptom:
+      'Deployments depend on memory, workarounds, and one person’s context.',
+    intervention:
+      'Protect critical behavior with tests, a release path, and explicit rollback.',
+    result:
+      'The team can operate and extend the system through a reliable release path.',
   },
 ];
 
@@ -69,471 +68,639 @@ const engagement = [
   },
 ];
 
-const readouts = [
-  { top: '14vh', left: '5%', text: '[ SYS.AUDIT: ACTIVE ]' },
-  { top: '132vh', right: '6%', text: '[ TECH_DEBT: QUANTIFIED ]' },
-  { top: '260vh', left: '8%', text: '[ REVIEW_PATH: PRESENT ]' },
-  { top: '405vh', right: '8%', text: '[ RELEASE_STATE: STABLE ]' },
-  { top: '550vh', left: '5%', text: '[ HANDOFF: READY ]' },
-];
-
-const drift = keyframes`
-  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.25; }
-  50% { transform: translate3d(0, -10px, 0); opacity: 0.5; }
-`;
-
 const Page = styled.main`
+  --color-ivory: ${({ theme }) => theme.colors.primaryText};
+  --color-ivory-soft: rgba(241, 237, 232, 0.76);
+  --color-ivory-muted: rgba(241, 237, 232, 0.62);
+  --color-sepia: rgba(224, 207, 173, 0.94);
+  --color-sepia-soft: rgba(224, 207, 173, 0.7);
+  --color-line: rgba(241, 237, 232, 0.15);
+  --color-line-strong: rgba(224, 207, 173, 0.38);
+  --color-charcoal: rgba(13, 13, 12, 0.96);
+  --color-charcoal-soft: rgba(18, 17, 15, 0.72);
+  --color-signal-glow: rgba(224, 207, 173, 0.48);
+  --color-hero-wash: rgba(224, 207, 173, 0.1);
+  --color-page-wash: rgba(13, 13, 12, 0.18);
+  --color-boundary-fill: rgba(224, 207, 173, 0.035);
+  --color-section-wash: rgba(224, 207, 173, 0.045);
+  --color-hero-glow: rgba(224, 207, 173, 0.14);
+  --color-major-glow: rgba(224, 207, 173, 0.16);
+  --font-display: 'Inclusive Sans', sans-serif;
+  --font-body: 'Rubik', sans-serif;
+  --font-technical: 'Orbit', sans-serif;
+  --nav-blend-offset: 5.35rem;
+  --signal-rail-inset: clamp(1.5rem, 4vw, 5rem);
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4rem;
+  --space-7: 6rem;
+  --space-8: 8rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
   position: relative;
   z-index: 10;
   width: 100%;
-  box-sizing: border-box;
+  margin-top: calc(var(--nav-blend-offset) * -1);
+  padding-top: var(--nav-blend-offset);
   overflow: hidden;
-  color: ${({ theme }) => theme.colors.primaryText};
+  box-sizing: border-box;
+  color: var(--color-ivory);
+  font-family: var(--font-body);
+  text-align: left;
   pointer-events: auto;
+  background: radial-gradient(
+      circle at 78% 8%,
+      var(--color-hero-wash),
+      transparent 26rem
+    ),
+    linear-gradient(180deg, var(--color-page-wash), var(--color-charcoal) 42rem);
 
-  &::before {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    content: '';
-    background: linear-gradient(
-        180deg,
-        rgba(13, 13, 12, 0.12) 0%,
-        rgba(13, 13, 12, 0.58) 26%,
-        rgba(13, 13, 12, 0.91) 100%
-      ),
-      radial-gradient(
-        circle at 78% 10%,
-        rgba(224, 207, 173, 0.1),
-        transparent 30%
-      );
+  @media (max-width: 40rem) {
+    --nav-blend-offset: 4.25rem;
   }
-`;
 
-const NoiseOverlay = styled.div`
-  position: fixed;
-  z-index: 1;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.045;
-  background-image: url('/images/displacement_smoke.png');
-  background-repeat: repeat;
-`;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-const FloatingReadout = styled.span<{
-  top: string;
-  left?: string;
-  right?: string;
-}>`
-  position: absolute;
-  z-index: 1;
-  top: ${({ top }) => top};
-  ${({ left }) => left && `left: ${left};`}
-  ${({ right }) => right && `right: ${right};`}
-  color: rgba(224, 207, 173, 0.55);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.59rem;
-  letter-spacing: 0.15em;
-  pointer-events: none;
-  animation: ${drift} 7s ease-in-out infinite;
-
-  @media (max-width: 760px) {
-    display: none;
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 `;
 
 const Shell = styled.div`
   position: relative;
   z-index: 2;
-  width: min(1200px, calc(100% - 3rem));
+  width: min(75rem, calc(100% - var(--space-6)));
   margin: 0 auto;
 
-  @media (max-width: 640px) {
-    width: min(100% - 2rem, 1200px);
+  @media (max-width: 40rem) {
+    width: calc(100% - var(--space-4));
   }
 `;
 
-const TerminalLabel = styled.p`
-  margin: 0;
-  color: rgba(224, 207, 173, 0.72);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.67rem;
-  font-weight: 400;
-  letter-spacing: 0.16em;
-  line-height: 1.45;
-  text-transform: uppercase;
-`;
-
 const Hero = styled.section`
-  position: relative;
-  display: flex;
-  min-height: 100svh;
-  padding: clamp(9rem, 17vh, 13rem) 0 clamp(5.5rem, 10vh, 8rem);
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(24rem, 1.05fr);
+  gap: var(--space-7);
+  min-height: calc(100svh - var(--nav-blend-offset));
+  padding: clamp(var(--space-7), 14vh, 9rem) 0 var(--space-7);
   align-items: center;
-  box-sizing: border-box;
 
-  @media (max-width: 800px) {
-    min-height: 100svh;
-    padding: 8rem 0 5rem;
+  @media (max-width: 52rem) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 40rem) {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-6);
   }
 `;
 
 const HeroContent = styled.div`
   position: relative;
   z-index: 2;
-  width: min(760px, 72%);
+  width: 100%;
+`;
 
-  @media (max-width: 800px) {
-    width: 100%;
+const HeroVisual = styled.div`
+  position: relative;
+  width: min(100%, 38rem);
+  justify-self: end;
+  opacity: 0.88;
+
+  &::before {
+    position: absolute;
+    inset: 16% 8%;
+    content: '';
+    background: radial-gradient(
+      circle,
+      var(--color-hero-wash),
+      transparent 68%
+    );
+    filter: blur(2rem);
+  }
+
+  figure {
+    position: relative;
+  }
+
+  @media (max-width: 52rem) {
+    display: none;
+  }
+`;
+
+const SignalRail = styled.div`
+  position: absolute;
+  z-index: 1;
+  top: 100svh;
+  right: var(--signal-rail-inset);
+  bottom: var(--space-8);
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    transparent,
+    var(--color-line-strong) 8%,
+    var(--color-line) 92%,
+    transparent
+  );
+
+  &::after {
+    position: absolute;
+    top: 0;
+    left: -0.2rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border: 1px solid var(--color-sepia-soft);
+    content: '';
+    background: var(--color-charcoal);
+    box-shadow: 0 0.35rem 1.1rem var(--color-signal-glow);
+    animation: rail-travel 18s linear infinite;
+  }
+
+  @keyframes rail-travel {
+    0% {
+      top: 0;
+      opacity: 0;
+    }
+    6%,
+    92% {
+      opacity: 0.9;
+    }
+    100% {
+      top: calc(100% - 0.45rem);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 60rem) {
+    display: none;
   }
 `;
 
 const HeroTitle = styled.h1`
-  max-width: 720px;
-  margin: clamp(1.35rem, 3vw, 2.2rem) 0 0;
-  color: rgba(241, 237, 232, 0.96);
+  max-width: 14ch;
+  margin: 0;
+  color: var(--color-ivory);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(3.5rem, 7.5vw, 7.25rem);
+  font-size: clamp(3.55rem, 6.6vw, 6.9rem);
   font-weight: 700;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.04em;
   line-height: 0.88;
+  text-wrap: balance;
   filter: url(#neonGlow);
 
-  em {
-    color: rgba(224, 207, 173, 0.92);
-    font-style: normal;
+  span {
+    display: block;
+    color: var(--color-sepia);
+    filter: drop-shadow(0 0 0.48em rgba(224, 207, 173, 0.42));
+  }
+`;
+
+const HeroSubtitle = styled.p`
+  margin: var(--space-3) 0 0;
+  color: var(--color-sepia-soft);
+  font-family: var(--font-technical);
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+
+  @media (max-width: 40rem) {
+    font-size: 0.67rem;
+    letter-spacing: 0.14em;
   }
 `;
 
 const HeroBody = styled.p`
-  max-width: 570px;
-  margin: clamp(1.8rem, 4vw, 2.7rem) 0 0;
-  color: rgba(241, 237, 232, 0.74);
-  font-size: clamp(1.05rem, 1.55vw, 1.25rem);
-  line-height: 1.62;
+  max-width: 44rem;
+  margin: var(--space-3) 0 0;
+  color: var(--color-ivory-soft);
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  line-height: 1.65;
 `;
 
-const HeroFootnote = styled(NeonText)`
-  width: auto;
-  margin-top: 2rem;
-  color: rgba(224, 207, 173, 0.7);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  line-height: 1.55;
-`;
-
-const Section = styled.section`
+const HeroActions = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
   align-items: center;
-  min-height: 100svh;
-  padding: clamp(6.5rem, 12vw, 10rem) 0;
-  border-top: 1px solid rgba(241, 237, 232, 0.1);
-  box-sizing: border-box;
+  margin-top: var(--space-4);
+`;
 
-  @media (max-width: 760px) {
-    min-height: auto;
+const PrimaryAction = styled.a`
+  display: inline-flex;
+  min-height: var(--space-5);
+  padding: 0 var(--space-3);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-sepia);
+  color: var(--color-charcoal);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  background: var(--color-sepia);
+  transition:
+    color 240ms var(--ease-out),
+    background-color 240ms var(--ease-out),
+    box-shadow 240ms var(--ease-out),
+    transform 240ms var(--ease-out);
+
+  &:hover {
+    color: var(--color-ivory);
+    background: var(--color-charcoal-soft);
+    box-shadow: 0 0.35rem 1.5rem var(--color-signal-glow);
+    transform: translateY(-0.125rem);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-ivory);
+    outline-offset: 4px;
+    box-shadow: 0 0.4rem 1.75rem var(--color-signal-glow);
   }
 `;
 
-const SectionIntro = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.75fr);
-  gap: 2rem 5rem;
-  align-items: end;
-  margin-bottom: clamp(2.6rem, 5vw, 4.5rem);
+const AnchorAction = styled.a`
+  display: inline-flex;
+  min-height: var(--space-5);
+  padding: 0 var(--space-1);
+  align-items: center;
+  color: var(--color-ivory);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-underline-offset: 0.35rem;
+  text-decoration-color: var(--color-sepia-soft);
+  transition:
+    color 240ms var(--ease-out),
+    text-decoration-color 240ms var(--ease-out);
 
-  @media (max-width: 720px) {
+  &:hover {
+    color: var(--color-sepia);
+    text-decoration-color: var(--color-sepia);
+  }
+
+  &:focus-visible {
+    border-radius: 0.125rem;
+    outline: 3px solid var(--color-ivory);
+    outline-offset: 4px;
+  }
+`;
+
+const DossierMeta = styled.dl`
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ivory-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+
+  div {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  dt {
+    color: var(--color-sepia-soft);
+    font-family: var(--font-technical);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+  }
+`;
+
+const Section = styled.section`
+  position: relative;
+  padding: var(--space-7) 0;
+  border-top: 1px solid var(--color-line);
+  scroll-margin-top: var(--space-6);
+
+  &::before {
+    position: absolute;
+    top: -0.23rem;
+    right: var(--signal-rail-inset);
+    width: 0.45rem;
+    height: 0.45rem;
+    border: 1px solid var(--color-sepia-soft);
+    content: '';
+    background: var(--color-charcoal);
+  }
+
+  @media (max-width: 60rem) {
+    &::before {
+      display: none;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    padding: var(--space-5) 0;
+  }
+`;
+
+const SectionHeader = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.72fr);
+  gap: var(--space-4) var(--space-6);
+  align-items: end;
+  margin-bottom: var(--space-5);
+
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
+    margin-bottom: var(--space-4);
   }
 `;
 
 const SectionTitle = styled.h2`
-  max-width: 800px;
-  margin: 1rem 0 0;
-  color: rgba(241, 237, 232, 0.94);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.4rem, 5.2vw, 4.75rem);
-  font-weight: 600;
-  letter-spacing: -0.06em;
-  line-height: 0.93;
-  filter: url(#neonGlow);
+  max-width: 16ch;
+  margin: 0;
+  color: var(--color-ivory);
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-wrap: balance;
 `;
 
 const SectionBody = styled.p`
-  max-width: 400px;
+  max-width: 42rem;
   margin: 0;
-  color: rgba(241, 237, 232, 0.63);
+  color: var(--color-ivory-soft);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
 `;
 
-const CardGrid = styled.div`
+const RiskPrinciple = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid rgba(241, 237, 232, 0.16);
-  border-left: 1px solid rgba(241, 237, 232, 0.16);
+  grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-line-strong);
+  border-bottom: 1px solid var(--color-line);
+  align-items: baseline;
 
-  @media (max-width: 760px) {
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
+    margin-top: var(--space-4);
   }
 `;
 
-const ScanCard = styled.article`
-  min-height: 290px;
-  padding: clamp(1.35rem, 2.5vw, 2rem);
-  border-right: 1px solid rgba(241, 237, 232, 0.16);
-  border-bottom: 1px solid rgba(241, 237, 232, 0.16);
-  background: rgba(16, 16, 14, 0.2);
-  box-sizing: border-box;
-  transition:
-    background-color 320ms ease,
-    border-color 320ms ease;
-
-  &:hover {
-    border-color: rgba(224, 207, 173, 0.36);
-    background: rgba(224, 207, 173, 0.055);
-  }
-`;
-
-const CardIndex = styled.p`
+const RiskPrincipleTitle = styled.h3`
   margin: 0;
-  color: rgba(224, 207, 173, 0.68);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  color: var(--color-sepia);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 `;
 
-const CardTitle = styled.h3`
-  margin: 3.4rem 0 0;
-  color: rgba(241, 237, 232, 0.9);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1;
-  filter: url(#neonGlow);
+const RiskPrincipleBody = styled.p`
+  max-width: 46rem;
+  margin: 0;
+  color: var(--color-ivory-soft);
+  font-size: 1rem;
+  line-height: 1.65;
 `;
 
-const CardBody = styled.p`
-  margin: 1rem 0 0;
-  color: rgba(241, 237, 232, 0.62);
-  font-size: 0.94rem;
-  line-height: 1.58;
+const DiagnosticSection = styled(Section)`
+  border-top-color: var(--color-line-strong);
+  background: linear-gradient(
+    180deg,
+    var(--color-section-wash),
+    transparent 32rem
+  );
 `;
 
-const CardSignal = styled.p`
-  margin: 2rem 0 0;
-  color: rgba(224, 207, 173, 0.7);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.58rem;
-  letter-spacing: 0.09em;
+const DiagnosticList = styled.div`
+  border-top: 1px solid var(--color-line-strong);
 `;
 
-const Outcomes = styled(Section)`
-  min-height: 92svh;
-  padding-top: 4rem;
-  border-top: none;
-`;
-
-const OutcomeGrid = styled.div`
+const DiagnosticRow = styled.article`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1.4rem, 3vw, 3.5rem);
+  grid-template-columns: minmax(10rem, 0.6fr) minmax(0, 1.4fr);
+  gap: var(--space-3) var(--space-5);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-line);
 
-  @media (max-width: 760px) {
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 40rem) {
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
   }
 `;
 
-const Outcome = styled.article`
-  padding-top: 1.3rem;
-  border-top: 1px solid rgba(224, 207, 173, 0.35);
+const DiagnosticTitle = styled.h3`
+  margin: 0;
+  color: var(--color-sepia);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 `;
 
-const OutcomeTitle = styled.h3`
-  margin: 2.2rem 0 0;
-  color: rgba(224, 207, 173, 0.9);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1.35rem, 2.3vw, 1.8rem);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  filter: url(#neonGlow) drop-shadow(0 0 0.45em rgba(224, 207, 173, 0.28));
+const DiagnosticDetails = styled.dl`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+
+  div {
+    min-width: 0;
+  }
+
+  dt {
+    margin-bottom: var(--space-1);
+    color: var(--color-sepia-soft);
+    font-family: var(--font-technical);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-ivory-soft);
+    font-size: 0.94rem;
+    line-height: 1.58;
+  }
+
+  @media (max-width: 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3) var(--space-2);
+
+    div:first-of-type {
+      grid-column: 1 / -1;
+    }
+  }
 `;
 
-const OutcomeBody = styled.p`
-  max-width: 330px;
-  margin: 1rem 0 0;
-  color: rgba(241, 237, 232, 0.61);
-  font-size: 0.96rem;
-  line-height: 1.58;
-`;
-
-const Process = styled(Section)`
+const EngagementSection = styled(Section)`
   background: linear-gradient(
     90deg,
-    rgba(224, 207, 173, 0.045),
+    var(--color-section-wash),
     transparent 68%
   );
 `;
 
-const ProcessLayout = styled.div`
+const EngagementLayout = styled.div`
   display: grid;
-  grid-template-columns: minmax(270px, 0.75fr) minmax(0, 1.25fr);
-  gap: clamp(3rem, 9vw, 9rem);
+  grid-template-columns: minmax(16rem, 0.72fr) minmax(0, 1.28fr);
+  gap: var(--space-5) var(--space-7);
 
-  @media (max-width: 800px) {
+  @media (max-width: 52rem) {
     grid-template-columns: 1fr;
   }
-`;
 
-const ProcessLead = styled.div`
-  @media (min-width: 801px) {
-    position: sticky;
-    top: 7rem;
-    align-self: start;
+  @media (max-width: 40rem) {
+    gap: var(--space-4);
   }
 `;
 
-const ProcessTitle = styled(SectionTitle)`
-  color: rgba(224, 207, 173, 0.92);
-  font-size: clamp(2.4rem, 4.5vw, 4rem);
-  filter: url(#neonGlow) drop-shadow(0 0 0.45em rgba(224, 207, 173, 0.28));
+const EngagementLead = styled.div`
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+
+  @media (min-width: 52.0625rem) {
+    position: sticky;
+    top: var(--space-7);
+  }
 `;
 
-const ProcessList = styled.ol`
-  position: relative;
-  display: grid;
-  gap: 0;
+const EngagementList = styled.ol`
   margin: 0;
   padding: 0;
+  border-top: 1px solid var(--color-line-strong);
   list-style: none;
+`;
 
-  &::before {
-    position: absolute;
-    top: 0.4rem;
-    bottom: 1.5rem;
-    left: 0.32rem;
-    width: 1px;
-    content: '';
-    background: linear-gradient(
-      rgba(224, 207, 173, 0.62),
-      rgba(224, 207, 173, 0.08)
-    );
+const EngagementStep = styled.li`
+  display: grid;
+  grid-template-columns: var(--space-5) minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-line);
+
+  @media (max-width: 40rem) {
+    padding: var(--space-3) 0;
   }
 `;
 
-const ProcessStep = styled.li`
-  position: relative;
-  padding: 0 0 clamp(3.2rem, 7vw, 5.4rem) clamp(2.25rem, 5vw, 4.25rem);
-
-  &:last-child {
-    padding-bottom: 0;
-  }
+const StepNumber = styled.span`
+  color: var(--color-sepia-soft);
+  font-family: var(--font-technical);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
 `;
 
-const StepMarker = styled.span`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0.68rem;
-  height: 0.68rem;
-  box-sizing: border-box;
-  border: 1px solid rgba(224, 207, 173, 0.82);
-  border-radius: 50%;
-  background: rgba(18, 17, 15, 0.9);
-  box-shadow: 0 0 14px rgba(224, 207, 173, 0.25);
+const StepContent = styled.div`
+  min-width: 0;
 `;
 
-const StepMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1rem;
-  color: rgba(224, 207, 173, 0.66);
-  font-family: 'Orbit', sans-serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
+const StepMeta = styled.p`
+  margin: 0;
+  color: var(--color-ivory-muted);
+  font-family: var(--font-technical);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
 `;
 
 const StepTitle = styled.h3`
-  margin: 0.85rem 0 0;
-  color: rgba(241, 237, 232, 0.93);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1.4rem, 2.8vw, 2.15rem);
-  font-weight: 600;
-  letter-spacing: -0.045em;
-  line-height: 1;
-  filter: url(#neonGlow);
+  margin: var(--space-1) 0 0;
+  color: var(--color-ivory);
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
 `;
 
 const StepBody = styled.p`
-  max-width: 620px;
-  margin: 1rem 0 0;
-  color: rgba(241, 237, 232, 0.65);
-  font-size: 0.99rem;
+  max-width: 44rem;
+  margin: var(--space-2) 0 0;
+  color: var(--color-ivory-soft);
+  font-size: 0.98rem;
   line-height: 1.62;
 `;
 
 const Deliverable = styled.p`
-  margin: 1.25rem 0 0;
-  color: rgba(241, 237, 232, 0.82);
-  font-size: 0.9rem;
-  line-height: 1.45;
+  margin: var(--space-2) 0 0;
+  color: var(--color-ivory);
+  font-size: 0.88rem;
+  line-height: 1.5;
 
   strong {
-    margin-right: 0.45rem;
-    color: rgba(224, 207, 173, 0.76);
-    font-family: 'Orbit', sans-serif;
-    font-size: 0.58rem;
-    font-weight: 400;
-    letter-spacing: 0.1em;
+    margin-right: var(--space-1);
+    color: var(--color-sepia-soft);
+    font-family: var(--font-technical);
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 `;
 
-const Invitation = styled.section`
-  display: flex;
-  align-items: center;
-  min-height: 100svh;
-  padding: clamp(7rem, 14vw, 12rem) 0;
-  border-top: 1px solid rgba(241, 237, 232, 0.1);
-  box-sizing: border-box;
+const ClosingSection = styled(Section)`
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
 
-  @media (max-width: 760px) {
-    min-height: auto;
+  @media (max-width: 40rem) {
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-5);
   }
 `;
 
-const InvitationStage = styled.div`
+const ClosingLayout = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.65fr);
-  gap: clamp(2.4rem, 7vw, 7rem);
-  padding: clamp(1.7rem, 4.5vw, 4rem);
-  border: 1px solid rgba(224, 207, 173, 0.26);
-  background: rgba(18, 17, 15, 0.55);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.65fr);
+  gap: var(--space-5) var(--space-7);
+  align-items: end;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line-strong);
 
-  @media (max-width: 720px) {
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding-top: var(--space-4);
   }
 `;
 
-const InvitationTitle = styled.h2`
-  max-width: 680px;
-  margin: 1.4rem 0 0;
-  color: rgba(224, 207, 173, 0.94);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.45rem, 5.8vw, 5.4rem);
-  font-weight: 600;
-  letter-spacing: -0.065em;
-  line-height: 0.9;
-  filter: url(#neonGlow) drop-shadow(0 0 0.5em rgba(224, 207, 173, 0.3));
+const ClosingTitle = styled(SectionTitle)`
+  max-width: 13ch;
+  color: var(--color-sepia);
+  filter: drop-shadow(0 0.4rem 1.25rem var(--color-major-glow));
 `;
 
-const InvitationBody = styled.div`
-  align-self: end;
-  color: rgba(241, 237, 232, 0.67);
+const ClosingBody = styled.div`
+  color: var(--color-ivory-soft);
   font-size: 1rem;
   line-height: 1.62;
 
@@ -543,129 +710,68 @@ const InvitationBody = styled.div`
 
   ul {
     display: grid;
-    gap: 0.7rem;
-    margin: 1.7rem 0 0;
-    padding: 1.35rem 0 0;
-    border-top: 1px solid rgba(224, 207, 173, 0.16);
-    list-style: none;
+    gap: var(--space-1);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-3) 0 0 var(--space-3);
+    border-top: 1px solid var(--color-line);
   }
 
-  li {
-    display: flex;
-    gap: 0.7rem;
-    align-items: baseline;
-    color: rgba(224, 207, 173, 0.72);
-    font-family: 'Orbit', sans-serif;
-    font-size: 0.61rem;
-    letter-spacing: 0.075em;
-    text-transform: uppercase;
-  }
-
-  li::before {
-    content: '[ + ]';
+  li::marker {
+    color: var(--color-sepia-soft);
   }
 `;
 
-const ReducedMotion = styled.div`
-  @media (prefers-reduced-motion: reduce) {
-    & *,
-    & {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      scroll-behavior: auto !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
+const ClosingAction = styled(PrimaryAction)`
+  margin-top: var(--space-3);
 `;
 
 export default function AIDesloppification() {
   const pageRef = useRef<HTMLElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const heroVisualRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+  useIsomorphicLayoutEffect(() => {
     const media = gsap.matchMedia();
-
     const context = gsap.context(() => {
       media.add('(prefers-reduced-motion: no-preference)', () => {
-        const stages = gsap.utils.toArray<HTMLElement>('.ai-stage');
+        const heroContent = heroContentRef.current;
+        const heroVisual = heroVisualRef.current;
+        const timeline = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-        stages.forEach((stage) => {
-          const reveals = stage.querySelectorAll<HTMLElement>('.stage-reveal');
-
-          if (reveals.length === 0) return;
-
-          gsap.fromTo(
-            reveals,
-            { autoAlpha: 0, y: 56 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 1.35,
-              ease: 'power4.out',
-              stagger: 0.11,
-              scrollTrigger: {
-                trigger: stage,
-                start: 'top 76%',
-                toggleActions: 'play none none reverse',
+        if (heroContent) {
+          timeline
+            .fromTo(
+              heroContent,
+              { filter: 'blur(10px)' },
+              { filter: 'blur(0px)', duration: 1.15 },
+              0,
+            )
+            .fromTo(
+              Array.from(heroContent.children),
+              { opacity: 0, y: 68 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 1.15,
+                stagger: 0.09,
               },
-            },
-          );
-        });
+              0,
+            );
+        }
 
-        const riskCards = gsap.utils.toArray<HTMLElement>('.risk-card');
-        gsap.fromTo(
-          riskCards,
-          { autoAlpha: 0, y: 74 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 1.1,
-            ease: 'power3.out',
-            stagger: 0.16,
-            scrollTrigger: {
-              trigger: '.risk-grid',
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        );
-
-        const outcomeCards = gsap.utils.toArray<HTMLElement>('.outcome-card');
-        gsap.fromTo(
-          outcomeCards,
-          { autoAlpha: 0, y: 64 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 1.2,
-            ease: 'power3.out',
-            stagger: 0.15,
-            scrollTrigger: {
-              trigger: '.outcome-grid',
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        );
-
-        const processSteps = gsap.utils.toArray<HTMLElement>('.process-step');
-        processSteps.forEach((step) => {
-          gsap.fromTo(
-            step,
-            { autoAlpha: 0.24, y: 40 },
+        if (heroVisual) {
+          timeline.fromTo(
+            heroVisual,
+            { opacity: 0, x: 64, filter: 'blur(12px)' },
             {
-              autoAlpha: 1,
-              y: 0,
-              duration: 1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: step,
-                start: 'top 82%',
-                toggleActions: 'play none none reverse',
-              },
+              opacity: 0.88,
+              x: 0,
+              filter: 'blur(0px)',
+              duration: 1.4,
             },
+            0.18,
           );
-        });
+        }
       });
     }, pageRef);
 
@@ -674,179 +780,207 @@ export default function AIDesloppification() {
       media.revert();
     };
   }, []);
+  const handleRecoveryNavigation: MouseEventHandler<HTMLAnchorElement> = (
+    event,
+  ) => {
+    event.preventDefault();
+    window.history.pushState(null, '', '#recovery-map');
+
+    const target = document.getElementById('recovery-map');
+    if (!target) return;
+
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      smoother.scrollTo(target, true, 'top 6rem');
+      return;
+    }
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <Page ref={pageRef} aria-labelledby="ai-desloppification-title">
-      <ReducedMotion>
-        <NoiseOverlay aria-hidden="true" />
-        {readouts.map((readout) => (
-          <FloatingReadout key={readout.text} {...readout}>
-            {readout.text}
-          </FloatingReadout>
-        ))}
-
-        <Shell>
-          <Hero className="ai-stage hero-stage">
-            <HeroContent>
-              <TerminalLabel className="stage-reveal">
-                AI DESLOPPIFICATION · SOFTWARE RECOVERY
-              </TerminalLabel>
-              <HeroTitle
-                id="ai-desloppification-title"
-                className="stage-reveal"
+    <Page
+      ref={pageRef}
+      id="ai-isolated-themed"
+      aria-labelledby="ai-desloppification-title"
+    >
+      <SignalRail aria-hidden="true" />
+      <Shell>
+        <Hero>
+          <HeroContent ref={heroContentRef}>
+            <HeroTitle
+              id="ai-desloppification-title"
+              aria-label="You shipped the demo. Now make it a system."
+            >
+              You shipped the demo. <span>Now make it a system.</span>
+            </HeroTitle>
+            <HeroSubtitle>
+              AI software recovery // maintainable systems
+            </HeroSubtitle>
+            <HeroBody>
+              The first version proved there was something worth building. We
+              turn the AI-accelerated application that got you there into
+              software your team can understand, operate, and improve with
+              confidence.
+            </HeroBody>
+            <HeroActions>
+              <PrimaryAction
+                href={assessmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                You shipped the demo.
-                <br />
-                <em>Now make it a system.</em>
-              </HeroTitle>
-              <HeroBody className="stage-reveal">
-                The first version proved there was something worth building. We
-                turn the AI-accelerated application that got you there into
-                software your team can understand, operate, and improve with
-                confidence.
-              </HeroBody>
-              <HeroFootnote
-                className="stage-reveal"
-                tone="sepia"
-                fontSize="0.68rem"
-                padding="0"
+                Start a system assessment
+              </PrimaryAction>
+              <AnchorAction
+                href="#recovery-map"
+                onClick={handleRecoveryNavigation}
               >
-                ASSESS · STABILIZE · ENABLE // NO BLIND REWRITE
-              </HeroFootnote>
-            </HeroContent>
+                See how recovery works
+              </AnchorAction>
+            </HeroActions>
+            <DossierMeta aria-label="Assessment approach">
+              <div>
+                <dt>Approach</dt>
+                <dd>Assess · stabilize · enable</dd>
+              </div>
+              <div>
+                <dt>Principle</dt>
+                <dd>No blind rewrite</dd>
+              </div>
+            </DossierMeta>
+          </HeroContent>
+          <HeroVisual ref={heroVisualRef} aria-hidden="true">
             <SystemTopology />
-          </Hero>
+          </HeroVisual>
+        </Hero>
+      </Shell>
+
+      <Section id="recovery-map" aria-labelledby="recovery-title">
+        <Shell>
+          <SectionHeader>
+            <SectionTitle id="recovery-title">
+              The expensive part starts after it works.
+            </SectionTitle>
+            <SectionBody>
+              Fast builds are valuable. But once a tool carries customer data,
+              business decisions, or team time, unknowns become operating risk.
+            </SectionBody>
+          </SectionHeader>
+
+          <RiskPrinciple>
+            <RiskPrincipleTitle>
+              Working and operable are different states.
+            </RiskPrincipleTitle>
+            <RiskPrincipleBody>
+              Recovery makes the product workflow, model boundary, customer-data
+              boundary, review and test seams, release path, and rollback
+              explicit—without discarding the product insight that made the
+              first version valuable.
+            </RiskPrincipleBody>
+          </RiskPrinciple>
         </Shell>
+      </Section>
 
-        <Section className="ai-stage">
-          <Shell>
-            <SectionIntro>
-              <div>
-                <TerminalLabel className="stage-reveal">
-                  THE CURRENT STATE · WHAT “WORKING” CAN HIDE
-                </TerminalLabel>
-                <SectionTitle className="stage-reveal">
-                  The expensive part starts after it works.
-                </SectionTitle>
-              </div>
-              <SectionBody className="stage-reveal">
-                Fast builds are valuable. But once a tool carries customer data,
-                business decisions, or team time, unknowns become operating
-                risk.
+      <DiagnosticSection aria-labelledby="diagnostic-title">
+        <Shell>
+          <SectionHeader>
+            <SectionTitle id="diagnostic-title">
+              Where the risk shows up.
+            </SectionTitle>
+            <SectionBody>
+              These patterns often arrive together, but each points to a
+              different boundary, safeguard, or operating path that needs to be
+              made explicit.
+            </SectionBody>
+          </SectionHeader>
+
+          <DiagnosticList>
+            {diagnostics.map((diagnostic) => (
+              <DiagnosticRow key={diagnostic.title}>
+                <DiagnosticTitle>{diagnostic.title}</DiagnosticTitle>
+                <DiagnosticDetails>
+                  <div>
+                    <dt>Current symptom</dt>
+                    <dd>{diagnostic.symptom}</dd>
+                  </div>
+                  <div>
+                    <dt>Intervention</dt>
+                    <dd>{diagnostic.intervention}</dd>
+                  </div>
+                  <div>
+                    <dt>Result</dt>
+                    <dd>{diagnostic.result}</dd>
+                  </div>
+                </DiagnosticDetails>
+              </DiagnosticRow>
+            ))}
+          </DiagnosticList>
+        </Shell>
+      </DiagnosticSection>
+
+      <EngagementSection aria-labelledby="engagement-title">
+        <Shell>
+          <EngagementLayout>
+            <EngagementLead>
+              <SectionTitle id="engagement-title">
+                Small phases. Clear ownership.
+              </SectionTitle>
+              <SectionBody>
+                We price and sequence the work around what the business actually
+                needs to protect, not an abstract ideal of perfect code.
               </SectionBody>
-            </SectionIntro>
-            <CardGrid className="risk-grid">
-              {risks.map((risk) => (
-                <ScanCard className="risk-card" key={risk.number}>
-                  <CardIndex>RISK_{risk.number}</CardIndex>
-                  <CardTitle>{risk.title}</CardTitle>
-                  <CardBody>{risk.body}</CardBody>
-                  <CardSignal>[ {risk.signal} ]</CardSignal>
-                </ScanCard>
-              ))}
-            </CardGrid>
-          </Shell>
-        </Section>
+            </EngagementLead>
 
-        <Outcomes className="ai-stage">
-          <Shell>
-            <SectionIntro>
-              <div>
-                <TerminalLabel className="stage-reveal">
-                  THE OUTCOME · A BETTER BASE TO BUILD ON
-                </TerminalLabel>
-                <SectionTitle className="stage-reveal">
-                  Not a rewrite. A reliable way forward.
-                </SectionTitle>
-              </div>
-              <SectionBody className="stage-reveal">
-                We make careful calls about what earns its place in the next
-                version, then build the conditions for good engineering to
-                compound.
-              </SectionBody>
-            </SectionIntro>
-            <OutcomeGrid className="outcome-grid">
-              {outcomes.map((outcome) => (
-                <Outcome className="outcome-card" key={outcome.number}>
-                  <CardIndex>OUTCOME_{outcome.number}</CardIndex>
-                  <OutcomeTitle>{outcome.title}</OutcomeTitle>
-                  <OutcomeBody>{outcome.body}</OutcomeBody>
-                </Outcome>
-              ))}
-            </OutcomeGrid>
-          </Shell>
-        </Outcomes>
-
-        <Process className="ai-stage">
-          <Shell>
-            <ProcessLayout>
-              <ProcessLead>
-                <TerminalLabel className="stage-reveal">
-                  ENGAGEMENT MODEL · FROM MESS TO MOMENTUM
-                </TerminalLabel>
-                <ProcessTitle className="stage-reveal">
-                  Small phases. Clear ownership.
-                </ProcessTitle>
-                <SectionBody
-                  className="stage-reveal"
-                  style={{ marginTop: '1.5rem' }}
-                >
-                  We price and sequence the work around what the business
-                  actually needs to protect, not an abstract ideal of perfect
-                  code.
-                </SectionBody>
-              </ProcessLead>
-
-              <ProcessList>
-                {engagement.map((step) => (
-                  <ProcessStep className="process-step" key={step.number}>
-                    <StepMarker aria-hidden="true" />
-                    <StepMeta>
-                      <span>PHASE_{step.number}</span>
-                      <span>{step.timing}</span>
-                    </StepMeta>
+            <EngagementList>
+              {engagement.map((step) => (
+                <EngagementStep key={step.number}>
+                  <StepNumber aria-hidden="true">{step.number}</StepNumber>
+                  <StepContent>
+                    <StepMeta>{step.timing}</StepMeta>
                     <StepTitle>{step.title}</StepTitle>
                     <StepBody>{step.body}</StepBody>
                     <Deliverable>
-                      <strong>YOU RECEIVE //</strong>
+                      <strong>You receive</strong>
                       {step.deliverable}
                     </Deliverable>
-                  </ProcessStep>
-                ))}
-              </ProcessList>
-            </ProcessLayout>
-          </Shell>
-        </Process>
+                  </StepContent>
+                </EngagementStep>
+              ))}
+            </EngagementList>
+          </EngagementLayout>
+        </Shell>
+      </EngagementSection>
 
-        <Invitation className="ai-stage">
-          <Shell>
-            <InvitationStage>
-              <div>
-                <TerminalLabel className="stage-reveal">
-                  START WITH THE WORKFLOW YOUR TEAM AVOIDS
-                </TerminalLabel>
-                <InvitationTitle className="stage-reveal">
-                  Make the next change safely.
-                </InvitationTitle>
-              </div>
-              <InvitationBody className="stage-reveal">
-                <p>
-                  Bring the application that has become difficult to reason
-                  about. We will help you decide what to preserve, what to
-                  repair, and what does not deserve a rebuild.
-                </p>
-                <ul>
-                  <li>The release or workflow people hesitate to touch</li>
-                  <li>Constraints around customers, data, or compliance</li>
-                  <li>
-                    The next outcome the business needs the software to support
-                  </li>
-                </ul>
-              </InvitationBody>
-            </InvitationStage>
-          </Shell>
-        </Invitation>
-      </ReducedMotion>
+      <ClosingSection aria-labelledby="closing-title">
+        <Shell>
+          <ClosingLayout>
+            <ClosingTitle id="closing-title">
+              Make the next change safely.
+            </ClosingTitle>
+            <ClosingBody>
+              <p>
+                Bring the application that has become difficult to reason about.
+                We will help you decide what to preserve, what to repair, and
+                what does not deserve a rebuild.
+              </p>
+              <ul>
+                <li>The release or workflow people hesitate to touch</li>
+                <li>Constraints around customers, data, or compliance</li>
+                <li>
+                  The next outcome the business needs the software to support
+                </li>
+              </ul>
+              <ClosingAction
+                href={assessmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Start a system assessment
+              </ClosingAction>
+            </ClosingBody>
+          </ClosingLayout>
+        </Shell>
+      </ClosingSection>
     </Page>
   );
 }
