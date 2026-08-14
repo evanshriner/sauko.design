@@ -9,6 +9,7 @@ interface CinematicSectionProps {
   title: string | React.ReactNode;
   subtitle?: string | React.ReactNode;
   content?: string | React.ReactNode;
+  imageAlt?: string;
   image?: string;
   background?: React.ReactNode;
   layout?: 'left' | 'right' | 'center';
@@ -42,13 +43,14 @@ const imageTreatments = {
 const SectionContainer = styled(FlexBox)`
   width: 100%;
   min-height: 100vh;
+  min-height: 100svh;
   position: relative;
   padding: 4rem 10%;
   overflow: hidden;
   justify-content: center;
   align-items: center;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     padding: 4rem 5%;
     flex-direction: column !important;
   }
@@ -76,7 +78,7 @@ const ContentWrapper = styled(FlexBox)<{ layout: string }>`
       ? 'flex-end'
       : 'center'};
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     max-width: 100%;
     text-align: center;
     align-items: center;
@@ -94,7 +96,7 @@ const Title = styled.h2`
 
 const TitleInner = styled.span`
   font-family: 'Space Grotesk', sans-serif;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--audio-heading);
   filter: url(#neonGlow);
   display: block;
 `;
@@ -104,14 +106,14 @@ const Subtitle = styled.p`
   font-size: clamp(0.7rem, 2vw, 0.9rem);
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--audio-technical);
 `;
 
 const ContentBody = styled.div`
   margin-top: 2rem;
   font-size: clamp(1rem, 2.5vw, 1.4rem);
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--audio-copy);
   max-width: 600px;
 `;
 const ImageWrapper = styled.div<{ layout: string }>`
@@ -148,11 +150,7 @@ const ImageWrapper = styled.div<{ layout: string }>`
   background: rgb(var(--display-black) / 0.94);
   filter: drop-shadow(0 18px 36px rgb(var(--display-ink) / 0.4));
 
-  @media (max-width: 1050px) and (min-width: 769px) {
-    width: 36vw;
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     position: relative;
     top: auto;
     left: auto;
@@ -216,7 +214,7 @@ const StyledImage = styled.img<{
   transform: translateZ(0);
   will-change: filter, opacity;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     object-position: ${({ $asset }) =>
       $asset === 'modular'
         ? '60% 50%'
@@ -225,21 +223,6 @@ const StyledImage = styled.img<{
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
-  }
-`;
-
-const BleedImage = styled(StyledImage)`
-  z-index: 2;
-  opacity: ${({ $asset }) => imageTreatments[$asset].bleedOpacity};
-  filter: ${({ $asset, $filterId }) =>
-    `url(#${$filterId}) ${imageTreatments[$asset].restingFilter} blur(3.2px) brightness(1.38)`};
-  mix-blend-mode: screen;
-  transform: scale(1.004);
-  will-change: auto;
-
-  @media (max-width: 768px) {
-    filter: ${({ $asset, $filterId }) =>
-      `url(#${$filterId}) ${imageTreatments[$asset].restingFilter} blur(2.2px) brightness(1.28)`};
   }
 `;
 
@@ -377,6 +360,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
   subtitle,
   content,
   image,
+  imageAlt,
   background,
   layout = 'center',
   className,
@@ -496,7 +480,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
 
       <ContentWrapper ref={contentRef} layout={layout}>
         {subtitle && <Subtitle>{subtitle}</Subtitle>}
-        <Title>
+        <Title as={id === 'source' ? 'h1' : undefined}>
           <TitleInner>{title}</TitleInner>
         </Title>
         {content && <ContentBody>{content}</ContentBody>}
@@ -535,14 +519,7 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
             <StyledImage
               ref={imageRef}
               src={image}
-              alt={typeof title === 'string' ? title : 'Section Image'}
-              $asset={imageTreatment}
-              $filterId={displayFilterId}
-            />
-            <BleedImage
-              src={image}
-              alt=""
-              aria-hidden="true"
+              alt={imageAlt ?? ''}
               $asset={imageTreatment}
               $filterId={displayFilterId}
             />

@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState, useMemo, useEffect } from 'react';
+import { useRef, useLayoutEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -10,26 +10,99 @@ import { DetroitSkyline } from './components/DetroitSkyline';
 import ProjectCarousel from './components/ProjectCarousel';
 
 const Container = styled(FlexBox)`
-  width: 100%;
-  position: relative;
-  flex-direction: column;
-  z-index: 10;
-  pointer-events: auto;
-  background: transparent;
-  overflow-x: hidden;
-`;
+  --audio-ivory: rgba(241, 237, 232, 0.96);
+  --audio-ivory-soft: rgba(241, 237, 232, 0.76);
+  --audio-ivory-muted: rgba(241, 237, 232, 0.62);
+  --audio-sepia: rgba(224, 207, 173, 0.94);
+  --audio-sepia-soft: rgba(224, 207, 173, 0.7);
+  --audio-line: rgba(241, 237, 232, 0.15);
+  --audio-line-strong: rgba(224, 207, 173, 0.38);
+  --audio-charcoal: rgba(13, 13, 12, 0.97);
+  --audio-charcoal-soft: rgba(18, 17, 15, 0.82);
+  --audio-boundary-fill: rgba(224, 207, 173, 0.035);
+  --audio-section-wash: rgba(224, 207, 173, 0.045);
+  --audio-signal-glow: rgba(224, 207, 173, 0.32);
+  --audio-hero-wash: rgba(224, 207, 173, 0.1);
+  --audio-page-wash: rgba(13, 13, 12, 0.18);
+  --audio-nav-blend-offset: 5.35rem;
+  --audio-heading: var(--audio-ivory);
+  --audio-copy: var(--audio-ivory-soft);
+  --audio-technical: var(--audio-sepia-soft);
+  --audio-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-const NoiseOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
+  z-index: 10;
   width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
-  opacity: 0.05;
-  background-image: url('/images/displacement_smoke.png');
-  background-repeat: repeat;
+  margin-top: calc(var(--audio-nav-blend-offset) * -1);
+  padding-top: var(--audio-nav-blend-offset);
+  flex-direction: column;
+  overflow-x: hidden;
+  color: var(--audio-ivory);
+  background: radial-gradient(
+      circle at 78% 8%,
+      var(--audio-hero-wash),
+      transparent 26rem
+    ),
+    linear-gradient(180deg, var(--audio-page-wash), var(--audio-charcoal) 42rem);
+  isolation: isolate;
+  pointer-events: auto;
+
+  @media (max-width: 40rem) {
+    --audio-nav-blend-offset: 4.25rem;
+  }
+
+  > #source {
+    --audio-heading: rgba(255, 255, 255, 0.85);
+    --audio-copy: rgba(255, 255, 255, 0.8);
+    --audio-technical: rgba(255, 255, 255, 0.6);
+  }
+
+  > #restoration,
+  > #mixing,
+  > #mastering,
+  > #projects,
+  > #console {
+    position: relative;
+    border-top: 1px solid var(--audio-line);
+  }
+
+  > #restoration::before,
+  > #mixing::before,
+  > #mastering::before,
+  > #projects::before,
+  > #console::before {
+    position: absolute;
+    z-index: 4;
+    top: -0.25rem;
+    right: clamp(1.5rem, 5vw, 5rem);
+    width: 0.45rem;
+    height: 0.45rem;
+    border: 1px solid var(--audio-sepia-soft);
+    content: '';
+    background: var(--audio-charcoal);
+    box-shadow: 0 0.35rem 1.1rem var(--audio-signal-glow);
+  }
+
+  @media (max-width: 64rem) {
+    > #restoration::before,
+    > #mixing::before,
+    > #mastering::before,
+    > #projects::before,
+    > #console::before {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 `;
 
 const SignalPathSVG = styled.svg`
@@ -42,18 +115,27 @@ const SignalPathSVG = styled.svg`
   height: 100%;
   pointer-events: none;
   z-index: 0;
+
+  path {
+    stroke: var(--audio-sepia-soft);
+    opacity: 0.42;
+  }
 `;
 
 const ConsoleWrapper = styled(FlexBox)`
   width: 100%;
-  min-height: 100vh;
+  min-height: 100svh;
   justify-content: center;
   align-items: center;
   position: relative;
   padding: 4rem 0;
 `;
 
-const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
+const FloatingUI = styled.div<{
+  top: string;
+  left?: string;
+  right?: string;
+}>`
   position: absolute;
   top: ${({ top }) => top};
   ${({ left }) => left && `left: ${left};`}
@@ -62,58 +144,31 @@ const FloatingUI = styled.div<{ top: string; left?: string; right?: string }>`
   pointer-events: none;
   font-family: 'Orbit', sans-serif;
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(224, 207, 173, 0.38);
   text-transform: uppercase;
   letter-spacing: 0.2em;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     display: none;
   }
 `;
 
-const TechnicalUIOverlay = () => {
-  const [coords, setCoords] = useState({ x: '000', y: '000' });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCoords({
-        x: Math.floor(Math.random() * 999)
-          .toString()
-          .padStart(3, '0'),
-        y: Math.floor(Math.random() * 999)
-          .toString()
-          .padStart(3, '0'),
-      });
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <>
-      <FloatingUI top="15vh" left="5%">
-        [SCAN_MODE: ACTIVE]
-      </FloatingUI>
-      <FloatingUI top="45vh" right="8%">
-        [BIT_DEPTH: 32_FLOAT]
-      </FloatingUI>
-      <FloatingUI top="75vh" left="10%">
-        [XY_COORD: {coords.x}.{coords.y}]
-      </FloatingUI>
-      <FloatingUI top="120vh" right="5%">
-        [SAMPLE_RATE: 96KHZ]
-      </FloatingUI>
-      <FloatingUI top="180vh" left="4%">
-        [BUFFER: 1024_SAMPLES]
-      </FloatingUI>
-      <FloatingUI top="240vh" right="12%">
-        [DYNAMIC_RANGE: +118DB]
-      </FloatingUI>
-      <FloatingUI top="310vh" left="6%">
-        [PHASE: ALIGNED]
-      </FloatingUI>
-    </>
-  );
-};
+const TechnicalUIOverlay = () => (
+  <>
+    <FloatingUI top="15vh" left="5%" aria-hidden="true">
+      [SCAN_MODE: ACTIVE]
+    </FloatingUI>
+    <FloatingUI top="45vh" right="8%" aria-hidden="true">
+      [BIT_DEPTH: 32_FLOAT]
+    </FloatingUI>
+    <FloatingUI top="120vh" right="5%" aria-hidden="true">
+      [SAMPLE_RATE: 96KHZ]
+    </FloatingUI>
+    <FloatingUI top="240vh" right="12%" aria-hidden="true">
+      [DYNAMIC_RANGE: +118DB]
+    </FloatingUI>
+  </>
+);
 
 function AudioEngineering() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -204,14 +259,13 @@ function AudioEngineering() {
 
   return (
     <Container ref={containerRef}>
-      <NoiseOverlay />
       <TechnicalUIOverlay />
 
       <SignalPathSVG viewBox="0 0 1000 6000" preserveAspectRatio="none">
         <path
           ref={pathRef}
           d={signalPath}
-          stroke="rgba(255, 255, 255, 0.2)"
+          stroke="rgba(224, 207, 173, 0.7)"
           strokeWidth="1.2"
           fill="none"
         />
@@ -251,6 +305,7 @@ function AudioEngineering() {
         }
         content="preserving the heritage of sound. we specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
         image="/images/restoration_equipment.png"
+        imageAlt="Reel-to-reel and archival audio restoration equipment"
       />
 
       <CinematicSection
@@ -275,6 +330,7 @@ function AudioEngineering() {
           </>
         }
         image="/images/modular_rack.png"
+        imageAlt="Modular synthesis and analogue production rack"
       />
 
       <CinematicSection

@@ -59,10 +59,16 @@ const SectionContainer = styled.section`
   align-items: flex-start; /* Align to top so pinning is more predictable */
   padding: 15vh 5vw;
   z-index: 2;
-  background: transparent;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--audio-section-wash) 14%,
+    var(--audio-section-wash) 86%,
+    transparent
+  );
   box-sizing: border-box;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     padding: 10vh 20px;
   }
 `;
@@ -75,7 +81,7 @@ const ContentWrapper = styled.div`
   align-items: flex-start;
   box-sizing: border-box;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     flex-direction: column;
     align-items: center;
     gap: 3rem;
@@ -90,7 +96,7 @@ const TitleColumn = styled.div`
   padding-top: 2rem;
   box-sizing: border-box;
 
-  @media (max-width: 768px) {
+  @media (max-width: 64rem) {
     width: 100%;
     text-align: center;
     padding-top: 0;
@@ -109,7 +115,7 @@ const SectionTitle = styled.h2`
   font-size: clamp(2.5rem, 6vw, 5rem);
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--audio-heading);
   line-height: 0.9;
   margin: 0;
   filter: url(#neonGlow);
@@ -120,18 +126,17 @@ const TechnicalLabel = styled.div`
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--audio-technical);
   margin-bottom: 1rem;
 `;
 
-const CardContainer = styled.div`
+const CardContainer = styled.article`
   position: relative;
   width: 100%;
   height: 400px;
-  cursor: pointer;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--audio-line);
+  background: var(--audio-boundary-fill);
   box-sizing: border-box;
 
   &:hover .project-image-wrapper {
@@ -146,6 +151,14 @@ const CardContainer = styled.div`
     max-height: 250px;
     opacity: 1;
     margin-top: 1rem;
+  }
+
+  @media (hover: none), (max-width: 64rem) {
+    .hover-content {
+      max-height: 250px;
+      margin-top: 1rem;
+      opacity: 1;
+    }
   }
 
   @media (max-width: 480px) {
@@ -171,7 +184,7 @@ const ImageWrapper = styled.div`
     background: linear-gradient(
       to bottom,
       transparent 40%,
-      rgba(0, 0, 0, 0.95)
+      var(--audio-charcoal) 100%
     );
     pointer-events: none;
   }
@@ -192,7 +205,7 @@ const InfoOverlay = styled.div`
   width: 100%;
   padding: 2rem;
   z-index: 3;
-  color: white;
+  color: var(--audio-ivory);
   box-sizing: border-box;
 
   @media (max-width: 480px) {
@@ -205,7 +218,7 @@ const ProjectArtist = styled.div`
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--audio-sepia-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -229,7 +242,7 @@ const HoverContent = styled.div`
 const Description = styled.p`
   font-size: 0.85rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--audio-ivory-soft);
   margin: 0;
 `;
 
@@ -237,7 +250,7 @@ const TechnicalMeta = styled.div`
   font-family: 'Orbit', sans-serif;
   font-size: 0.55rem;
   margin-top: 1rem;
-  color: #00ff66;
+  color: var(--audio-sepia);
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -279,34 +292,36 @@ const ProjectCarousel: React.FC<{ id: string }> = ({ id }) => {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Reveal project cards on scroll
-      const cards = gsap.utils.toArray('.project-card') as HTMLElement[];
-      cards.forEach((card) => {
-        gsap.fromTo(
-          card,
-          { y: 50, opacity: 0, filter: 'blur(10px)' },
-          {
-            y: 0,
-            opacity: 1,
-            filter: 'blur(0px)',
-            duration: 1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 95%',
-              toggleActions: 'play none none reverse',
+      const media = gsap.matchMedia();
+
+      media.add('(prefers-reduced-motion: no-preference)', () => {
+        const cards = gsap.utils.toArray('.project-card') as HTMLElement[];
+
+        cards.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { y: 50, opacity: 0, filter: 'blur(10px)' },
+            {
+              y: 0,
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: 1,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 95%',
+                toggleActions: 'play none none reverse',
+              },
             },
-          },
-        );
+          );
+        });
       });
 
-      // Pin the title column on desktop
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 769px)', () => {
+      media.add('(min-width: 64.0625rem)', () => {
         ScrollTrigger.create({
           trigger: containerRef.current,
-          start: 'top 15%', // Pin 15% from top of viewport
-          end: 'bottom 85%', // Unpin 15% from bottom of viewport
+          start: 'top 15%',
+          end: 'bottom 85%',
           pin: titleRef.current,
           pinSpacing: false,
           invalidateOnRefresh: true,

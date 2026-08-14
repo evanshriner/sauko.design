@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import BentoBlock from '../../blog/BentoBlock';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 const TechnicalLabel = styled.div`
   font-family: 'Orbit', sans-serif;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--audio-technical);
 `;
 
 const Title = styled.h2`
@@ -15,8 +16,51 @@ const Title = styled.h2`
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   margin: 0.5rem 0;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--audio-heading);
   filter: url(#neonGlow);
+`;
+
+const ConsolePanel = styled(BentoBlock)`
+  width: min(40rem, calc(100% - 2rem));
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid var(--audio-line-strong);
+  color: var(--audio-ivory);
+  background: linear-gradient(
+    135deg,
+    var(--audio-boundary-fill),
+    var(--audio-charcoal-soft)
+  );
+  backdrop-filter: none;
+  box-shadow: none;
+
+  > div:not(.glitch-content) {
+    display: none;
+  }
+
+  .glitch-content {
+    animation: none !important;
+  }
+
+  &::after {
+    display: none !important;
+  }
+
+  &:focus-within {
+    border-color: var(--audio-sepia-soft);
+  }
+
+  &:hover {
+    border-color: var(--audio-line-strong);
+    background: linear-gradient(
+      135deg,
+      var(--audio-section-wash),
+      var(--audio-charcoal-soft)
+    );
+
+    .glitch-content {
+      animation: none;
+    }
+  }
 `;
 
 const Form = styled.form`
@@ -35,61 +79,93 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-family: 'Orbit', sans-serif;
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--audio-sepia-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
 `;
 
-const Input = styled.input`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.8rem;
-  color: white;
+const fieldStyles = css`
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--audio-line);
+  border-radius: 0;
+  color: var(--audio-ivory);
   font-family: inherit;
+  font-size: 1rem;
+  background: var(--audio-boundary-fill);
+  transition:
+    border-color 220ms var(--audio-ease-out),
+    background-color 220ms var(--audio-ease-out),
+    outline-color 220ms var(--audio-ease-out);
+
+  &::placeholder {
+    color: var(--audio-ivory-muted);
+  }
+
+  &:hover {
+    border-color: var(--audio-line-strong);
+    background: var(--audio-section-wash);
+  }
+
   &:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: var(--audio-sepia-soft);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--audio-ivory);
+    outline-offset: 3px;
   }
 `;
 
+const Input = styled.input`
+  ${fieldStyles}
+`;
+
 const Select = styled.select`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.8rem;
-  color: white;
-  font-family: inherit;
-  &:focus {
-    outline: none;
-    border-color: rgba(255, 255, 255, 0.4);
+  ${fieldStyles}
+
+  option {
+    color: var(--audio-ivory);
+    background: var(--audio-charcoal);
   }
 `;
 
 const TextArea = styled.textarea`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.8rem;
-  color: white;
-  font-family: inherit;
-  min-height: 100px;
+  ${fieldStyles}
+
+  min-height: 8rem;
   resize: vertical;
-  &:focus {
-    outline: none;
-    border-color: rgba(255, 255, 255, 0.4);
-  }
 `;
 
 const SubmitButton = styled.button`
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  border: 1px solid var(--audio-sepia);
+  color: var(--audio-charcoal);
   font-family: 'Orbit', sans-serif;
-  background: white;
-  color: black;
-  border: none;
-  padding: 1rem;
-  font-weight: bold;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  background: var(--audio-sepia);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition:
+    color 220ms var(--audio-ease-out),
+    background-color 220ms var(--audio-ease-out),
+    box-shadow 220ms var(--audio-ease-out),
+    transform 220ms var(--audio-ease-out);
+
   &:hover {
-    opacity: 0.8;
+    color: var(--audio-ivory);
+    background: var(--audio-charcoal-soft);
+    box-shadow: 0 0.35rem 1.5rem var(--audio-signal-glow);
+    transform: translateY(-0.125rem);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--audio-ivory);
+    outline-offset: 4px;
   }
 `;
 
@@ -108,14 +184,15 @@ const EngineeringConsole = () => {
   };
 
   return (
-    <BentoBlock transparent gridColumn="span 3" style={{ maxWidth: '600px' }}>
+    <ConsolePanel transparent gridColumn="span 3">
       <TechnicalLabel>TERMINAL_INTERFACE // REQUEST</TechnicalLabel>
       <Title>Initiate signal.</Title>
 
       <Form onSubmit={handleSubmit}>
         <FormGroup>
-          <Label>CLIENT_NAME</Label>
+          <Label htmlFor="engineering-client-name">CLIENT_NAME</Label>
           <Input
+            id="engineering-client-name"
             type="text"
             placeholder="ENTER NAME..."
             value={formData.name}
@@ -125,8 +202,9 @@ const EngineeringConsole = () => {
         </FormGroup>
 
         <FormGroup>
-          <Label>SERVICE_TYPE</Label>
+          <Label htmlFor="engineering-service-type">SERVICE_TYPE</Label>
           <Select
+            id="engineering-service-type"
             value={formData.service}
             onChange={(e) =>
               setFormData({ ...formData, service: e.target.value })
@@ -140,9 +218,12 @@ const EngineeringConsole = () => {
         </FormGroup>
 
         <FormGroup>
-          <Label>PROJECT_LINK (DROPBOX/WETRANSFER)</Label>
+          <Label htmlFor="engineering-project-link">
+            PROJECT_LINK (DROPBOX/WETRANSFER)
+          </Label>
           <Input
             type="url"
+            id="engineering-project-link"
             placeholder="HTTPS://..."
             value={formData.link}
             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
@@ -151,8 +232,9 @@ const EngineeringConsole = () => {
         </FormGroup>
 
         <FormGroup>
-          <Label>ADDITIONAL_NOTES</Label>
+          <Label htmlFor="engineering-notes">ADDITIONAL_NOTES</Label>
           <TextArea
+            id="engineering-notes"
             placeholder="TECHNICAL SPECS, REFERENCE TRACKS, ETC..."
             value={formData.notes}
             onChange={(e) =>
@@ -163,7 +245,7 @@ const EngineeringConsole = () => {
 
         <SubmitButton type="submit">TRANSMIT REQUEST</SubmitButton>
       </Form>
-    </BentoBlock>
+    </ConsolePanel>
   );
 };
 
