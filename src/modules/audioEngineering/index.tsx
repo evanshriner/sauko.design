@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FlexBox from '../../shared/components/FlexBox';
 import CinematicSection from './components/CinematicSection';
-import EngineeringConsole from './sections/EngineeringConsole';
+import ProjectReview from './sections/ProjectReview';
 import NeonText from '@/shared/styles/NeonText';
 import { DetroitSkyline } from './components/DetroitSkyline';
 import ProjectCarousel from './components/ProjectCarousel';
@@ -61,7 +61,7 @@ const Container = styled(FlexBox)`
   > #mixing,
   > #mastering,
   > #projects,
-  > #console {
+  > #project-review {
     position: relative;
     border-top: 1px solid var(--audio-line);
   }
@@ -70,7 +70,7 @@ const Container = styled(FlexBox)`
   > #mixing::before,
   > #mastering::before,
   > #projects::before,
-  > #console::before {
+  > #project-review::before {
     position: absolute;
     z-index: 4;
     top: -0.25rem;
@@ -88,7 +88,7 @@ const Container = styled(FlexBox)`
     > #mixing::before,
     > #mastering::before,
     > #projects::before,
-    > #console::before {
+    > #project-review::before {
       display: none;
     }
   }
@@ -120,15 +120,6 @@ const SignalPathSVG = styled.svg`
     stroke: var(--audio-sepia-soft);
     opacity: 0.42;
   }
-`;
-
-const ConsoleWrapper = styled(FlexBox)`
-  width: 100%;
-  min-height: 100svh;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: 4rem 0;
 `;
 
 const FloatingUI = styled.div<{
@@ -202,7 +193,7 @@ function AudioEngineering() {
 
     const ctx = gsap.context(() => {
       const sections = gsap.utils.toArray(
-        '.cinematic-section, .pin-section, .console-section',
+        '.cinematic-section, .pin-section, .project-review-section',
       ) as HTMLElement[];
 
       sections.forEach((section, i) => {
@@ -349,9 +340,7 @@ function AudioEngineering() {
 
       <ProjectCarousel id="projects" />
 
-      <ConsoleWrapper id="console" className="console-section">
-        <EngineeringConsole />
-      </ConsoleWrapper>
+      <ProjectReview />
     </Container>
   );
 }

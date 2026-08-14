@@ -2,7 +2,8 @@ import type { MouseEventHandler, RefObject } from 'react';
 import styled from '@emotion/styled';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import SystemTopology from '../components/SystemTopology';
-import { ASSESSMENT_URL, RECOVERY_MAP_ID } from '../data';
+import { BOOKING_URL } from '@/shared/constants/booking';
+import { RECOVERY_MAP_ID } from '../data';
 import { BREAKPOINTS, PrimaryAction, Shell } from '../styles';
 
 const Hero = styled.section`
@@ -233,7 +234,7 @@ export default function HeroSection({
           </HeroBody>
           <HeroActions>
             <PrimaryAction
-              href={ASSESSMENT_URL}
+              href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
             >

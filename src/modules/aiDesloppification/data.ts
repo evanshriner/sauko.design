@@ -13,9 +13,6 @@ type EngagementStep = Readonly<{
   deliverable: string;
 }>;
 
-export const ASSESSMENT_URL =
-  'https://calendar.google.com/calendar/u/0/r/month/2026/8/12';
-
 export const RECOVERY_MAP_ID = 'recovery-map';
 
 export const diagnostics: readonly Diagnostic[] = [

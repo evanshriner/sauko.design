@@ -7,7 +7,7 @@ import {
   SectionTitle,
   PrimaryAction,
 } from '../styles';
-import { ASSESSMENT_URL } from '../data';
+import { BOOKING_URL } from '@/shared/constants/booking';
 
 const ClosingRoot = styled(Section)`
   padding-top: var(--space-8);
@@ -99,7 +99,7 @@ export default function ClosingSection() {
               </li>
             </ul>
             <ClosingAction
-              href={ASSESSMENT_URL}
+              href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
