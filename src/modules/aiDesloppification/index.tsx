@@ -7,6 +7,7 @@ import {
 import styled from '@emotion/styled';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SystemTopology from './components/SystemTopology';
 const useIsomorphicLayoutEffect =
   typeof window === 'undefined' ? useEffect : useLayoutEffect;
@@ -414,6 +415,27 @@ const Section = styled.section`
     padding: var(--space-5) 0;
   }
 `;
+const ChapterFolio = styled.span`
+  display: block;
+  width: max-content;
+  margin: 0 0 var(--space-2) auto;
+  color: var(--color-ivory-muted);
+  font-family: var(--font-technical);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+`;
+
+const RecoverySection = styled(Section)`
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-7);
+
+  @media (max-width: 40rem) {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-5);
+  }
+`;
 
 const SectionHeader = styled.div`
   display: grid;
@@ -428,15 +450,20 @@ const SectionHeader = styled.div`
   }
 `;
 
+const DiagnosticHeader = styled(SectionHeader)`
+  margin-bottom: var(--space-4);
+`;
+
 const SectionTitle = styled.h2`
   max-width: 16ch;
   margin: 0;
   color: var(--color-ivory);
-  font-family: var(--font-display);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2.5rem, 5.5vw, 4.75rem);
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   line-height: 0.98;
+  filter: url(#neonGlow);
   text-wrap: balance;
 `;
 
@@ -447,20 +474,50 @@ const SectionBody = styled.p`
   font-size: 1rem;
   line-height: 1.65;
 `;
+const RecoveryHeader = styled.div`
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
+
+  > h2 {
+    grid-column: 1 / span 8;
+  }
+
+  > p {
+    grid-column: 8 / -1;
+    margin-top: var(--space-4);
+  }
+
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+
+    > h2,
+    > p {
+      grid-column: 1;
+      margin-top: 0;
+    }
+  }
+`;
 
 const RiskPrinciple = styled.div`
   display: grid;
   grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
   gap: var(--space-3) var(--space-6);
-  margin-top: var(--space-5);
-  padding: var(--space-4) 0;
+  width: min(62rem, calc(100% - var(--space-6)));
+  margin-top: var(--space-7);
+  margin-left: auto;
+  padding: var(--space-4);
   border-top: 1px solid var(--color-line-strong);
   border-bottom: 1px solid var(--color-line);
   align-items: baseline;
+  background: var(--color-boundary-fill);
 
   @media (max-width: 48rem) {
     grid-template-columns: 1fr;
+    width: 100%;
     margin-top: var(--space-4);
+    padding: var(--space-3);
   }
 `;
 
@@ -483,16 +540,23 @@ const RiskPrincipleBody = styled.p`
 `;
 
 const DiagnosticSection = styled(Section)`
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-7);
   border-top-color: var(--color-line-strong);
-  background: linear-gradient(
-    180deg,
-    var(--color-section-wash),
-    transparent 32rem
-  );
+
+  @media (max-width: 40rem) {
+    padding: var(--space-5) 0;
+  }
 `;
 
 const DiagnosticList = styled.div`
+  padding: 0 var(--space-4);
   border-top: 1px solid var(--color-line-strong);
+  background: var(--color-section-wash);
+
+  @media (max-width: 40rem) {
+    padding: 0 var(--space-3);
+  }
 `;
 
 const DiagnosticRow = styled.article`
@@ -551,22 +615,26 @@ const DiagnosticDetails = styled.dl`
     line-height: 1.58;
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: 48rem) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3) var(--space-2);
+    gap: var(--space-3);
 
     div:first-of-type {
       grid-column: 1 / -1;
     }
   }
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 1fr;
+
+    div:first-of-type {
+      grid-column: auto;
+    }
+  }
 `;
 
 const EngagementSection = styled(Section)`
-  background: linear-gradient(
-    90deg,
-    var(--color-section-wash),
-    transparent 68%
-  );
+  background: none;
 `;
 
 const EngagementLayout = styled.div`
@@ -587,6 +655,7 @@ const EngagementLead = styled.div`
   display: grid;
   gap: var(--space-3);
   align-content: start;
+  align-self: start;
 
   @media (min-width: 52.0625rem) {
     position: sticky;
@@ -596,16 +665,22 @@ const EngagementLead = styled.div`
 
 const EngagementList = styled.ol`
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 var(--space-4);
   border-top: 1px solid var(--color-line-strong);
+  border-left: 1px solid var(--color-line);
   list-style: none;
+
+  @media (max-width: 52rem) {
+    padding-left: 0;
+    border-left: 0;
+  }
 `;
 
 const EngagementStep = styled.li`
   display: grid;
   grid-template-columns: var(--space-5) minmax(0, 1fr);
   gap: var(--space-3);
-  padding: var(--space-4) 0;
+  padding: var(--space-5) 0;
   border-bottom: 1px solid var(--color-line);
 
   @media (max-width: 40rem) {
@@ -682,21 +757,25 @@ const ClosingLayout = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.65fr);
   gap: var(--space-5) var(--space-7);
+  padding: var(--space-5);
   align-items: end;
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--color-line-strong);
+  background: var(--color-boundary-fill);
 
   @media (max-width: 48rem) {
     grid-template-columns: 1fr;
     gap: var(--space-4);
-    padding-top: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  @media (max-width: 40rem) {
+    padding: var(--space-3);
   }
 `;
 
 const ClosingTitle = styled(SectionTitle)`
   max-width: 13ch;
   color: var(--color-sepia);
-  filter: drop-shadow(0 0.4rem 1.25rem var(--color-major-glow));
+  filter: url(#neonGlow) drop-shadow(0 0.4rem 1.25rem var(--color-major-glow));
 `;
 
 const ClosingBody = styled.div`
@@ -723,6 +802,10 @@ const ClosingBody = styled.div`
 
 const ClosingAction = styled(PrimaryAction)`
   margin-top: var(--space-3);
+
+  @media (max-width: 40rem) {
+    width: 100%;
+  }
 `;
 
 export default function AIDesloppification() {
@@ -731,6 +814,7 @@ export default function AIDesloppification() {
   const heroVisualRef = useRef<HTMLDivElement>(null);
 
   useIsomorphicLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const media = gsap.matchMedia();
     const context = gsap.context(() => {
       media.add('(prefers-reduced-motion: no-preference)', () => {
@@ -772,6 +856,40 @@ export default function AIDesloppification() {
             0.18,
           );
         }
+
+        const chapterSections = Array.from(
+          pageRef.current?.querySelectorAll<HTMLElement>(
+            '[data-chapter-section]',
+          ) ?? [],
+        );
+
+        chapterSections.forEach((section) => {
+          const elements = Array.from(
+            section.querySelectorAll<HTMLElement>('[data-chapter-reveal]'),
+          );
+
+          gsap.fromTo(
+            elements,
+            {
+              opacity: 0,
+              y: 56,
+              filter: 'blur(8px)',
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              duration: 1.05,
+              stagger: 0.1,
+              ease: 'power4.out',
+              scrollTrigger: {
+                trigger: section,
+                start: 'top 82%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
+        });
       });
     }, pageRef);
 
@@ -855,9 +973,16 @@ export default function AIDesloppification() {
         </Hero>
       </Shell>
 
-      <Section id="recovery-map" aria-labelledby="recovery-title">
+      <RecoverySection
+        id="recovery-map"
+        aria-labelledby="recovery-title"
+        data-chapter-section
+      >
         <Shell>
-          <SectionHeader>
+          <ChapterFolio aria-hidden="true" data-chapter-reveal>
+            01 / 04
+          </ChapterFolio>
+          <RecoveryHeader data-chapter-reveal>
             <SectionTitle id="recovery-title">
               The expensive part starts after it works.
             </SectionTitle>
@@ -865,9 +990,9 @@ export default function AIDesloppification() {
               Fast builds are valuable. But once a tool carries customer data,
               business decisions, or team time, unknowns become operating risk.
             </SectionBody>
-          </SectionHeader>
+          </RecoveryHeader>
 
-          <RiskPrinciple>
+          <RiskPrinciple data-chapter-reveal>
             <RiskPrincipleTitle>
               Working and operable are different states.
             </RiskPrincipleTitle>
@@ -879,11 +1004,17 @@ export default function AIDesloppification() {
             </RiskPrincipleBody>
           </RiskPrinciple>
         </Shell>
-      </Section>
+      </RecoverySection>
 
-      <DiagnosticSection aria-labelledby="diagnostic-title">
+      <DiagnosticSection
+        aria-labelledby="diagnostic-title"
+        data-chapter-section
+      >
         <Shell>
-          <SectionHeader>
+          <ChapterFolio aria-hidden="true" data-chapter-reveal>
+            02 / 04
+          </ChapterFolio>
+          <DiagnosticHeader data-chapter-reveal>
             <SectionTitle id="diagnostic-title">
               Where the risk shows up.
             </SectionTitle>
@@ -892,9 +1023,9 @@ export default function AIDesloppification() {
               different boundary, safeguard, or operating path that needs to be
               made explicit.
             </SectionBody>
-          </SectionHeader>
+          </DiagnosticHeader>
 
-          <DiagnosticList>
+          <DiagnosticList data-chapter-reveal>
             {diagnostics.map((diagnostic) => (
               <DiagnosticRow key={diagnostic.title}>
                 <DiagnosticTitle>{diagnostic.title}</DiagnosticTitle>
@@ -918,10 +1049,16 @@ export default function AIDesloppification() {
         </Shell>
       </DiagnosticSection>
 
-      <EngagementSection aria-labelledby="engagement-title">
+      <EngagementSection
+        aria-labelledby="engagement-title"
+        data-chapter-section
+      >
         <Shell>
+          <ChapterFolio aria-hidden="true" data-chapter-reveal>
+            03 / 04
+          </ChapterFolio>
           <EngagementLayout>
-            <EngagementLead>
+            <EngagementLead data-chapter-reveal>
               <SectionTitle id="engagement-title">
                 Small phases. Clear ownership.
               </SectionTitle>
@@ -931,7 +1068,7 @@ export default function AIDesloppification() {
               </SectionBody>
             </EngagementLead>
 
-            <EngagementList>
+            <EngagementList data-chapter-reveal>
               {engagement.map((step) => (
                 <EngagementStep key={step.number}>
                   <StepNumber aria-hidden="true">{step.number}</StepNumber>
@@ -951,9 +1088,12 @@ export default function AIDesloppification() {
         </Shell>
       </EngagementSection>
 
-      <ClosingSection aria-labelledby="closing-title">
+      <ClosingSection aria-labelledby="closing-title" data-chapter-section>
         <Shell>
-          <ClosingLayout>
+          <ChapterFolio aria-hidden="true" data-chapter-reveal>
+            04 / 04
+          </ChapterFolio>
+          <ClosingLayout data-chapter-reveal>
             <ClosingTitle id="closing-title">
               Make the next change safely.
             </ClosingTitle>
