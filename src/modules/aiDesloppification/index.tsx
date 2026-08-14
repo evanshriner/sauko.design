@@ -15,6 +15,13 @@ const useIsomorphicLayoutEffect =
 const assessmentUrl =
   'https://calendar.google.com/calendar/u/0/r/month/2026/8/12';
 
+const BREAKPOINTS = {
+  small: '40rem',
+  medium: '48rem',
+  large: '64rem',
+  largeUp: '64.0625rem',
+} as const;
+
 const diagnostics = [
   {
     title: 'Change anxiety',
@@ -119,7 +126,7 @@ const Page = styled.main`
     ),
     linear-gradient(180deg, var(--color-page-wash), var(--color-charcoal) 42rem);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     --nav-blend-offset: 4.25rem;
   }
 
@@ -147,26 +154,27 @@ const Shell = styled.div`
   width: min(75rem, calc(100% - var(--space-6)));
   margin: 0 auto;
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     width: calc(100% - var(--space-4));
   }
 `;
 
 const Hero = styled.section`
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(24rem, 1.05fr);
-  gap: var(--space-7);
+  grid-template-columns: minmax(0, 1.08fr) minmax(22rem, 0.92fr);
+  gap: clamp(var(--space-4), 5vw, var(--space-7));
   min-height: calc(100svh - var(--nav-blend-offset));
-  padding: clamp(var(--space-7), 14vh, 9rem) 0 var(--space-7);
+  padding: clamp(var(--space-5), 10svh, var(--space-7)) 0
+    clamp(var(--space-4), 6svh, var(--space-5));
   align-items: center;
 
-  @media (max-width: 52rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     grid-template-columns: 1fr;
   }
 
-  @media (max-width: 40rem) {
-    padding-top: var(--space-7);
-    padding-bottom: var(--space-6);
+  @media (max-width: ${BREAKPOINTS.small}) {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
   }
 `;
 
@@ -198,7 +206,7 @@ const HeroVisual = styled.div`
     position: relative;
   }
 
-  @media (max-width: 52rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     display: none;
   }
 `;
@@ -246,7 +254,7 @@ const SignalRail = styled.div`
     }
   }
 
-  @media (max-width: 60rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     display: none;
   }
 `;
@@ -256,7 +264,7 @@ const HeroTitle = styled.h1`
   margin: 0;
   color: var(--color-ivory);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(3.55rem, 6.6vw, 6.9rem);
+  font-size: clamp(3.55rem, min(6.6vw, 10svh), 6.9rem);
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 0.88;
@@ -268,10 +276,15 @@ const HeroTitle = styled.h1`
     color: var(--color-sepia);
     filter: drop-shadow(0 0 0.48em rgba(224, 207, 173, 0.42));
   }
+
+  @media (max-width: ${BREAKPOINTS.small}) {
+    font-size: clamp(3rem, 15vw, 3.55rem);
+    line-height: 0.9;
+  }
 `;
 
 const HeroSubtitle = styled.p`
-  margin: var(--space-3) 0 0;
+  margin: clamp(var(--space-2), 2.5svh, var(--space-3)) 0 0;
   color: var(--color-sepia-soft);
   font-family: var(--font-technical);
   font-size: 0.74rem;
@@ -280,18 +293,29 @@ const HeroSubtitle = styled.p`
   letter-spacing: 0.2em;
   text-transform: uppercase;
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
+    margin-top: var(--space-2);
     font-size: 0.67rem;
     letter-spacing: 0.14em;
+  }
+
+  @media (max-width: ${BREAKPOINTS.small}) and (max-height: 44rem) {
+    display: none;
   }
 `;
 
 const HeroBody = styled.p`
   max-width: 44rem;
-  margin: var(--space-3) 0 0;
+  margin: clamp(var(--space-2), 2.5svh, var(--space-3)) 0 0;
   color: var(--color-ivory-soft);
   font-size: clamp(1.05rem, 1.8vw, 1.3rem);
-  line-height: 1.65;
+  line-height: 1.58;
+
+  @media (max-width: ${BREAKPOINTS.small}) {
+    margin-top: var(--space-2);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
 `;
 
 const HeroActions = styled.div`
@@ -299,7 +323,12 @@ const HeroActions = styled.div`
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
   align-items: center;
-  margin-top: var(--space-4);
+  margin-top: clamp(1.25rem, 3.5svh, var(--space-4));
+
+  @media (max-width: ${BREAKPOINTS.small}) {
+    row-gap: var(--space-1);
+    margin-top: var(--space-3);
+  }
 `;
 
 const PrimaryAction = styled.a`
@@ -365,7 +394,7 @@ const DossierMeta = styled.dl`
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
-  margin: var(--space-5) 0 0;
+  margin: clamp(var(--space-3), 5svh, var(--space-5)) 0 0;
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-line);
   color: var(--color-ivory-muted);
@@ -386,6 +415,10 @@ const DossierMeta = styled.dl`
   dd {
     margin: 0;
   }
+
+  @media (max-width: ${BREAKPOINTS.small}) {
+    margin-top: var(--space-3);
+  }
 `;
 
 const Section = styled.section`
@@ -405,13 +438,13 @@ const Section = styled.section`
     background: var(--color-charcoal);
   }
 
-  @media (max-width: 60rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     &::before {
       display: none;
     }
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding: var(--space-5) 0;
   }
 `;
@@ -431,7 +464,7 @@ const RecoverySection = styled(Section)`
   padding-top: var(--space-8);
   padding-bottom: var(--space-7);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding-top: var(--space-6);
     padding-bottom: var(--space-5);
   }
@@ -444,7 +477,7 @@ const SectionHeader = styled.div`
   align-items: end;
   margin-bottom: var(--space-5);
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: 1fr;
     margin-bottom: var(--space-4);
   }
@@ -488,7 +521,7 @@ const RecoveryHeader = styled.div`
     margin-top: var(--space-4);
   }
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: 1fr;
     gap: var(--space-3);
 
@@ -513,7 +546,7 @@ const RiskPrinciple = styled.div`
   align-items: baseline;
   background: var(--color-boundary-fill);
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: 1fr;
     width: 100%;
     margin-top: var(--space-4);
@@ -544,7 +577,7 @@ const DiagnosticSection = styled(Section)`
   padding-bottom: var(--space-7);
   border-top-color: var(--color-line-strong);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding: var(--space-5) 0;
   }
 `;
@@ -554,7 +587,7 @@ const DiagnosticList = styled.div`
   border-top: 1px solid var(--color-line-strong);
   background: var(--color-section-wash);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding: 0 var(--space-3);
   }
 `;
@@ -566,12 +599,12 @@ const DiagnosticRow = styled.article`
   padding: var(--space-4) 0;
   border-bottom: 1px solid var(--color-line);
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: 1fr;
     gap: var(--space-3);
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     gap: var(--space-2);
     padding: var(--space-3) 0;
   }
@@ -615,7 +648,7 @@ const DiagnosticDetails = styled.dl`
     line-height: 1.58;
   }
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
 
@@ -624,7 +657,7 @@ const DiagnosticDetails = styled.dl`
     }
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     grid-template-columns: 1fr;
 
     div:first-of-type {
@@ -642,11 +675,11 @@ const EngagementLayout = styled.div`
   grid-template-columns: minmax(16rem, 0.72fr) minmax(0, 1.28fr);
   gap: var(--space-5) var(--space-7);
 
-  @media (max-width: 52rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     grid-template-columns: 1fr;
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     gap: var(--space-4);
   }
 `;
@@ -657,7 +690,7 @@ const EngagementLead = styled.div`
   align-content: start;
   align-self: start;
 
-  @media (min-width: 52.0625rem) {
+  @media (min-width: ${BREAKPOINTS.largeUp}) {
     position: sticky;
     top: var(--space-7);
   }
@@ -670,7 +703,7 @@ const EngagementList = styled.ol`
   border-left: 1px solid var(--color-line);
   list-style: none;
 
-  @media (max-width: 52rem) {
+  @media (max-width: ${BREAKPOINTS.large}) {
     padding-left: 0;
     border-left: 0;
   }
@@ -683,7 +716,7 @@ const EngagementStep = styled.li`
   padding: var(--space-5) 0;
   border-bottom: 1px solid var(--color-line);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding: var(--space-3) 0;
   }
 `;
@@ -747,7 +780,7 @@ const ClosingSection = styled(Section)`
   padding-top: var(--space-8);
   padding-bottom: var(--space-8);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding-top: var(--space-5);
     padding-bottom: var(--space-5);
   }
@@ -761,13 +794,13 @@ const ClosingLayout = styled.div`
   align-items: end;
   background: var(--color-boundary-fill);
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${BREAKPOINTS.medium}) {
     grid-template-columns: 1fr;
     gap: var(--space-4);
     padding: var(--space-4);
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     padding: var(--space-3);
   }
 `;
@@ -803,7 +836,7 @@ const ClosingBody = styled.div`
 const ClosingAction = styled(PrimaryAction)`
   margin-top: var(--space-3);
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${BREAKPOINTS.small}) {
     width: 100%;
   }
 `;
