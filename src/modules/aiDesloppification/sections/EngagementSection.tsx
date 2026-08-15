@@ -132,8 +132,8 @@ export default function EngagementSection() {
               Small phases. Clear ownership.
             </SectionTitle>
             <SectionBody>
-              We price and sequence the work around what the business actually
-              needs to protect, not an abstract ideal of perfect code.
+              We sequence the work around the workflows the business needs to
+              trust first—not an abstract ideal of perfect code.
             </SectionBody>
           </EngagementLead>
 

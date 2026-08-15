@@ -132,9 +132,9 @@ export default function DiagnosticsSection() {
             Where the risk shows up.
           </SectionTitle>
           <SectionBody>
-            These patterns often arrive together, but each points to a different
-            boundary, safeguard, or operating path that needs to be made
-            explicit.
+            These patterns appear when code is produced faster than it is
+            understood. Each points to missing structure, knowledge, or
+            verification that human engineering needs to restore.
           </SectionBody>
         </DiagnosticHeader>
 

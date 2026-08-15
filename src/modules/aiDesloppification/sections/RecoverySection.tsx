@@ -100,8 +100,9 @@ export default function RecoverySection() {
             The expensive part starts after it works.
           </SectionTitle>
           <SectionBody>
-            Fast builds are valuable. But once a tool carries customer data,
-            business decisions, or team time, unknowns become operating risk.
+            AI can compress the path to a working product. It does not remove
+            the need for architecture, verification, and ownership. When
+            generation outpaces understanding, that gap becomes operating risk.
           </SectionBody>
         </RecoveryHeader>
 
@@ -110,10 +111,10 @@ export default function RecoverySection() {
             Working and operable are different states.
           </RiskPrincipleTitle>
           <RiskPrincipleBody>
-            Recovery makes the product workflow, model boundary, customer-data
-            boundary, review and test seams, release path, and rollback
-            explicit—without discarding the product insight that made the first
-            version valuable.
+            Recovery closes the gap between code that produces the right result
+            today and a system a team can explain, test, release, and change
+            tomorrow. We keep the product insight, then make its boundaries,
+            decisions, and failure paths explicit.
           </RiskPrincipleBody>
         </RiskPrinciple>
       </Shell>

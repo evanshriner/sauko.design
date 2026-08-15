@@ -225,12 +225,13 @@ export default function HeroSection({
             You shipped the demo. <span>Now make it a system.</span>
           </HeroTitle>
           <HeroSubtitle>
-            AI software recovery // maintainable systems
+            AI-accelerated software // human-led recovery
           </HeroSubtitle>
           <HeroBody>
-            The first version proved there was something worth building. We turn
-            the AI-accelerated application that got you there into software your
-            team can understand, operate, and improve with confidence.
+            The first version proved the idea. AI helped you reach working
+            software quickly; now it needs the engineering that speed left
+            unresolved. We turn it into a system your team can explain, test,
+            operate, and keep improving.
           </HeroBody>
           <HeroActions>
             <PrimaryAction

@@ -87,16 +87,15 @@ export default function ClosingSection() {
           </ClosingTitle>
           <ClosingBody>
             <p>
-              Bring the application that has become difficult to reason about.
-              We will help you decide what to preserve, what to repair, and what
-              does not deserve a rebuild.
+              Bring the AI-accelerated application that works, but has become
+              difficult to explain, extend, or put into production. We will
+              identify what is sound, recover the structure around it, and
+              define the smallest safe path forward.
             </p>
             <ul>
-              <li>The release or workflow people hesitate to touch</li>
-              <li>Constraints around customers, data, or compliance</li>
-              <li>
-                The next outcome the business needs the software to support
-              </li>
+              <li>The core workflow that already works</li>
+              <li>Where the code becomes difficult to understand or change</li>
+              <li>The next release or product outcome you need to support</li>
             </ul>
             <ClosingAction
               href={BOOKING_URL}

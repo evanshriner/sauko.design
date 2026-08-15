@@ -15,7 +15,7 @@ export const Page = styled.main`
   --color-sepia-soft: rgba(224, 207, 173, 0.7);
   --color-line: rgba(241, 237, 232, 0.15);
   --color-line-strong: rgba(224, 207, 173, 0.38);
-  --color-charcoal: rgba(13, 13, 12, 0.96);
+  --color-charcoal: rgba(13, 13, 12, 0.86);
   --color-charcoal-soft: rgba(18, 17, 15, 0.72);
   --color-signal-glow: rgba(224, 207, 173, 0.48);
   --color-hero-wash: rgba(224, 207, 173, 0.1);

@@ -17,7 +17,7 @@ const Container = styled(FlexBox)`
   --audio-sepia-soft: rgba(224, 207, 173, 0.7);
   --audio-line: rgba(241, 237, 232, 0.15);
   --audio-line-strong: rgba(224, 207, 173, 0.38);
-  --audio-charcoal: rgba(13, 13, 12, 0.97);
+  --audio-charcoal: rgba(13, 13, 12, 0.84);
   --audio-charcoal-soft: rgba(18, 17, 15, 0.82);
   --audio-boundary-fill: rgba(224, 207, 173, 0.035);
   --audio-section-wash: rgba(224, 207, 173, 0.045);
