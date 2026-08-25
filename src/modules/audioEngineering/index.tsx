@@ -147,7 +147,7 @@ const FloatingUI = styled.div<{
 const TechnicalUIOverlay = () => (
   <>
     <FloatingUI top="15vh" left="5%" aria-hidden="true">
-      [SCAN_MODE: ACTIVE]
+      [LUFS_MONITOR: ACTIVE]
     </FloatingUI>
     <FloatingUI top="45vh" right="8%" aria-hidden="true">
       [BIT_DEPTH: 32_FLOAT]
@@ -275,7 +275,7 @@ function AudioEngineering() {
         }
         content={
           <>
-            with over a decade of engineering, mixing, and producing experience,
+            With over a decade of engineering, mixing, and producing experience,
             sauko specializes in providing high-end audio services to the motor
             city music industry.
           </>
@@ -294,7 +294,9 @@ function AudioEngineering() {
             Digital precision.
           </>
         }
-        content="preserving the heritage of sound. we specialize in the meticulous restoration and archival of analogue media, bringing recordings into the modern bit-depth with surgical transparency."
+        content="Through calibrated, premium hardware chains and transparent digital restoration, we   
+   meticulously remove age and noise, delivering master-quality digital files that       
+   preserve your audio heritage for generations."
         image="/images/restoration_equipment.png"
         imageAlt="Reel-to-reel and archival audio restoration equipment"
       />
@@ -315,9 +317,6 @@ function AudioEngineering() {
             shaping the acoustic landscape. we balance clarity with character,
             blending the warmth of analogue circuitry with modern production
             techniques to define your signature sound.
-            <NeonText fontSize="1rem" padding="1rem 0 0 0">
-              [CHARACTER_DRIVE_ACTIVE]
-            </NeonText>
           </>
         }
         image="/images/modular_rack.png"
