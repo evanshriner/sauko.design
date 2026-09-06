@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FlexBox from '../../shared/components/FlexBox';
 import CinematicSection from './components/CinematicSection';
 import ProjectReview from './sections/ProjectReview';
-import NeonText from '@/shared/styles/NeonText';
 import { DetroitSkyline } from './components/DetroitSkyline';
 import ProjectCarousel from './components/ProjectCarousel';
 
@@ -273,13 +272,7 @@ function AudioEngineering() {
             without compromise.
           </>
         }
-        content={
-          <>
-            With over a decade of engineering, mixing, and producing experience,
-            sauko specializes in providing high-end audio services to the motor
-            city music industry.
-          </>
-        }
+        content="Rooted in Detroit, sauko brings more than a decade of engineering, mixing, and production experience to music made in the Motor City—from archival restoration to final master."
         background={<DetroitSkyline />}
       />
 
@@ -312,13 +305,7 @@ function AudioEngineering() {
             Creative depth.
           </>
         }
-        content={
-          <>
-            shaping the acoustic landscape. we balance clarity with character,
-            blending the warmth of analogue circuitry with modern production
-            techniques to define your signature sound.
-          </>
-        }
+        content="Whether developing a production or mixing a finished arrangement, we use critical listening, analogue circuitry, and precise digital control to shape tone, space, balance, and dynamics—delivering a coherent mix prepared for mastering without losing its character."
         image="/images/modular_rack.png"
         imageAlt="Modular synthesis and analogue production rack"
       />
@@ -334,7 +321,7 @@ function AudioEngineering() {
             Global translation.
           </>
         }
-        content="the final stage of the sonic journey. we ensure your sound translates perfectly across all playback systems, from the club to headphones. commercial loudness with zero compromise on dynamic integrity."
+        content="Working from a stereo mix or stems, we refine tonal balance, dynamics, stereo image, and final level for the release—preserving the record’s character across club systems, headphones, streaming, and physical formats."
       />
 
       <ProjectCarousel id="projects" />
