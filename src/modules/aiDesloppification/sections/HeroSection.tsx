@@ -250,13 +250,13 @@ export default function HeroSection({
           </HeroActions>
           <DossierMeta aria-label="Assessment approach">
             <div>
-              <dt>Approach</dt>
-              <dd>Assess · stabilize · enable</dd>
+              <dt>あはは、結局あれを翻訳してもらったんですね。</dt>
+              {/* <dd>Assess · stabilize · enable</dd> */}
             </div>
-            <div>
+            {/* <div>
               <dt>Principle</dt>
               <dd>No blind rewrite</dd>
-            </div>
+            </div> */}
           </DossierMeta>
         </HeroContent>
         <HeroVisual ref={heroVisualRef} aria-hidden="true">

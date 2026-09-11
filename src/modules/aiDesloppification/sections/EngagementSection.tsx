@@ -8,6 +8,7 @@ import {
   SectionTitle,
   Shell,
 } from '../styles';
+import FlexBox from '@/shared/components/FlexBox';
 
 const EngagementRoot = styled(Section)`
   background: none;
@@ -104,7 +105,7 @@ const StepBody = styled.p`
   line-height: 1.62;
 `;
 
-const Deliverable = styled.p`
+const Deliverable = styled(FlexBox)`
   margin: var(--space-2) 0 0;
   color: var(--color-ivory);
   font-size: 0.88rem;
@@ -146,8 +147,14 @@ export default function EngagementSection() {
                   <StepTitle>{step.title}</StepTitle>
                   <StepBody>{step.body}</StepBody>
                   <Deliverable>
-                    <strong>You receive</strong>
-                    {step.deliverable}
+                    <strong>You receive:</strong>
+                    <FlexBox
+                      alignItems="center"
+                      justifyContent="center"
+                      width="auto"
+                    >
+                      {step.deliverable}
+                    </FlexBox>
                   </Deliverable>
                 </StepContent>
               </EngagementStep>

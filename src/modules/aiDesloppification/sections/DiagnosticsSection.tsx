@@ -129,7 +129,7 @@ export default function DiagnosticsSection() {
         </ChapterFolio>
         <DiagnosticHeader data-chapter-reveal>
           <SectionTitle id="diagnostic-title">
-            Where the risk shows up.
+            Where the risk shows up
           </SectionTitle>
           <SectionBody>
             These patterns appear when code is produced faster than it is

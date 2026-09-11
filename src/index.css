@@ -12,7 +12,7 @@ body,
 
 @font-face {
   font-family: 'Inclusive Sans';
-  src: url('./fonts/InclusiveSans-Regular.ttf') format('truetype');
+  src: url('/fonts/InclusiveSans-Regular.ttf') format('truetype');
 }
 
 .background {
