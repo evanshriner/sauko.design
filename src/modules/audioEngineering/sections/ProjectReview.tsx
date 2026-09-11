@@ -6,6 +6,7 @@ const ReviewRoot = styled.section`
   z-index: 2;
   display: flex;
   width: 100%;
+
   min-height: 100svh;
   padding: clamp(5rem, 12vh, 8rem) clamp(1.25rem, 5vw, 5rem);
   align-items: center;
@@ -20,11 +21,14 @@ const ReviewRoot = styled.section`
 const ReviewField = styled.div`
   display: grid;
   width: min(72rem, 100%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.7fr);
   gap: clamp(3rem, 7vw, 7rem);
   padding: clamp(2rem, 5vw, 4rem);
   border: 1px solid var(--audio-line);
   align-items: end;
+
   text-align: left;
   background: linear-gradient(
     135deg,

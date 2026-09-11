@@ -3,6 +3,11 @@ export const WAVE_ANIMATION_SPEED_DIVISOR = 1500;
 export const WAVE_AMPLITUDE = 3.5;
 export const WAVE_FREQUENCY = 5;
 export const HANDLE_AMPLITUDE_MULTIPLIER = 1.1;
+export const CONTROL_CLICK_ANIMATION_DURATION = 0.24;
+export const CONTROL_CLICK_ANIMATION_EASE: [number, number, number, number] = [
+  0.16, 1, 0.3, 1,
+];
+export const CONTROL_DRAG_THRESHOLD = 3;
 
 // Sizing and layout constants
 export const MEDIA_PLAYER_MAX_WIDTH = '500px';
@@ -12,8 +17,9 @@ export const MEDIA_PLAYER_GAP = '16px';
 export const CONTROL_BUTTON_PADDING = '8px';
 export const SCRUBBER_HEIGHT = '24px';
 export const SCRUBBER_MARGIN_TOP = '9px';
-export const SCRUBBER_HANDLE_SIZE = '14px';
-export const SCRUBBER_HANDLE_Y_OFFSET = 7; // Half of SCRUBBER_HANDLE_SIZE
+export const SCRUBBER_HANDLE_SIZE_PX = 14;
+export const SCRUBBER_HANDLE_SIZE = `${SCRUBBER_HANDLE_SIZE_PX}px`;
+export const SCRUBBER_HANDLE_Y_OFFSET = SCRUBBER_HANDLE_SIZE_PX / 2;
 export const PLAY_PAUSE_BUTTON_FONT_SIZE = '0.9rem';
 export const CONTROL_BUTTON_FONT_SIZE = '16px';
 export const TRACK_INFO_FONT_SIZE = '14px';

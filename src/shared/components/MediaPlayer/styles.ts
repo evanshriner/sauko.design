@@ -65,26 +65,44 @@ export const ScrubberContainer = styled(FlexBox)({
   alignItems: 'center',
 });
 
-export const MediaControlContainer = styled(FlexBox)<{ intensity?: number }>(
-  ({ theme, intensity = 0 }) => ({
-    backgroundColor: 'transparent',
-    borderRadius: '0px',
-    flexDirection: 'column',
-    color: theme.colors.defaultText,
-    padding: '3px',
-    height: '100%',
-    fontSize: '12px',
-    opacity: 0.8,
-    border: `${C.PLAY_PAUSE_BORDER_WIDTH} solid ${theme.colors.defaultText}`,
-    width: C.CONTROL_CONTAINER_MAX_WIDTH,
-    filter: theme.colors.defaultTextFilter,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    background: `linear-gradient(to top, ${theme.colors.defaultText} ${intensity}%, transparent ${intensity}%)`,
-    cursor: 'pointer',
-  }),
-);
+export const MediaControlContainer = styled(FlexBox)(({ theme }) => ({
+  position: 'relative',
+  overflow: 'hidden',
+  isolation: 'isolate',
+  backgroundColor: 'transparent',
+  borderRadius: '0px',
+  flexDirection: 'column',
+  color: theme.colors.defaultText,
+  padding: '3px',
+  height: '100%',
+  fontSize: '12px',
+  opacity: 0.8,
+  border: `${C.PLAY_PAUSE_BORDER_WIDTH} solid ${theme.colors.defaultText}`,
+  width: C.CONTROL_CONTAINER_MAX_WIDTH,
+  filter: theme.colors.defaultTextFilter,
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  cursor: 'pointer',
+  touchAction: 'none',
+}));
+
+export const MediaControlFill = styled(motion.div)(({ theme }) => ({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  backgroundColor: theme.colors.defaultText,
+  transformOrigin: 'bottom',
+  pointerEvents: 'none',
+}));
+
+export const MediaControlIcon = styled.div({
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  mixBlendMode: 'difference',
+  pointerEvents: 'none',
+});
 
 export const ScrubberHandle = styled(motion.div)(({ theme }) => ({
   position: 'absolute',

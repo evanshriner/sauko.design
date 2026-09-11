@@ -76,6 +76,7 @@ export const useMediaPlayer = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const gainRef = useRef<GainNode | null>(null);
 
+  const resumeAfterTrackChangeRef = useRef(false);
   useEffect(() => {
     audioRef.current.preload = 'auto';
     const fetchTracks = async () => {
@@ -116,19 +117,20 @@ export const useMediaPlayer = () => {
   });
 
   useEffect(() => {
-    console.log('Analyser node updated:', analyserRef.current);
-  }, [analyserRef.current]);
-
-  useEffect(() => {
     const audio = audioRef.current;
     if (currentTrackIndex !== null && tracks[currentTrackIndex]) {
       const track = tracks[currentTrackIndex];
+      const shouldResume =
+        resumeAfterTrackChangeRef.current || isPlayingRef.current;
+      resumeAfterTrackChangeRef.current = false;
+
+      setProgress(0);
+      setDuration(0);
+      setAmplitude(0);
       audio.src = track.url;
       audio.load();
 
-      setAmplitude(0);
-
-      if (isPlayingRef.current) {
+      if (shouldResume) {
         audio.play().catch((e) => {
           console.error('Autoplay failed', e);
           setIsPlaying(false);
@@ -255,18 +257,29 @@ export const useMediaPlayer = () => {
     } catch (error) {
       console.error('Playback failed:', error);
     }
-  }, [currentTrackIndex, isAudioGraphSetup]);
+  }, [currentTrackIndex, isAudioGraphSetup, volume]);
 
   const pause = useCallback(() => {
     audioRef.current.pause();
   }, []);
 
   const skipForward = useCallback(() => {
-    if (currentTrackIndex !== null) {
+    if (currentTrackIndex !== null && tracks.length > 0) {
       const nextIndex = (currentTrackIndex + 1) % tracks.length;
       setCurrentTrackIndex(nextIndex);
     }
   }, [currentTrackIndex, tracks.length]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    const handleEnded = () => {
+      resumeAfterTrackChangeRef.current = true;
+      skipForward();
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
+  }, [skipForward]);
 
   const skipBackward = useCallback(() => {
     if (currentTrackIndex !== null) {
