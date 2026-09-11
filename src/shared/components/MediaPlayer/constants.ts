@@ -8,6 +8,9 @@ export const CONTROL_CLICK_ANIMATION_EASE: [number, number, number, number] = [
   0.16, 1, 0.3, 1,
 ];
 export const CONTROL_DRAG_THRESHOLD = 3;
+export const SEEK_KEYBOARD_STEP_SECONDS = 5;
+export const LEVEL_KEYBOARD_STEP = 5;
+export const LEVEL_KEYBOARD_PAGE_STEP = 10;
 
 // Sizing and layout constants
 export const MEDIA_PLAYER_MAX_WIDTH = '500px';
@@ -22,6 +25,11 @@ export const SCRUBBER_HANDLE_SIZE = `${SCRUBBER_HANDLE_SIZE_PX}px`;
 export const SCRUBBER_HANDLE_Y_OFFSET = SCRUBBER_HANDLE_SIZE_PX / 2;
 export const PLAY_PAUSE_BUTTON_FONT_SIZE = '0.9rem';
 export const CONTROL_BUTTON_FONT_SIZE = '16px';
+export const MOBILE_TOUCH_TARGET = '44px';
+export const MOBILE_PLAY_PAUSE_SIZE = '56px';
+export const MOBILE_PLAYER_PADDING = '20px';
+export const MOBILE_PLAYER_GAP = '16px';
+export const MOBILE_LEVEL_CONTROL_HEIGHT = '44px';
 export const TRACK_INFO_FONT_SIZE = '14px';
 export const WAVE_SVG_HEIGHT = '10';
 export const WAVE_CLIP_PATH_Y = '-5';
@@ -37,4 +45,4 @@ export const TRANSFORM_SCALE_HOVER = 'scale(1.1)';
 export const TRANSFORM_TRANSITION_DURATION = '0.5s';
 
 // IDs
-export const CLIP_PATH_ID = 'progress-clip';
+export const WAVE_CLIP_PATH_ID_PREFIX = 'progress-clip';
