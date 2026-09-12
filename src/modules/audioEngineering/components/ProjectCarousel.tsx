@@ -10,44 +10,52 @@ interface Project {
   description: string;
   image: string;
   type: string;
+  platform: string;
+  url: string;
 }
 
 const projects: Project[] = [
   {
-    artist: 'DETROIT TECHNO COLLECTIVE',
-    title: 'Vibrations from the Underground',
-    year: '2024',
-    description:
-      'Meticulous stem mastering for a 12-track vinyl release. Focused on maintaining sub-bass integrity while achieving commercial loudness.',
-    image: '/images/artist1.jpg',
-    type: 'STEM_MASTERING',
+    artist: 'Know Now',
+    title: 'Wash',
+    year: '2021',
+    description: '',
+    image: 'https://f4.bcbits.com/img/a2248853944_5.jpg',
+    type: 'MASTERING / PRODUCTION',
+    platform: 'BANDCAMP',
+    url: 'https://knownow.bandcamp.com/album/wash',
   },
   {
-    artist: 'SARAH LUV',
-    title: 'Ethereal Echoes',
-    year: '2023',
-    description:
-      'Full production and mixing. Blending organic vocal textures with industrial modular synthesis.',
-    image: '/images/artist2.jpg',
-    type: 'PRODUCTION // MIXING',
+    artist: 'suralo',
+    title: 'steady.220',
+    year: '2020',
+    description: '',
+    image:
+      'https://i1.sndcdn.com/artworks-ojYZ3OJbFkTuX8qm-VmjDmg-t1080x1080.jpg',
+    type: 'PRODUCTION',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/suralo/steady',
   },
   {
-    artist: 'THE ARCHIVIST',
-    title: 'Reel-to-Reel Restoration',
-    year: '2023',
-    description:
-      'Restoration of lost 1970s jazz tapes. Noise floor reduction and frequency balancing for digital archival.',
-    image: '/images/artist1.jpg',
-    type: 'RESTORATION',
+    artist: 'MADLINK',
+    title: 'Earthbound',
+    year: '2020',
+    description: '',
+    image:
+      'https://i1.sndcdn.com/artworks-ynk0zPmjOQSqPY2N-xgRTFQ-t1080x1080.jpg',
+    type: 'MASTERING',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/maxwell-mcgrath/sets/earthbound',
   },
   {
-    artist: 'URBAN RHYTHM',
-    title: 'Concrete Jungle',
-    year: '2022',
-    description:
-      'Stereo mastering for global streaming. Optimized for maximum translation across club systems and mobile devices.',
-    image: '/images/artist2.jpg',
-    type: 'STEREO_MASTERING',
+    artist: 'CountedGnome',
+    title: 'Revive',
+    year: '2018',
+    description: '',
+    image: 'https://i1.sndcdn.com/artworks-000374202798-8h1hz0-t1080x1080.jpg',
+    type: 'MASTERING',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/countedgnome/countedgnome-revive',
   },
 ];
 
@@ -256,6 +264,25 @@ const TechnicalMeta = styled.div`
   gap: 10px;
   flex-wrap: wrap;
 `;
+const ProjectLink = styled.a`
+  color: var(--audio-sepia);
+  text-decoration: underline;
+  text-decoration-color: var(--audio-sepia-soft);
+  text-underline-offset: 0.25em;
+  transition:
+    color 220ms var(--audio-ease-out),
+    text-decoration-color 220ms var(--audio-ease-out);
+
+  &:hover {
+    color: var(--audio-ivory);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--audio-ivory);
+    outline-offset: 0.25rem;
+  }
+`;
 
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
   return (
@@ -263,7 +290,7 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       <ImageWrapper className="project-image-wrapper">
         <ProjectImage
           src={project.image}
-          alt={project.title}
+          alt={`${project.title} artwork by ${project.artist}`}
           className="project-image"
         />
       </ImageWrapper>
@@ -275,8 +302,15 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
         <HoverContent className="hover-content">
           <Description>{project.description}</Description>
           <TechnicalMeta>
-            <span>[TYPE: {project.type}]</span>
-            <span>[STATUS: DELIVERED]</span>
+            <span>[FORMAT: {project.type}]</span>
+            <ProjectLink
+              href={project.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Listen to ${project.title} by ${project.artist} on ${project.platform} (opens in a new tab)`}
+            >
+              [OPEN_ON_{project.platform}]
+            </ProjectLink>
           </TechnicalMeta>
         </HoverContent>
       </InfoOverlay>
@@ -307,6 +341,7 @@ const ProjectCarousel: React.FC<{ id: string }> = ({ id }) => {
               filter: 'blur(0px)',
               duration: 1,
               ease: 'power3.out',
+              immediateRender: false,
               scrollTrigger: {
                 trigger: card,
                 start: 'top 95%',
