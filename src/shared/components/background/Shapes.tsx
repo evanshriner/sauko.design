@@ -75,8 +75,12 @@ const ModelInstance = React.forwardRef<
           }
         }
       });
+
+      if (config.initialRotationOffset !== undefined) {
+        clonedScene.rotation.y = config.initialRotationOffset;
+      }
       return clonedScene;
-    }, [gltf, reflectiveMaterial]);
+    }, [gltf, reflectiveMaterial, config.initialRotationOffset]);
 
     return (
       <primitive
@@ -261,17 +265,7 @@ export default function Shapes({
   useEffect(() => {
     modelRefs.current.forEach((ref, index) => {
       if (ref.current) {
-        const config = objectConfigurations[index];
-        const modelConfig =
-          isMobile && config.models.mobile
-            ? config.models.mobile
-            : config.models.desktop;
-
         ref.current.position.copy(animationStates.current[index].currentPos);
-
-        if (modelConfig.initialRotationOffset) {
-          ref.current.rotation.y = modelConfig.initialRotationOffset;
-        }
       }
     });
   }, [isMobile]);

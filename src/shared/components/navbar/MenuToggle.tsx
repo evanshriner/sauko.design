@@ -43,8 +43,8 @@ const MenuToggleButton = styled('button', {
   }`,
   borderRadius: 0,
   backgroundColor: $isOpen
-    ? 'rgba(13, 13, 12, 0.82)'
-    : 'rgba(13, 13, 12, 0.28)',
+    ? 'rgba(13, 13, 12, 0.12)'
+    : 'rgba(13, 13, 12, 0.18)',
   color: $isOpen ? theme.colors.defaultSelected : theme.colors.defaultText,
   filter: theme.colors.defaultTextFilter,
   fontSize: '1.65rem',
@@ -65,7 +65,7 @@ const MenuToggleButton = styled('button', {
   '@media (hover: hover) and (pointer: fine)': {
     '&:hover': {
       borderColor: 'rgba(224, 207, 173, 0.38)',
-      backgroundColor: 'rgba(13, 13, 12, 0.64)',
+      backgroundColor: 'rgba(13, 13, 12, 0.04)',
     },
   },
   '@media (prefers-reduced-motion: reduce)': {
