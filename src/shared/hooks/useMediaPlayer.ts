@@ -4,9 +4,7 @@ type WindowWithAudioContext = Window &
   typeof globalThis & {
     webkitAudioContext: typeof AudioContext;
   };
-import { Track, AudioService } from '../services/AudioService';
-
-const audioService = new AudioService();
+import { TRACKS, type Track } from '../services/tracks';
 
 const getAmplitudeForFrequencyRange = (
   analyser: AnalyserNode,
@@ -57,9 +55,9 @@ const getAmplitudeForFrequencyRange = (
 };
 
 export const useMediaPlayer = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const tracks = TRACKS;
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
-    null,
+    () => (TRACKS.length > 0 ? 0 : null),
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -77,17 +75,9 @@ export const useMediaPlayer = () => {
   const gainRef = useRef<GainNode | null>(null);
 
   const resumeAfterTrackChangeRef = useRef(false);
+  const hasPlaybackBeenRequestedRef = useRef(false);
   useEffect(() => {
-    audioRef.current.preload = 'auto';
-    const fetchTracks = async () => {
-      const fetchedTracks = await audioService.getTracks();
-      setTracks(fetchedTracks);
-      console.log(`Fetched ${fetchedTracks.length} tracks`);
-      if (fetchedTracks.length > 0) {
-        setCurrentTrackIndex(0);
-      }
-    };
-    fetchTracks();
+    audioRef.current.preload = 'none';
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
@@ -116,7 +106,19 @@ export const useMediaPlayer = () => {
     isPlayingRef.current = isPlaying;
   });
 
+  const loadTrackSource = useCallback((track: Track) => {
+    const audio = audioRef.current;
+
+    setProgress(0);
+    setDuration(0);
+    setAmplitude(0);
+    audio.src = track.url;
+    audio.load();
+  }, []);
+
   useEffect(() => {
+    if (!hasPlaybackBeenRequestedRef.current) return;
+
     const audio = audioRef.current;
     if (currentTrackIndex !== null && tracks[currentTrackIndex]) {
       const track = tracks[currentTrackIndex];
@@ -218,6 +220,15 @@ export const useMediaPlayer = () => {
   const play = useCallback(async () => {
     if (currentTrackIndex === null) return;
 
+    const track = tracks[currentTrackIndex];
+    if (!track) return;
+
+    const audio = audioRef.current;
+    hasPlaybackBeenRequestedRef.current = true;
+    if (audio.getAttribute('src') !== track.url) {
+      loadTrackSource(track);
+    }
+
     if (!isAudioGraphSetup) {
       if (!audioContextRef.current) {
         try {
@@ -239,7 +250,6 @@ export const useMediaPlayer = () => {
           return;
         }
       }
-      const audio = audioRef.current;
       if (audioContextRef.current && analyserRef.current && gainRef.current) {
         const source = audioContextRef.current.createMediaElementSource(audio);
         source.connect(analyserRef.current);
@@ -253,11 +263,11 @@ export const useMediaPlayer = () => {
       if (audioContextRef.current?.state === 'suspended') {
         await audioContextRef.current.resume();
       }
-      await audioRef.current.play();
+      await audio.play();
     } catch (error) {
       console.error('Playback failed:', error);
     }
-  }, [currentTrackIndex, isAudioGraphSetup, volume]);
+  }, [currentTrackIndex, isAudioGraphSetup, loadTrackSource, tracks, volume]);
 
   const pause = useCallback(() => {
     audioRef.current.pause();
