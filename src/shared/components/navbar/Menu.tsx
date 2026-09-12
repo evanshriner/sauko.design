@@ -36,7 +36,7 @@ const MobileBackdrop = styled(motion.div)({
   position: 'fixed',
   inset: 0,
   zIndex: 900,
-  backgroundColor: 'rgba(4, 4, 3, 0.64)',
+  backgroundColor: 'rgba(4, 4, 3, 0.44)',
   backdropFilter: 'blur(3px)',
   WebkitBackdropFilter: 'blur(3px)',
   pointerEvents: 'auto',
@@ -65,7 +65,7 @@ const MobileSheet = styled(motion.section)(({ theme }) => ({
   border: 0,
   borderTop: '1px solid rgba(241, 237, 232, 0.15)',
   borderRadius: 0,
-  backgroundColor: 'rgba(13, 13, 12, 0.9)',
+  backgroundColor: 'rgba(13, 13, 12, 0.3)',
   color: theme.colors.primaryText,
   backdropFilter: 'blur(20px) saturate(0.85)',
   WebkitBackdropFilter: 'blur(20px) saturate(0.85)',
@@ -80,17 +80,17 @@ const MobileSheet = styled(motion.section)(({ theme }) => ({
 }));
 
 const getFocusableElements = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) => {
-      const style = window.getComputedStyle(element);
-      return (
-        !element.matches(':disabled') &&
-        element.getAttribute('aria-hidden') !== 'true' &&
-        style.display !== 'none' &&
-        style.visibility !== 'hidden'
-      );
-    },
-  );
+  Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+  ).filter((element) => {
+    const style = window.getComputedStyle(element);
+    return (
+      !element.matches(':disabled') &&
+      element.getAttribute('aria-hidden') !== 'true' &&
+      style.display !== 'none' &&
+      style.visibility !== 'hidden'
+    );
+  });
 
 const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
   const prefersReducedMotion = useReducedMotion();
@@ -173,7 +173,8 @@ const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
       }
 
       const firstFocusableElement = focusableElements[0];
-      const lastFocusableElement = focusableElements[focusableElements.length - 1];
+      const lastFocusableElement =
+        focusableElements[focusableElements.length - 1];
       const activeElement = document.activeElement;
 
       if (
@@ -186,7 +187,8 @@ const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
         lastFocusableElement.focus({ preventScroll: true });
       } else if (
         !event.shiftKey &&
-        (activeElement === lastFocusableElement || !sheet.contains(activeElement))
+        (activeElement === lastFocusableElement ||
+          !sheet.contains(activeElement))
       ) {
         event.preventDefault();
         firstFocusableElement.focus({ preventScroll: true });
@@ -264,9 +266,7 @@ const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
                   aria-label="Quick controls"
                   tabIndex={-1}
                   initial={
-                    prefersReducedMotion
-                      ? false
-                      : { opacity: 0, y: '3rem' }
+                    prefersReducedMotion ? false : { opacity: 0, y: '3rem' }
                   }
                   animate={{ opacity: 1, y: 0 }}
                   exit={sheetExit}
@@ -284,4 +284,3 @@ const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
 };
 
 export default Menu;
-
