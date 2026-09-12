@@ -75,6 +75,8 @@ export default function Background({
       gl={WEBGL_PARAMETERS}
       data-scene-quality={quality.tier}
       data-scene-multisampling={quality.multisampling}
+      data-scene-reflection-resolution={quality.reflectionResolution}
+      data-scene-reflection-refresh-rate={quality.reflectionRefreshRate}
       camera={{
         fov: 70,
         near: 0.01,
@@ -88,6 +90,8 @@ export default function Background({
 
       <group>
         <Shapes
+          reflectionResolution={quality.reflectionResolution}
+          reflectionRefreshRate={quality.reflectionRefreshRate}
           selectedObjectKey={
             objectConfigurations.find(
               (config) => config.page === currentSelectableSubPage,

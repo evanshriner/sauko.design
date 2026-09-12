@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Preload } from '@react-three/drei';
@@ -21,22 +27,16 @@ import {
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
 
-const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
-  format: THREE.RGBAFormat,
-  generateMipmaps: false,
-  minFilter: THREE.LinearFilter,
-  colorSpace: THREE.SRGBColorSpace,
-});
-
-const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
-
 interface ShapesSwitcherProps {
   selectedObjectKey: DisplayedObject;
+  reflectionResolution: number;
+  reflectionRefreshRate: number;
   onObjectClick?: (objectId: DisplayedObject) => void;
   onObjectHover?: (objectId: DisplayedObject | null) => void;
 }
 
 const X_OFFSET_SPACING = 5.5;
+const REFLECTION_INTERVAL_TOLERANCE_SECONDS = 0.001;
 
 // Component to render a single model instance
 // eslint-disable-next-line react/display-name
@@ -101,6 +101,8 @@ const ModelInstance = React.forwardRef<
 );
 
 export default function Shapes({
+  reflectionResolution,
+  reflectionRefreshRate,
   selectedObjectKey = DisplayedObject.Boombox,
   onObjectClick,
   onObjectHover,
@@ -121,6 +123,31 @@ export default function Shapes({
   const modelRefs = useRef(
     objectConfigurations.map(() => React.createRef<THREE.Group>()),
   );
+  const reflectiveMeshesRef = useRef<THREE.Mesh[]>([]);
+  const reflectiveVisibilityRef = useRef<boolean[]>([]);
+  const reflectionAccumulatorRef = useRef(0);
+  const hasCapturedReflectionRef = useRef(false);
+
+  const reflectionResources = useMemo(() => {
+    const renderTarget = new THREE.WebGLCubeRenderTarget(reflectionResolution, {
+      format: THREE.RGBAFormat,
+      generateMipmaps: false,
+      minFilter: THREE.LinearFilter,
+      colorSpace: THREE.SRGBColorSpace,
+    });
+
+    return {
+      renderTarget,
+      camera: new THREE.CubeCamera(0.1, 100, renderTarget),
+    };
+  }, [reflectionResolution]);
+
+  useEffect(() => {
+    const { renderTarget } = reflectionResources;
+    return () => renderTarget.dispose();
+  }, [reflectionResources]);
+
+  const reflectionIntervalSeconds = 1 / Math.max(1, reflectionRefreshRate);
 
   const gltfPaths = useMemo(() => {
     const paths = new Set<string>();
@@ -187,11 +214,10 @@ export default function Shapes({
   const reflectiveUniforms = useMemo(
     () => ({
       time: { value: 0 },
-      tCube: { value: cubeRenderTarget.texture },
+      tCube: { value: reflectionResources.renderTarget.texture },
       resolution: { value: new THREE.Vector4() },
-      // Add any other uniforms your FresnelReflection shader needs
     }),
-    [],
+    [reflectionResources],
   );
 
   const reflectiveMaterial = useMemo(
@@ -204,6 +230,10 @@ export default function Shapes({
       }),
     [reflectiveUniforms], // Vertex/Fragment shaders are static strings
   );
+
+  useEffect(() => {
+    return () => reflectiveMaterial.dispose();
+  }, [reflectiveMaterial]);
 
   useEffect(() => {
     const newSelectedIndex = objectConfigurations.findIndex(
@@ -246,9 +276,30 @@ export default function Shapes({
     });
   }, [isMobile]);
 
-  useEffect(() => {
-    console.log(modelRefs.current);
-  }, [modelRefs.current]);
+  useLayoutEffect(() => {
+    const reflectiveMeshes = reflectiveMeshesRef.current;
+    reflectiveMeshes.length = 0;
+
+    modelRefs.current.forEach((ref) => {
+      ref.current?.traverse((object) => {
+        if (
+          object instanceof THREE.Mesh &&
+          object.material === reflectiveMaterial
+        ) {
+          reflectiveMeshes.push(object);
+        }
+      });
+    });
+
+    reflectiveVisibilityRef.current.length = reflectiveMeshes.length;
+    reflectionAccumulatorRef.current = 0;
+    hasCapturedReflectionRef.current = false;
+  }, [gltfMap, isMobile, reflectiveMaterial]);
+
+  useLayoutEffect(() => {
+    reflectionAccumulatorRef.current = 0;
+    hasCapturedReflectionRef.current = false;
+  }, [reflectionResources, selectedObjectKey]);
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
@@ -258,43 +309,56 @@ export default function Shapes({
       outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
     }
 
-    const { gl, scene } = state;
-
-    // Rotate the outer sphere
+    // Rotate the outer sphere independently of the reflection capture cadence.
     if (outerSphereMeshRef.current) {
       const speed = 0.03;
       outerSphereMeshRef.current.rotation.y = -time * speed;
     }
 
-    ///////////// ensure reflections on shapes are updated /////////////
-    const reflectiveMeshesInScene: THREE.Mesh[] = [];
-    scene.traverse((object) => {
+    reflectionAccumulatorRef.current += delta;
+    const shouldUpdateReflection =
+      !hasCapturedReflectionRef.current ||
+      reflectionAccumulatorRef.current +
+        REFLECTION_INTERVAL_TOLERANCE_SECONDS >=
+        reflectionIntervalSeconds;
+
+    if (shouldUpdateReflection) {
       if (
-        object instanceof THREE.Mesh &&
-        object.material === reflectiveMaterial &&
-        object.visible // Only consider visible meshes for reflection
+        hasCapturedReflectionRef.current &&
+        reflectionAccumulatorRef.current >= reflectionIntervalSeconds
       ) {
-        reflectiveMeshesInScene.push(object);
+        reflectionAccumulatorRef.current %= reflectionIntervalSeconds;
+      } else {
+        reflectionAccumulatorRef.current = 0;
       }
-    });
 
-    // Hide the objects that will receive the reflection
-    reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = false));
+      const reflectiveMeshes = reflectiveMeshesRef.current;
+      const previousVisibility = reflectiveVisibilityRef.current;
+      previousVisibility.length = reflectiveMeshes.length;
 
-    // To capture a static reflection, we temporarily reset the sphere's rotation,
-    // render the reflection, and then restore the rotation.
-    const sphere = outerSphereMeshRef.current;
-    if (sphere) {
-      const originalRotationY = sphere.rotation.y;
-      sphere.rotation.y = 0;
-      cubeCamera.update(gl, scene);
-      sphere.rotation.y = originalRotationY;
-    } else {
-      cubeCamera.update(gl, scene);
+      for (let index = 0; index < reflectiveMeshes.length; index += 1) {
+        const mesh = reflectiveMeshes[index];
+        previousVisibility[index] = mesh.visible;
+        mesh.visible = false;
+      }
+
+      const sphere = outerSphereMeshRef.current;
+      const originalRotationY = sphere?.rotation.y;
+
+      try {
+        if (sphere) sphere.rotation.y = 0;
+        reflectionResources.camera.update(state.gl, state.scene);
+        hasCapturedReflectionRef.current = true;
+      } finally {
+        if (sphere && originalRotationY !== undefined) {
+          sphere.rotation.y = originalRotationY;
+        }
+
+        for (let index = 0; index < reflectiveMeshes.length; index += 1) {
+          reflectiveMeshes[index].visible = previousVisibility[index];
+        }
+      }
     }
-
-    // Restore visibility for the main render
-    reflectiveMeshesInScene.forEach((mesh) => (mesh.visible = true));
 
     // Animate objects
     animationStates.current.forEach((animState, idx) => {
