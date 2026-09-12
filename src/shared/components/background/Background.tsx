@@ -1,14 +1,42 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { EffectComposer, Sepia, Vignette } from '@react-three/postprocessing';
 import { Vector3 } from 'three';
 
 import Shapes from './Shapes';
 import { DisplayedObject, objectConfigurations } from './ShapeConfig';
 import { Pages } from '@/shared/interfaces/pages';
-import { BlendFunction } from 'postprocessing';
+import {
+  BlendFunction,
+  type EffectComposer as EffectComposerImpl,
+} from 'postprocessing';
 import CustomDotScreen from './shaders/CustomDotScreen';
 import { cameraConfigurations } from './CameraConfig';
+import { useSceneQuality } from '@/shared/hooks/useSceneQuality';
+
+const WEBGL_PARAMETERS = { antialias: false } as const;
+
+function SceneEffects({ multisampling }: { multisampling: number }) {
+  const composerRef = useRef<EffectComposerImpl>(null);
+
+  useEffect(() => {
+    const composer = composerRef.current;
+    return () => composer?.dispose();
+  }, []);
+
+  return (
+    <EffectComposer ref={composerRef} multisampling={multisampling}>
+      <CustomDotScreen />
+      <Sepia intensity={0.1} blendFunction={BlendFunction.NORMAL} />
+      <Vignette
+        offset={0.6}
+        darkness={0.4}
+        eskil={false}
+        blendFunction={BlendFunction.NORMAL}
+      />
+    </EffectComposer>
+  );
+}
 
 function CameraControl({ currentPage }: { currentPage: Pages }) {
   const { camera } = useThree();
@@ -39,8 +67,14 @@ export default function Background({
   onObjectClick: (page: Pages) => void;
   onObjectHover: (isHovering: boolean) => void;
 }) {
+  const quality = useSceneQuality();
+
   return (
     <Canvas
+      dpr={quality.dpr}
+      gl={WEBGL_PARAMETERS}
+      data-scene-quality={quality.tier}
+      data-scene-multisampling={quality.multisampling}
       camera={{
         fov: 70,
         near: 0.01,
@@ -72,19 +106,7 @@ export default function Background({
           }}
         />
       </group>
-      <EffectComposer>
-        <CustomDotScreen />
-        <Sepia
-          intensity={0.1} // sepia intensity
-          blendFunction={BlendFunction.NORMAL} // blend mode
-        />
-        <Vignette
-          offset={0.6} // vignette offset
-          darkness={0.4} // vignette darkness
-          eskil={false} // Eskil's vignette technique
-          blendFunction={BlendFunction.NORMAL} // blend mode
-        />
-      </EffectComposer>
+      <SceneEffects key={quality.tier} multisampling={quality.multisampling} />
     </Canvas>
   );
 }
