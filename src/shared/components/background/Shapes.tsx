@@ -1,4 +1,7 @@
 import React, {
+  Suspense,
+  startTransition,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -7,8 +10,9 @@ import React, {
 } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useGLTF, Preload } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import type { GLTF } from 'three-stdlib';
+import { useReducedMotion } from 'framer-motion';
 
 import {
   fragmentShader as wavesFragment,
@@ -23,6 +27,7 @@ import {
   DisplayedObject,
   objectConfigurations,
   ObjectModelConfig,
+  ObjectConfig,
 } from './ShapeConfig';
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
@@ -37,22 +42,50 @@ interface ShapesSwitcherProps {
 
 const X_OFFSET_SPACING = 5.5;
 const REFLECTION_INTERVAL_TOLERANCE_SECONDS = 0.001;
+const COMPACT_MODEL_BREAKPOINT = 558;
+const IDLE_PREFETCH_TIMEOUT_MS = 1500;
+const AUDIO_RESPONSE_ATTACK_SECONDS = 0.045;
+const AUDIO_RESPONSE_DECAY_SECONDS = 0.32;
+const MAX_POINTER_ROTATION_RADIANS = THREE.MathUtils.degToRad(12);
+const POINTER_ROTATION_DAMPING = 5;
 
-// Component to render a single model instance
-// eslint-disable-next-line react/display-name
-const ModelInstance = React.forwardRef<
-  THREE.Group,
-  {
-    config: ObjectModelConfig;
-    gltf: GLTF;
-    reflectiveMaterial: THREE.ShaderMaterial | null;
-    onClick?: (event: ThreeEvent<MouseEvent>) => void;
-    onPointerOver?: (event: ThreeEvent<MouseEvent>) => void;
-    onPointerOut?: (event: ThreeEvent<MouseEvent>) => void;
-  }
->(
+const getActiveModelConfig = (
+  config: ObjectConfig,
+  isCompact: boolean,
+): ObjectModelConfig =>
+  isCompact
+    ? config.models.mobile ?? config.models.desktop
+    : config.models.desktop;
+
+interface ModelInstanceProps {
+  config: ObjectModelConfig;
+  gltf: GLTF;
+  initialPosition: THREE.Vector3;
+  modelIndex: number;
+  reflectiveMaterial: THREE.ShaderMaterial;
+  registerModelInstance: (
+    modelIndex: number,
+    modelScene: THREE.Group,
+    config: ObjectModelConfig,
+  ) => () => void;
+  onClick?: (event: ThreeEvent<MouseEvent>) => void;
+  onPointerOver?: (event: ThreeEvent<MouseEvent>) => void;
+  onPointerOut?: (event: ThreeEvent<MouseEvent>) => void;
+}
+
+const ModelInstance = React.forwardRef<THREE.Group, ModelInstanceProps>(
   (
-    { config, gltf, reflectiveMaterial, onClick, onPointerOver, onPointerOut },
+    {
+      config,
+      gltf,
+      initialPosition,
+      modelIndex,
+      reflectiveMaterial,
+      registerModelInstance,
+      onClick,
+      onPointerOver,
+      onPointerOut,
+    },
     ref,
   ) => {
     const responsiveScale = useResponsiveScale(
@@ -65,44 +98,62 @@ const ModelInstance = React.forwardRef<
       clonedScene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           if (!child.geometry.attributes.normal) {
-            // this needs to be done for some models that
-            // done have pre-calculated normals.
             child.geometry.computeVertexNormals();
           }
 
-          if (reflectiveMaterial) {
-            child.material = reflectiveMaterial;
-          }
+          child.material = reflectiveMaterial;
         }
       });
 
+      clonedScene.position.copy(initialPosition);
       if (config.initialRotationOffset !== undefined) {
         clonedScene.rotation.y = config.initialRotationOffset;
       }
       return clonedScene;
-    }, [gltf, reflectiveMaterial, config.initialRotationOffset]);
+    }, [
+      config.initialRotationOffset,
+      gltf,
+      initialPosition,
+      reflectiveMaterial,
+    ]);
+
+    useLayoutEffect(
+      () => registerModelInstance(modelIndex, modelScene, config),
+      [config, modelIndex, modelScene, registerModelInstance],
+    );
 
     return (
       <primitive
         ref={ref}
         object={modelScene}
         scale={responsiveScale}
-        onClick={(e: ThreeEvent<MouseEvent>) => {
-          e.stopPropagation();
-          onClick?.(e);
+        onClick={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          onClick?.(event);
         }}
-        onPointerOver={(e: ThreeEvent<MouseEvent>) => {
-          e.stopPropagation();
-          onPointerOver?.(e);
+        onPointerOver={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          onPointerOver?.(event);
         }}
-        onPointerOut={(e: ThreeEvent<MouseEvent>) => {
-          e.stopPropagation();
-          onPointerOut?.(e);
+        onPointerOut={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          onPointerOut?.(event);
         }}
       />
     );
   },
 );
+ModelInstance.displayName = 'ModelInstance';
+
+type LazyModelInstanceProps = Omit<ModelInstanceProps, 'gltf'>;
+
+const LazyModelInstance = React.forwardRef<THREE.Group, LazyModelInstanceProps>(
+  ({ config, ...props }, ref) => {
+    const gltf = useGLTF(config.gltfPath);
+    return <ModelInstance ref={ref} config={config} gltf={gltf} {...props} />;
+  },
+);
+LazyModelInstance.displayName = 'LazyModelInstance';
 
 export default function Shapes({
   reflectionResolution,
@@ -111,21 +162,138 @@ export default function Shapes({
   onObjectClick,
   onObjectHover,
 }: ShapesSwitcherProps) {
-  const { amplitude } = useMediaPlayerContext();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 558);
+  const { amplitude, currentTrackIndex, isPlaying } = useMediaPlayerContext();
+  const prefersReducedMotion = useReducedMotion();
+  const audioEnvelopeRef = useRef(0);
+  const pointerRotationTargetRef = useRef(new THREE.Vector2());
+  const [isCompact, setIsCompact] = useState(
+    () => window.innerWidth < COMPACT_MODEL_BREAKPOINT,
+  );
+  const [renderedObjectIds, setRenderedObjectIds] = useState(
+    () => new Set<DisplayedObject>([selectedObjectKey]),
+  );
+  const [displayedObjectKey, setDisplayedObjectKey] =
+    useState<DisplayedObject>(selectedObjectKey);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const initialSelectedObjectKeyRef = useRef(selectedObjectKey);
+  const selectedObjectKeyRef = useRef(selectedObjectKey);
+  const requestedCompactModeRef = useRef(isCompact);
+  const prefetchedPathsRef = useRef(new Set<string>());
+  selectedObjectKeyRef.current = selectedObjectKey;
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 558);
+      const nextIsCompact = window.innerWidth < COMPACT_MODEL_BREAKPOINT;
+      if (nextIsCompact === requestedCompactModeRef.current) return;
+
+      requestedCompactModeRef.current = nextIsCompact;
+      startTransition(() => {
+        setIsCompact(nextIsCompact);
+        setRenderedObjectIds(
+          new Set<DisplayedObject>([selectedObjectKeyRef.current]),
+        );
+      });
     };
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const pointerTarget = pointerRotationTargetRef.current;
+    if (prefersReducedMotion) {
+      pointerTarget.set(0, 0);
+      return;
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      pointerTarget.set(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        1 - (event.clientY / window.innerHeight) * 2,
+      );
+    };
+    const resetPointerTarget = () => pointerTarget.set(0, 0);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('blur', resetPointerTarget);
+    document.documentElement.addEventListener('mouseleave', resetPointerTarget);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('blur', resetPointerTarget);
+      document.documentElement.removeEventListener(
+        'mouseleave',
+        resetPointerTarget,
+      );
+    };
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    setRenderedObjectIds((currentIds) => {
+      if (currentIds.has(selectedObjectKey)) return currentIds;
+      const nextIds = new Set(currentIds);
+      nextIds.add(selectedObjectKey);
+      return nextIds;
+    });
+
+    if (selectedObjectKey !== initialSelectedObjectKeyRef.current) {
+      setHasInteracted(true);
+    }
+  }, [selectedObjectKey]);
+
+  useEffect(() => {
+    if (!hasInteracted || objectConfigurations.length === 0) return;
+
+    const selectedIndex = objectConfigurations.findIndex(
+      (config) => config.id === selectedObjectKey,
+    );
+    if (selectedIndex < 0) return;
+
+    const nextConfig =
+      objectConfigurations[(selectedIndex + 1) % objectConfigurations.length];
+    const nextPath = getActiveModelConfig(nextConfig, isCompact).gltfPath;
+    if (prefetchedPathsRef.current.has(nextPath)) return;
+
+    let cancelled = false;
+    const preloadNextModel = () => {
+      if (cancelled) return;
+      prefetchedPathsRef.current.add(nextPath);
+      useGLTF.preload(nextPath);
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const idleCallbackId = window.requestIdleCallback(preloadNextModel, {
+        timeout: IDLE_PREFETCH_TIMEOUT_MS,
+      });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(idleCallbackId);
+      };
+    }
+
+    const timeoutId = window.setTimeout(
+      preloadNextModel,
+      IDLE_PREFETCH_TIMEOUT_MS,
+    );
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [hasInteracted, isCompact, selectedObjectKey]);
 
   const outerSphereRef = useRef<THREE.ShaderMaterial>(null);
   const outerSphereMeshRef = useRef<THREE.Mesh>(null);
   const modelRefs = useRef(
     objectConfigurations.map(() => React.createRef<THREE.Group>()),
+  );
+  const reflectiveMeshesByModelRef = useRef(
+    objectConfigurations.map(() => [] as THREE.Mesh[]),
+  );
+  const mountedModelConfigsRef = useRef(
+    objectConfigurations.map(() => null as ObjectModelConfig | null),
+  );
+  const mountedModelScenesRef = useRef(
+    objectConfigurations.map(() => null as THREE.Group | null),
   );
   const reflectiveMeshesRef = useRef<THREE.Mesh[]>([]);
   const reflectiveVisibilityRef = useRef<boolean[]>([]);
@@ -153,34 +321,6 @@ export default function Shapes({
 
   const reflectionIntervalSeconds = 1 / Math.max(1, reflectionRefreshRate);
 
-  const gltfPaths = useMemo(() => {
-    const paths = new Set<string>();
-    objectConfigurations.forEach((config) => {
-      paths.add(config.models.desktop.gltfPath);
-      if (config.models.mobile) {
-        paths.add(config.models.mobile.gltfPath);
-      }
-    });
-    return Array.from(paths);
-  }, []);
-
-  const gltfs = useGLTF(gltfPaths) as GLTF[];
-
-  const gltfMap = useMemo(() => {
-    const map: Record<string, GLTF> = {};
-    gltfs.forEach((gltf, index) => {
-      // This mapping assumes the order of gltfPaths matches the order of gltfs.
-      // It's better to map by path.
-      const path = gltfPaths[index];
-      map[path] = gltf;
-    });
-    return map;
-  }, [gltfs, gltfPaths]);
-
-  useEffect(() => {
-    console.log('gltf map:', gltfMap);
-  }, [gltfMap]);
-
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(4, 32, 32), []);
 
   // This ref will hold the animation state for each object
@@ -192,7 +332,7 @@ export default function Shapes({
       const carouselOffsetX = (index - initialSelectedIndex) * X_OFFSET_SPACING;
 
       // Use the object's basePosition from the config as the starting point
-      const modelConfig = config.models.mobile ?? config.models.desktop;
+      const modelConfig = getActiveModelConfig(config, isCompact);
       const initialPos = modelConfig.basePosition.clone();
       initialPos.x += carouselOffsetX;
 
@@ -214,6 +354,11 @@ export default function Shapes({
     }),
     [],
   );
+
+  useLayoutEffect(() => {
+    audioEnvelopeRef.current = 0;
+    outerUniforms.uAmplitude.value = 0;
+  }, [currentTrackIndex, outerUniforms]);
 
   const reflectiveUniforms = useMemo(
     () => ({
@@ -239,56 +384,97 @@ export default function Shapes({
     return () => reflectiveMaterial.dispose();
   }, [reflectiveMaterial]);
 
+  const rebuildReflectiveMeshCache = useCallback(() => {
+    const reflectiveMeshes = reflectiveMeshesRef.current;
+    reflectiveMeshes.length = 0;
+
+    for (const modelMeshes of reflectiveMeshesByModelRef.current) {
+      for (const mesh of modelMeshes) reflectiveMeshes.push(mesh);
+    }
+
+    reflectiveVisibilityRef.current.length = reflectiveMeshes.length;
+    reflectionAccumulatorRef.current = 0;
+    hasCapturedReflectionRef.current = false;
+  }, []);
+
+  const registerModelInstance = useCallback(
+    (
+      modelIndex: number,
+      modelScene: THREE.Group,
+      config: ObjectModelConfig,
+    ) => {
+      const modelMeshes = reflectiveMeshesByModelRef.current[modelIndex];
+      modelMeshes.length = 0;
+
+      modelScene.position.copy(animationStates.current[modelIndex].currentPos);
+      modelScene.traverse((object) => {
+        if (
+          object instanceof THREE.Mesh &&
+          object.material === reflectiveMaterial
+        ) {
+          modelMeshes.push(object);
+        }
+      });
+
+      mountedModelScenesRef.current[modelIndex] = modelScene;
+      mountedModelConfigsRef.current[modelIndex] = config;
+      rebuildReflectiveMeshCache();
+
+      const objectConfig = objectConfigurations[modelIndex];
+      if (
+        objectConfig?.id === selectedObjectKeyRef.current &&
+        getActiveModelConfig(objectConfig, requestedCompactModeRef.current)
+          .gltfPath === config.gltfPath
+      ) {
+        setDisplayedObjectKey(objectConfig.id);
+      }
+
+      return () => {
+        if (mountedModelScenesRef.current[modelIndex] !== modelScene) return;
+
+        mountedModelScenesRef.current[modelIndex] = null;
+        mountedModelConfigsRef.current[modelIndex] = null;
+        modelMeshes.length = 0;
+        rebuildReflectiveMeshCache();
+      };
+    },
+    [rebuildReflectiveMeshCache, reflectiveMaterial],
+  );
+
+  useLayoutEffect(() => {
+    const selectedIndex = objectConfigurations.findIndex(
+      (config) => config.id === selectedObjectKey,
+    );
+    if (selectedIndex < 0) return;
+
+    const objectConfig = objectConfigurations[selectedIndex];
+    const mountedConfig = mountedModelConfigsRef.current[selectedIndex];
+    if (
+      mountedModelScenesRef.current[selectedIndex] &&
+      mountedConfig?.gltfPath ===
+        getActiveModelConfig(objectConfig, isCompact).gltfPath
+    ) {
+      setDisplayedObjectKey(selectedObjectKey);
+    }
+  }, [isCompact, selectedObjectKey]);
+
   useEffect(() => {
     const newSelectedIndex = objectConfigurations.findIndex(
-      (c) => c.id === selectedObjectKey,
+      (c) => c.id === displayedObjectKey,
     );
 
     animationStates.current.forEach((state, index) => {
       const config = objectConfigurations[index];
       const carouselOffsetX = (index - newSelectedIndex) * X_OFFSET_SPACING;
 
-      const modelConfig =
-        isMobile && config.models.mobile
-          ? config.models.mobile
-          : config.models.desktop;
+      const modelConfig = getActiveModelConfig(config, isCompact);
       const basePos = modelConfig.basePosition.clone();
 
       // Update the entire target position vector
       state.targetPos.copy(basePos);
       state.targetPos.x = carouselOffsetX;
     });
-  }, [selectedObjectKey, isMobile]);
-
-  // This effect sets the initial position for each model to prevent a flicker
-  // from [0,0,0] on the first frame.
-  useEffect(() => {
-    modelRefs.current.forEach((ref, index) => {
-      if (ref.current) {
-        ref.current.position.copy(animationStates.current[index].currentPos);
-      }
-    });
-  }, [isMobile]);
-
-  useLayoutEffect(() => {
-    const reflectiveMeshes = reflectiveMeshesRef.current;
-    reflectiveMeshes.length = 0;
-
-    modelRefs.current.forEach((ref) => {
-      ref.current?.traverse((object) => {
-        if (
-          object instanceof THREE.Mesh &&
-          object.material === reflectiveMaterial
-        ) {
-          reflectiveMeshes.push(object);
-        }
-      });
-    });
-
-    reflectiveVisibilityRef.current.length = reflectiveMeshes.length;
-    reflectionAccumulatorRef.current = 0;
-    hasCapturedReflectionRef.current = false;
-  }, [gltfMap, isMobile, reflectiveMaterial]);
+  }, [displayedObjectKey, isCompact]);
 
   useLayoutEffect(() => {
     reflectionAccumulatorRef.current = 0;
@@ -299,8 +485,24 @@ export default function Shapes({
     const time = state.clock.getElapsedTime();
     // controls the speed of the wave animation
     if (outerSphereRef.current) {
+      const targetAmplitude = isPlaying
+        ? Math.max(0, Math.min(1, amplitude))
+        : 0;
+      const envelopeSeconds =
+        targetAmplitude > audioEnvelopeRef.current
+          ? AUDIO_RESPONSE_ATTACK_SECONDS
+          : AUDIO_RESPONSE_DECAY_SECONDS;
+      const envelopeBlend = 1 - Math.exp(-delta / envelopeSeconds);
+      const nextAmplitude = THREE.MathUtils.lerp(
+        audioEnvelopeRef.current,
+        targetAmplitude,
+        envelopeBlend,
+      );
+
+      audioEnvelopeRef.current = nextAmplitude < 0.0001 ? 0 : nextAmplitude;
       outerSphereRef.current.uniforms.time.value += delta * 0.2;
-      outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
+      outerSphereRef.current.uniforms.uAmplitude.value =
+        audioEnvelopeRef.current;
     }
 
     // Rotate the outer sphere independently of the reflection capture cadence.
@@ -382,17 +584,32 @@ export default function Shapes({
       }
     });
 
-    objectConfigurations.forEach((config, idx) => {
+    mountedModelConfigsRef.current.forEach((modelConfig, idx) => {
       const groupRef = modelRefs.current[idx]?.current;
-      if (!groupRef) return;
+      if (!groupRef || !modelConfig) return;
 
-      const modelConfig =
-        isMobile && config.models.mobile
-          ? config.models.mobile
-          : config.models.desktop;
+      const baseRotationY = modelConfig.initialRotationOffset ?? 0;
 
-      // Apply animations directly to the entire group object
-      // modelConfig.rotationAnimation(groupRef, time);
+      if (prefersReducedMotion) {
+        groupRef.rotation.x = 0;
+        groupRef.rotation.y = baseRotationY;
+      } else {
+        // Counter-rotate across the screen axes so the model mirrors the cursor.
+        groupRef.rotation.x = THREE.MathUtils.damp(
+          groupRef.rotation.x,
+          pointerRotationTargetRef.current.y * MAX_POINTER_ROTATION_RADIANS,
+          POINTER_ROTATION_DAMPING,
+          delta,
+        );
+        groupRef.rotation.y = THREE.MathUtils.damp(
+          groupRef.rotation.y,
+          baseRotationY -
+            pointerRotationTargetRef.current.x * MAX_POINTER_ROTATION_RADIANS,
+          POINTER_ROTATION_DAMPING,
+          delta,
+        );
+      }
+
       modelConfig.floatAnimation(groupRef, time);
     });
   });
@@ -410,34 +627,29 @@ export default function Shapes({
         />
       </mesh>
 
-      {/* Render current model */}
+      {/* Render only the selected and previously visited models for this asset tier. */}
       {objectConfigurations.map((config, index) => {
-        const modelConfig =
-          isMobile && config.models.mobile
-            ? config.models.mobile
-            : config.models.desktop;
+        const shouldRenderModel =
+          renderedObjectIds.has(config.id) || config.id === selectedObjectKey;
+        if (!shouldRenderModel) return null;
 
-        const gltf = gltfMap[modelConfig.gltfPath];
-        if (!gltf) {
-          console.warn(`GLTF data not found for ${modelConfig.gltfPath}`);
-          return null;
-        }
+        const modelConfig = getActiveModelConfig(config, isCompact);
         return (
-          <ModelInstance
-            key={config.id}
-            ref={modelRefs.current[index]}
-            config={modelConfig}
-            gltf={gltf}
-            reflectiveMaterial={reflectiveMaterial}
-            onClick={() => onObjectClick?.(config.id)}
-            onPointerOver={() => onObjectHover?.(config.id)}
-            onPointerOut={() => onObjectHover?.(null)}
-          />
+          <Suspense key={config.id} fallback={null}>
+            <LazyModelInstance
+              ref={modelRefs.current[index]}
+              config={modelConfig}
+              initialPosition={animationStates.current[index].currentPos}
+              modelIndex={index}
+              reflectiveMaterial={reflectiveMaterial}
+              registerModelInstance={registerModelInstance}
+              onClick={() => onObjectClick?.(config.id)}
+              onPointerOver={() => onObjectHover?.(config.id)}
+              onPointerOut={() => onObjectHover?.(null)}
+            />
+          </Suspense>
         );
       })}
-
-      {/* Render previous model during transition */}
-      <Preload all />
     </>
   );
 }

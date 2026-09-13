@@ -4,6 +4,7 @@ import { softwareProjects } from './data';
 import {
   ControlButton,
   LabHeader,
+  LabHeading,
   Page,
   ProjectShutter,
   ScreenReaderText,
@@ -90,8 +91,12 @@ export default function Software() {
     <Page id="software-lab" aria-labelledby="software-lab-title">
       <Workbench aria-describedby="software-lab-instructions">
         <LabHeader>
-          <h1 id="software-lab-title">software lab</h1>
-          <p>Independent products and selected web design.</p>
+          <LabHeading>
+            <h1 id="software-lab-title">software lab</h1>
+            <p>
+              <span>Independent products and selected web design.</span>
+            </p>
+          </LabHeading>
           <StageControls>
             <ControlButton
               type="button"

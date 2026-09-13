@@ -43,13 +43,13 @@ export const softwareProjects: readonly SoftwareProject[] = [
     imagePosition: 'left top',
   },
   {
-    id: 'wynwood',
-    name: 'Wynwood Walls',
+    id: 'davidcastillo',
+    name: 'David Castillo Gallery',
     category: 'Web design',
-    descriptor: 'Street art museum',
-    url: 'https://thewynwoodwalls.com',
+    descriptor: 'Modern art gallery',
+    url: 'https://davidcastillogallery.com/',
     image: `${publicAssetBaseUrl}images/software/wynwood.png`,
-    imageAlt: 'Wynwood Walls website homepage',
+    imageAlt: 'David Castillo home page',
     imagePosition: 'center top',
   },
   {

@@ -55,7 +55,7 @@ const Container = styled(FlexBox)`
   > #source {
     --audio-heading: rgba(255, 255, 255, 0.85);
     --audio-copy: rgba(255, 255, 255, 0.8);
-    --audio-technical: rgba(255, 255, 255, 0.6);
+    --audio-technical: rgba(224, 207, 173, 0.7);
   }
 
   > #restoration,

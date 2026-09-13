@@ -117,8 +117,16 @@ export const Workbench = styled.section`
 export const LabHeader = styled.header`
   position: relative;
   z-index: 4;
-  width: max-content;
-  max-width: 100%;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: clamp(1rem, 3vw, 3rem);
+  row-gap: 0.6rem;
+`;
+
+export const LabHeading = styled.div`
+  flex: 1 1 22rem;
 
   h1 {
     margin: 0;
@@ -133,11 +141,15 @@ export const LabHeader = styled.header`
   }
 
   p {
-    max-width: 22rem;
     margin: 1.1rem 0 0;
     color: var(--lab-ivory-soft);
     font-size: clamp(0.75rem, 0.82vw, 0.86rem);
     line-height: 1.5;
+
+    span {
+      display: block;
+      max-width: 22rem;
+    }
   }
 
   @media (max-width: 52rem) {
@@ -147,18 +159,17 @@ export const LabHeader = styled.header`
     }
 
     p {
-      margin-top: 1rem;
       font-size: 0.82rem;
     }
   }
 `;
 
 export const StageControls = styled.div`
-  position: relative;
   z-index: 5;
   display: flex;
   width: max-content;
-  margin-top: 1.25rem;
+  flex: 0 0 auto;
+  margin: 0.5rem 0 0 auto;
   align-items: center;
   gap: 0.65rem;
 
@@ -170,6 +181,9 @@ export const StageControls = styled.div`
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.12em;
     text-align: center;
+  }
+  @media (max-width: 52rem) {
+    display: none;
   }
 `;
 

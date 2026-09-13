@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.75" result="blur" />
+      <feColorMatrix type="matrix" values="
+        0 0 0 0 0.878
+        0 0 0 0 0.812
+        0 0 0 0 0.678
+        0 0 0 0.5 0" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Charcoal base aperture with signal sepia hairline -->
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="#0d0d0c" stroke="#e0cfad" stroke-opacity="0.28" stroke-width="1" />
+  <!-- Authentic Orbit lowercase 's' with luminous ivory & sepia neon glow -->
+  <path d="M17.04 27.40L17.04 27.40Q12.58 27.40 9.90 25.15Q7.23 22.90 7.14 19.08L7.14 19.08L10.33 19.08Q10.41 21.54 12.20 23.01Q13.98 24.47 16.95 24.43L16.95 24.43Q19.12 24.39 20.50 23.49Q21.88 22.60 21.83 21.24L21.83 21.24Q21.79 20.01 20.73 19.12Q19.67 18.23 17.16 17.38L17.16 17.38L14.49 16.45Q11.22 15.30 9.80 13.96Q8.38 12.63 8.29 10.67L8.29 10.67Q8.25 8.89 9.18 7.53Q10.12 6.17 11.84 5.39Q13.56 4.60 15.85 4.60L15.85 4.60Q19.80 4.56 22.17 6.58Q24.55 8.59 24.64 12.12L24.64 12.12L21.45 12.16Q21.16 10.04 19.67 8.80Q18.18 7.57 15.93 7.57L15.93 7.57Q13.90 7.57 12.66 8.46Q11.43 9.36 11.47 10.71L11.47 10.71Q11.52 11.65 12.43 12.37Q13.34 13.09 15.51 13.86L15.51 13.86L18.23 14.79Q21.75 15.98 23.28 17.36Q24.81 18.74 24.85 20.78L24.85 20.78Q24.93 22.73 23.96 24.22Q22.98 25.70 21.20 26.55Q19.41 27.40 17.04 27.40Z" fill="#f1ede8" filter="url(#neonGlow)" />
+</svg>
