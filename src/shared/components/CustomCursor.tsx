@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { RiArrowRightUpLine } from 'react-icons/ri';
 import { motion, useMotionValue } from 'framer-motion';
@@ -10,7 +10,7 @@ const StyledCursor = styled(motion.div)`
   left: 0;
   z-index: 9999;
   pointer-events: none; // Allow clicks to pass through
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,8 +20,12 @@ const StyledCursor = styled(motion.div)`
   animation: pulse 2.5s infinite alternate;
 
   @keyframes pulse {
-    from { opacity: 0.5; }
-    to { opacity: 0.8; }
+    from {
+      opacity: 0.5;
+    }
+    to {
+      opacity: 0.8;
+    }
   }
 
   .hover-icon {
@@ -32,29 +36,29 @@ const StyledCursor = styled(motion.div)`
 
 const cursorVariants = {
   default: {
-    width: "7px",
-    height: "7px",
+    width: '7px',
+    height: '7px',
     transition: {
-      type: "tween",
-      ease: "easeOut",
-      duration: 0.3
-    }
+      type: 'tween',
+      ease: 'easeOut',
+      duration: 0.3,
+    },
   },
   hover: {
-    width: "60px",
-    height: "60px",
-    backgroundColor: "rgba(65, 65, 65, 0.3)",
+    width: '60px',
+    height: '60px',
+    backgroundColor: 'rgba(65, 65, 65, 0.3)',
     transition: {
-      type: "tween",
-      ease: "easeOut",
-      duration: 0.3
-    }
-  }
+      type: 'tween',
+      ease: 'easeOut',
+      duration: 0.3,
+    },
+  },
 };
 
 const iconVariants = {
   hidden: { opacity: 0, scale: 0.1, rotate: -45 },
-  visible: { opacity: 1, scale: 1, rotate: 0 }
+  visible: { opacity: 1, scale: 1, rotate: 0 },
 };
 
 interface CustomCursorProps {
@@ -62,10 +66,25 @@ interface CustomCursorProps {
 }
 
 const CustomCursor: React.FC<CustomCursorProps> = ({ isHoveringNav }) => {
+  const [hasFinePointer, setHasFinePointer] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const updatePointerCapability = () => setHasFinePointer(mediaQuery.matches);
+
+    updatePointerCapability();
+    mediaQuery.addEventListener('change', updatePointerCapability);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updatePointerCapability);
+    };
+  }, []);
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
   useEffect(() => {
+    if (!hasFinePointer) return;
+
     const handleMouseMove = (event: MouseEvent) => {
       cursorX.set(event.clientX);
       cursorY.set(event.clientY);
@@ -76,42 +95,33 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ isHoveringNav }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, hasFinePointer]);
 
-  // Apply rule to all elements to override any specific cursor styles,
-  // so the browser cursor is hidden when hovering over navigation elements.
   useEffect(() => {
+    if (!hasFinePointer || !isHoveringNav) return;
+
     const styleId = 'custom-cursor-hide-style';
-  
-    if (isHoveringNav) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.innerHTML = `* { cursor: none !important; }`;
-      document.head.appendChild(style);
-    } else {
-      const style = document.getElementById(styleId);
-      if (style) {
-        style.remove();
-      }
-    }
-  
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `* { cursor: none !important; }`;
+    document.head.appendChild(style);
+
     return () => {
-      const style = document.getElementById(styleId);
-      if (style) {
-        style.remove();
-      }
+      document.getElementById(styleId)?.remove();
     };
-  }, [isHoveringNav]);
+  }, [hasFinePointer, isHoveringNav]);
+
+  if (!hasFinePointer) return null;
 
   return (
     <StyledCursor
       variants={cursorVariants}
-      animate={isHoveringNav ? "hover" : "default"}
+      animate={isHoveringNav ? 'hover' : 'default'}
       style={{
         x: cursorX,
         y: cursorY,
-        translateX: "-50%",
-        translateY: "-50%",
+        translateX: '-50%',
+        translateY: '-50%',
       }}
       // transition={{
       //   type: "spring",
@@ -123,8 +133,8 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ isHoveringNav }) => {
         className="hover-icon"
         variants={iconVariants}
         initial="hidden"
-        animate={isHoveringNav ? "visible" : "hidden"}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        animate={isHoveringNav ? 'visible' : 'hidden'}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
         <RiArrowRightUpLine />
       </motion.div>
