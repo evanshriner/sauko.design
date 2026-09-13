@@ -89,7 +89,7 @@ export default function Software() {
 
   return (
     <Page id="software-lab" aria-labelledby="software-lab-title">
-      <Workbench aria-describedby="software-lab-instructions">
+      <Workbench data-nosnippet aria-describedby="software-lab-instructions">
         <LabHeader>
           <LabHeading>
             <h1 id="software-lab-title">software lab</h1>
@@ -188,7 +188,7 @@ export default function Software() {
                     <VisitLink
                       href={project.url}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="nofollow noopener noreferrer"
                       aria-label={`Visit ${project.name} (opens in a new tab)`}
                       initial={
                         prefersReducedMotion ? false : { opacity: 0, y: 5 }

@@ -22,16 +22,22 @@ import AIDesloppification from './modules/aiDesloppification';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { getPageFromPath, getPathForPage } from './shared/utils/routing';
+import { usePageSEO } from './shared/hooks/usePageSEO';
 
 function App() {
   const { progress } = useProgress();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [initialRoute] = useState(() => getPageFromPath());
   const [currentSelectableSubPage, setCurrentSelectableSubPage] =
-    useState<Pages>(Pages.AudioEngineering);
-  const [currentPage, setCurrentPage] = useState<Pages>(Pages.Home);
+    useState<Pages>(
+      initialRoute === Pages.Home ? Pages.AudioEngineering : initialRoute,
+    );
+  const [currentPage, setCurrentPage] = useState<Pages>(initialRoute);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
-  // Ref to store the Locomotive Scroll instance
+
+  usePageSEO(currentPage);
 
   const pageComponents: { [key in Pages]: React.ReactElement } = {
     [Pages.Home]: (
@@ -63,6 +69,19 @@ function App() {
     return () => clearTimeout(timer);
   }, [currentPage]);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const pageFromUrl = getPageFromPath();
+      setCurrentPage(pageFromUrl);
+      if (pageFromUrl !== Pages.Home) {
+        setCurrentSelectableSubPage(pageFromUrl);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // effect to handle transition between loading screen and main content
   const handleStarted = () => {
     setIsTransitioning(true);
@@ -76,10 +95,19 @@ function App() {
   };
 
   const handlePageChange = (page: Pages) => {
-    setCurrentSelectableSubPage(page);
+    if (page !== Pages.Home) {
+      setCurrentSelectableSubPage(page);
+    }
     setCurrentPage(page);
     // this is necessary since the raycaster is not updated until the mouse moves (just an aesthetic improvement)
     setIsHoveringNav(false);
+
+    if (typeof window !== 'undefined') {
+      const targetPath = getPathForPage(page);
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ page }, '', targetPath);
+      }
+    }
   };
 
   const isHome = currentPage === Pages.Home;
@@ -115,8 +143,7 @@ function App() {
             <FlexBox flexDirection="column" id="dom-content" minHeight="100vh">
               <NavBar
                 onMenuItemClick={(page) => {
-                  // this will always be home for now
-                  setCurrentPage(page);
+                  handlePageChange(page);
                 }}
                 onHoverChange={setIsHoveringNav}
               />
