@@ -23,6 +23,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { getPageFromPath, getPathForPage } from './shared/utils/routing';
+import { usePageSEO } from './shared/hooks/usePageSEO';
 
 function App() {
   const { progress } = useProgress();
@@ -35,7 +36,8 @@ function App() {
     );
   const [currentPage, setCurrentPage] = useState<Pages>(initialRoute);
   const [isHoveringNav, setIsHoveringNav] = useState(false);
-  // Ref to store the Locomotive Scroll instance
+
+  usePageSEO(currentPage);
 
   const pageComponents: { [key in Pages]: React.ReactElement } = {
     [Pages.Home]: (

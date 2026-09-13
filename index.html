@@ -17,18 +17,60 @@
       rel="stylesheet"
     />
     <script type="text/javascript">
-      (function(l) {
+      (function (l) {
         if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&');
-          }).join('?');
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash,
           );
         }
-      }(window.location));
+      })(window.location);
     </script>
-    <title>sauko design</title>
+    <title>
+      sauko — applied signals | Detroit Audio Engineering & Software Consulting
+    </title>
+    <meta
+      name="description"
+      content="Applied signals: Motor City & Detroit audio engineering, analogue restoration, and software consulting."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://sauko.design/" />
+    <meta
+      property="og:title"
+      content="sauko — applied signals | Detroit Audio Engineering & Software Consulting"
+    />
+    <meta
+      property="og:description"
+      content="Applied signals: Motor City & Detroit audio engineering, analogue restoration, and software consulting."
+    />
+    <meta property="og:url" content="https://sauko.design/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="sauko" />
+    <meta
+      property="og:image"
+      content="https://sauko.design/apple-touch-icon.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="sauko — applied signals | Detroit Audio Engineering & Software Consulting"
+    />
+    <meta
+      name="twitter:description"
+      content="Applied signals: Motor City & Detroit audio engineering, analogue restoration, and software consulting."
+    />
+    <meta
+      name="twitter:image"
+      content="https://sauko.design/apple-touch-icon.png"
+    />
   </head>
   <body>
     <svg style="display: none">
