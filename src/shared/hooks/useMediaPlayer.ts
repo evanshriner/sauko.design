@@ -54,6 +54,11 @@ const getAmplitudeForFrequencyRange = (
   return normalizedAmplitude;
 };
 
+const DEFAULT_VISUAL_RESPONSE = 35;
+const AMPLITUDE_HISTORY_SIZE = 15;
+const MIN_ABSOLUTE_DYNAMIC_RANGE = 0.00025;
+const MIN_RELATIVE_DYNAMIC_RANGE = 0.3;
+
 export const useMediaPlayer = () => {
   const tracks = TRACKS;
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
@@ -64,14 +69,20 @@ export const useMediaPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isAudioGraphSetup, setIsAudioGraphSetup] = useState(false);
   const [amplitude, setAmplitude] = useState(0);
-  const [intensity, setIntensity] = useState(100);
+  const [intensity, setIntensity] = useState(DEFAULT_VISUAL_RESPONSE);
   const [volume, setVolumeState] = useState(1);
   const amplitudeHistoryRef = useRef<number[]>([]);
+
+  const resetAudioResponse = useCallback(() => {
+    amplitudeHistoryRef.current.length = 0;
+    setAmplitude(0);
+  }, []);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const lastProgressUpdate = useRef<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const frequencyDataRef = useRef<Uint8Array | null>(null);
   const gainRef = useRef<GainNode | null>(null);
 
   const resumeAfterTrackChangeRef = useRef(false);
@@ -106,15 +117,18 @@ export const useMediaPlayer = () => {
     isPlayingRef.current = isPlaying;
   });
 
-  const loadTrackSource = useCallback((track: Track) => {
-    const audio = audioRef.current;
+  const loadTrackSource = useCallback(
+    (track: Track) => {
+      const audio = audioRef.current;
 
-    setProgress(0);
-    setDuration(0);
-    setAmplitude(0);
-    audio.src = track.url;
-    audio.load();
-  }, []);
+      setProgress(0);
+      setDuration(0);
+      resetAudioResponse();
+      audio.src = track.url;
+      audio.load();
+    },
+    [resetAudioResponse],
+  );
 
   useEffect(() => {
     if (!hasPlaybackBeenRequestedRef.current) return;
@@ -128,7 +142,7 @@ export const useMediaPlayer = () => {
 
       setProgress(0);
       setDuration(0);
-      setAmplitude(0);
+      resetAudioResponse();
       audio.src = track.url;
       audio.load();
 
@@ -139,7 +153,7 @@ export const useMediaPlayer = () => {
         });
       }
     }
-  }, [currentTrackIndex, tracks]);
+  }, [currentTrackIndex, resetAudioResponse, tracks]);
 
   const animationFrameRef = useRef<number>();
 
@@ -155,11 +169,17 @@ export const useMediaPlayer = () => {
       }
     }
 
-    if (analyserRef.current) {
-      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-      analyserRef.current.getByteFrequencyData(dataArray);
+    const analyser = analyserRef.current;
+    if (analyser) {
+      let dataArray = frequencyDataRef.current;
+      if (!dataArray) {
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        frequencyDataRef.current = dataArray;
+      }
+
+      analyser.getByteFrequencyData(dataArray);
       const rawAmplitude = getAmplitudeForFrequencyRange(
-        analyserRef.current,
+        analyser,
         dataArray,
         100,
         14000,
@@ -167,17 +187,18 @@ export const useMediaPlayer = () => {
 
       const history = amplitudeHistoryRef.current;
       history.push(rawAmplitude);
-      if (history.length > 15) {
+      if (history.length > AMPLITUDE_HISTORY_SIZE) {
         history.shift();
       }
 
       const minAmp = Math.min(...history);
       const maxAmp = Math.max(...history);
-      let range = maxAmp - minAmp;
-
-      // establish a minimum dynamic range to stabilize output for smooth audio
-      const MIN_RANGE = 0.15;
-      range = Math.max(range, MIN_RANGE);
+      const observedRange = maxAmp - minAmp;
+      const minimumRange = Math.max(
+        MIN_ABSOLUTE_DYNAMIC_RANGE,
+        maxAmp * MIN_RELATIVE_DYNAMIC_RANGE,
+      );
+      const range = Math.max(observedRange, minimumRange);
 
       let dynamicAmplitude = (rawAmplitude - minAmp) / range;
 
@@ -188,8 +209,9 @@ export const useMediaPlayer = () => {
       const finalAmplitude = Math.pow(dynamicAmplitude, 1.5);
 
       // console.log('finalAmplitude:', finalAmplitude);
-      // smoothing and intensity scaling
-      setAmplitude((prev) => prev * 0.5 + finalAmplitude * (intensity * 2));
+      // Scale to a normalized target; the WebGL frame loop owns the envelope.
+      const responseScale = Math.max(0, Math.min(100, intensity)) / 100;
+      setAmplitude(finalAmplitude * responseScale);
     }
   }, [intensity]);
 
@@ -271,7 +293,8 @@ export const useMediaPlayer = () => {
 
   const pause = useCallback(() => {
     audioRef.current.pause();
-  }, []);
+    resetAudioResponse();
+  }, [resetAudioResponse]);
 
   const skipForward = useCallback(() => {
     if (currentTrackIndex !== null && tracks.length > 0) {

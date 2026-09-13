@@ -43,6 +43,8 @@ const X_OFFSET_SPACING = 5.5;
 const REFLECTION_INTERVAL_TOLERANCE_SECONDS = 0.001;
 const COMPACT_MODEL_BREAKPOINT = 558;
 const IDLE_PREFETCH_TIMEOUT_MS = 1500;
+const AUDIO_RESPONSE_ATTACK_SECONDS = 0.045;
+const AUDIO_RESPONSE_DECAY_SECONDS = 0.32;
 
 const getActiveModelConfig = (
   config: ObjectConfig,
@@ -157,7 +159,8 @@ export default function Shapes({
   onObjectClick,
   onObjectHover,
 }: ShapesSwitcherProps) {
-  const { amplitude } = useMediaPlayerContext();
+  const { amplitude, currentTrackIndex, isPlaying } = useMediaPlayerContext();
+  const audioEnvelopeRef = useRef(0);
   const [isCompact, setIsCompact] = useState(
     () => window.innerWidth < COMPACT_MODEL_BREAKPOINT,
   );
@@ -318,6 +321,11 @@ export default function Shapes({
     [],
   );
 
+  useLayoutEffect(() => {
+    audioEnvelopeRef.current = 0;
+    outerUniforms.uAmplitude.value = 0;
+  }, [currentTrackIndex, outerUniforms]);
+
   const reflectiveUniforms = useMemo(
     () => ({
       time: { value: 0 },
@@ -443,8 +451,24 @@ export default function Shapes({
     const time = state.clock.getElapsedTime();
     // controls the speed of the wave animation
     if (outerSphereRef.current) {
+      const targetAmplitude = isPlaying
+        ? Math.max(0, Math.min(1, amplitude))
+        : 0;
+      const envelopeSeconds =
+        targetAmplitude > audioEnvelopeRef.current
+          ? AUDIO_RESPONSE_ATTACK_SECONDS
+          : AUDIO_RESPONSE_DECAY_SECONDS;
+      const envelopeBlend = 1 - Math.exp(-delta / envelopeSeconds);
+      const nextAmplitude = THREE.MathUtils.lerp(
+        audioEnvelopeRef.current,
+        targetAmplitude,
+        envelopeBlend,
+      );
+
+      audioEnvelopeRef.current = nextAmplitude < 0.0001 ? 0 : nextAmplitude;
       outerSphereRef.current.uniforms.time.value += delta * 0.2;
-      outerSphereRef.current.uniforms.uAmplitude.value = amplitude;
+      outerSphereRef.current.uniforms.uAmplitude.value =
+        audioEnvelopeRef.current;
     }
 
     // Rotate the outer sphere independently of the reflection capture cadence.

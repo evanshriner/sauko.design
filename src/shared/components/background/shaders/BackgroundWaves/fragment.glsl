@@ -48,12 +48,17 @@ float lines(vec2 uv, float offset) {
 void main() {
     float n = noise(vPosition + time);
 
-    vec3 color1 = vec3(20./255., 23./255., 24./255.);
+    float response = clamp(uAmplitude, 0.0, 1.0);
+    float glow = pow(response, 0.72);
+
+    vec3 coolShadow = vec3(20./255., 23./255., 24./255.);
+    vec3 warmShadow = vec3(27./255., 19./255., 12./255.);
+    vec3 color1 = mix(coolShadow, warmShadow, glow * 0.18);
     vec3 color3 = vec3(9./255., 6./255., 3./255.);
 
-    // Intensity of color2 fluctuates with audio amplitude
-    float intensity = (90.0 + 120.0 * uAmplitude) / 255.0;
-    vec3 color2 = vec3(intensity);
+    vec3 idleHighlight = vec3(68./255.);
+    vec3 flashHighlight = vec3(1.0, 0.97, 0.91);
+    vec3 color2 = mix(idleHighlight, flashHighlight, glow);
 
     vec2 b_uv = rotate2D(n) * vPosition.xy * 0.1;
 
@@ -62,6 +67,12 @@ void main() {
 
     vec3 mixedColors = mix(color1, color2, pattern);
     vec3 mixedColors2 = mix(mixedColors, color3, pattern2);
+
+    float haloThreshold = mix(0.68, 0.16, glow);
+    float halo = smoothstep(haloThreshold, 0.94, pattern);
+    vec3 bloomColor = vec3(1.0, 0.84, 0.65);
+    mixedColors2 +=
+        bloomColor * halo * (1.0 - pattern2 * 0.4) * response * 0.18;
 
     gl_FragColor = vec4(mixedColors2, 1.0);
 }
