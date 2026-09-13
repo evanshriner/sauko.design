@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /software
+Disallow: /software/
+Disallow: /software-lab
+Disallow: /software-lab/
+
+Allow: /
+Allow: /ai-desloppification
+Allow: /audio-engineering
+
+Sitemap: https://sauko.design/sitemap.xml
