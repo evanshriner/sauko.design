@@ -1,0 +1,15 @@
+import styled from '@emotion/styled';
+import type { CSSObject } from '@emotion/react';
+import FlexBox from '../components/FlexBox';
+
+const ContentBox = styled(FlexBox)((): CSSObject => ({
+  boxSizing: 'border-box',
+  // border: `0.5rem solid rgba(255, 255, 255, 0.73)`,
+  boxShadow: 'rgba(255, 255, 255, 0.9) 0px 2px 8px 0px',
+  background: 'rgba(255, 255, 255, 0.95)',
+  color: 'black',
+  justifyContent: 'center',
+  alignItems: 'center',
+}));
+
+export default ContentBox;

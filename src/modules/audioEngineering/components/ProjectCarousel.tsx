@@ -1,0 +1,391 @@
+import React, { useRef, useLayoutEffect } from 'react';
+import styled from '@emotion/styled';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+interface Project {
+  artist: string;
+  title: string;
+  year: string;
+  description: string;
+  image: string;
+  type: string;
+  platform: string;
+  url: string;
+}
+
+const projects: Project[] = [
+  {
+    artist: 'Know Now',
+    title: 'Wash',
+    year: '2021',
+    description: '',
+    image: 'https://f4.bcbits.com/img/a2248853944_5.jpg',
+    type: 'MASTERING / PRODUCTION',
+    platform: 'BANDCAMP',
+    url: 'https://knownow.bandcamp.com/album/wash',
+  },
+  {
+    artist: 'suralo',
+    title: 'steady.220',
+    year: '2020',
+    description: '',
+    image:
+      'https://i1.sndcdn.com/artworks-ojYZ3OJbFkTuX8qm-VmjDmg-t1080x1080.jpg',
+    type: 'PRODUCTION',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/suralo/steady',
+  },
+  {
+    artist: 'MADLINK',
+    title: 'Earthbound',
+    year: '2020',
+    description: '',
+    image:
+      'https://i1.sndcdn.com/artworks-ynk0zPmjOQSqPY2N-xgRTFQ-t1080x1080.jpg',
+    type: 'MASTERING',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/maxwell-mcgrath/sets/earthbound',
+  },
+  {
+    artist: 'CountedGnome',
+    title: 'Revive',
+    year: '2018',
+    description: '',
+    image: 'https://i1.sndcdn.com/artworks-000374202798-8h1hz0-t1080x1080.jpg',
+    type: 'MASTERING',
+    platform: 'SOUNDCLOUD',
+    url: 'https://soundcloud.com/countedgnome/countedgnome-revive',
+  },
+];
+
+const SectionContainer = styled.section`
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top so pinning is more predictable */
+  padding: 15vh 5vw;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--audio-section-wash) 14%,
+    var(--audio-section-wash) 86%,
+    transparent
+  );
+  box-sizing: border-box;
+
+  @media (max-width: 64rem) {
+    padding: 10vh 20px;
+  }
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  gap: 5vw;
+  align-items: flex-start;
+  box-sizing: border-box;
+
+  @media (max-width: 64rem) {
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+`;
+
+const TitleColumn = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 2rem;
+  box-sizing: border-box;
+
+  @media (max-width: 64rem) {
+    width: 100%;
+    text-align: center;
+    padding-top: 0;
+  }
+`;
+const ProjectsColumn = styled.div`
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: var(--audio-heading);
+  line-height: 0.9;
+  margin: 0;
+  filter: url(#neonGlow);
+`;
+
+const TechnicalLabel = styled.div`
+  font-family: 'Orbit', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--audio-technical);
+  margin-bottom: 1rem;
+`;
+
+const CardContainer = styled.article`
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border: 1px solid var(--audio-line);
+  background: var(--audio-boundary-fill);
+  box-sizing: border-box;
+
+  &:hover .project-image-wrapper {
+    filter: grayscale(0%) contrast(1.1) brightness(0.9);
+  }
+
+  &:hover .project-image {
+    transform: scale(1.05);
+  }
+
+  &:hover .hover-content {
+    max-height: 250px;
+    opacity: 1;
+    margin-top: 1rem;
+  }
+
+  @media (hover: none), (max-width: 64rem) {
+    .hover-content {
+      max-height: 250px;
+      margin-top: 1rem;
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    height: 350px;
+  }
+`;
+
+const ImageWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  filter: grayscale(100%) contrast(1.2) brightness(0.7);
+  transition: filter 0.5s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      var(--audio-charcoal) 100%
+    );
+    pointer-events: none;
+  }
+`;
+
+const ProjectImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.15);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+`;
+
+const InfoOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem;
+  z-index: 3;
+  color: var(--audio-ivory);
+  box-sizing: border-box;
+
+  @media (max-width: 480px) {
+    padding: 1.5rem;
+  }
+`;
+
+const ProjectArtist = styled.div`
+  font-family: 'Orbit', sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--audio-sepia-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ProjectTitle = styled.h3`
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  line-height: 1;
+`;
+
+const HoverContent = styled.div`
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+`;
+
+const Description = styled.p`
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--audio-ivory-soft);
+  margin: 0;
+`;
+
+const TechnicalMeta = styled.div`
+  font-family: 'Orbit', sans-serif;
+  font-size: 0.55rem;
+  margin-top: 1rem;
+  color: var(--audio-sepia);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+const ProjectLink = styled.a`
+  color: var(--audio-sepia);
+  text-decoration: underline;
+  text-decoration-color: var(--audio-sepia-soft);
+  text-underline-offset: 0.25em;
+  transition:
+    color 220ms var(--audio-ease-out),
+    text-decoration-color 220ms var(--audio-ease-out);
+
+  &:hover {
+    color: var(--audio-ivory);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--audio-ivory);
+    outline-offset: 0.25rem;
+  }
+`;
+
+const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+  return (
+    <CardContainer className="project-card">
+      <ImageWrapper className="project-image-wrapper">
+        <ProjectImage
+          src={project.image}
+          alt={`${project.title} artwork by ${project.artist}`}
+          className="project-image"
+        />
+      </ImageWrapper>
+      <InfoOverlay>
+        <ProjectArtist>
+          {project.artist} {'//'} {project.year}
+        </ProjectArtist>
+        <ProjectTitle>{project.title}</ProjectTitle>
+        <HoverContent className="hover-content">
+          <Description>{project.description}</Description>
+          <TechnicalMeta>
+            <span>[FORMAT: {project.type}]</span>
+            <ProjectLink
+              href={project.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Listen to ${project.title} by ${project.artist} on ${project.platform} (opens in a new tab)`}
+            >
+              [OPEN_ON_{project.platform}]
+            </ProjectLink>
+          </TechnicalMeta>
+        </HoverContent>
+      </InfoOverlay>
+    </CardContainer>
+  );
+};
+
+const ProjectCarousel: React.FC<{ id: string }> = ({ id }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const media = gsap.matchMedia();
+
+      media.add('(prefers-reduced-motion: no-preference)', () => {
+        const cards = gsap.utils.toArray('.project-card') as HTMLElement[];
+
+        cards.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { y: 50, opacity: 0, filter: 'blur(10px)' },
+            {
+              y: 0,
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: 1,
+              ease: 'power3.out',
+              immediateRender: false,
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 95%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
+        });
+      });
+
+      media.add('(min-width: 64.0625rem)', () => {
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: 'top 15%',
+          end: 'bottom 85%',
+          pin: titleRef.current,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+        });
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <SectionContainer id={id} ref={containerRef} className="pin-section">
+      <ContentWrapper>
+        <TitleColumn ref={titleRef}>
+          <TechnicalLabel>CLIENT_HISTORY // ARCHIVE</TechnicalLabel>
+          <SectionTitle>
+            Selected
+            <br />
+            projects.
+          </SectionTitle>
+        </TitleColumn>
+        <ProjectsColumn>
+          {projects.map((project, i) => (
+            <ProjectCard key={i} project={project} />
+          ))}
+        </ProjectsColumn>
+      </ContentWrapper>
+    </SectionContainer>
+  );
+};
+
+export default ProjectCarousel;
