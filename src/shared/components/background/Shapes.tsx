@@ -12,6 +12,7 @@ import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF } from '@react-three/drei';
 import type { GLTF } from 'three-stdlib';
+import { useReducedMotion } from 'framer-motion';
 
 import {
   fragmentShader as wavesFragment,
@@ -45,6 +46,8 @@ const COMPACT_MODEL_BREAKPOINT = 558;
 const IDLE_PREFETCH_TIMEOUT_MS = 1500;
 const AUDIO_RESPONSE_ATTACK_SECONDS = 0.045;
 const AUDIO_RESPONSE_DECAY_SECONDS = 0.32;
+const MAX_POINTER_ROTATION_RADIANS = THREE.MathUtils.degToRad(12);
+const POINTER_ROTATION_DAMPING = 5;
 
 const getActiveModelConfig = (
   config: ObjectConfig,
@@ -160,7 +163,9 @@ export default function Shapes({
   onObjectHover,
 }: ShapesSwitcherProps) {
   const { amplitude, currentTrackIndex, isPlaying } = useMediaPlayerContext();
+  const prefersReducedMotion = useReducedMotion();
   const audioEnvelopeRef = useRef(0);
+  const pointerRotationTargetRef = useRef(new THREE.Vector2());
   const [isCompact, setIsCompact] = useState(
     () => window.innerWidth < COMPACT_MODEL_BREAKPOINT,
   );
@@ -193,6 +198,35 @@ export default function Shapes({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const pointerTarget = pointerRotationTargetRef.current;
+    if (prefersReducedMotion) {
+      pointerTarget.set(0, 0);
+      return;
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      pointerTarget.set(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        1 - (event.clientY / window.innerHeight) * 2,
+      );
+    };
+    const resetPointerTarget = () => pointerTarget.set(0, 0);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('blur', resetPointerTarget);
+    document.documentElement.addEventListener('mouseleave', resetPointerTarget);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('blur', resetPointerTarget);
+      document.documentElement.removeEventListener(
+        'mouseleave',
+        resetPointerTarget,
+      );
+    };
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     setRenderedObjectIds((currentIds) => {
@@ -554,8 +588,28 @@ export default function Shapes({
       const groupRef = modelRefs.current[idx]?.current;
       if (!groupRef || !modelConfig) return;
 
-      // Apply animations directly to the entire group object
-      // modelConfig.rotationAnimation(groupRef, time);
+      const baseRotationY = modelConfig.initialRotationOffset ?? 0;
+
+      if (prefersReducedMotion) {
+        groupRef.rotation.x = 0;
+        groupRef.rotation.y = baseRotationY;
+      } else {
+        // Counter-rotate across the screen axes so the model mirrors the cursor.
+        groupRef.rotation.x = THREE.MathUtils.damp(
+          groupRef.rotation.x,
+          pointerRotationTargetRef.current.y * MAX_POINTER_ROTATION_RADIANS,
+          POINTER_ROTATION_DAMPING,
+          delta,
+        );
+        groupRef.rotation.y = THREE.MathUtils.damp(
+          groupRef.rotation.y,
+          baseRotationY -
+            pointerRotationTargetRef.current.x * MAX_POINTER_ROTATION_RADIANS,
+          POINTER_ROTATION_DAMPING,
+          delta,
+        );
+      }
+
       modelConfig.floatAnimation(groupRef, time);
     });
   });
