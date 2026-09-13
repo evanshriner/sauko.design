@@ -9,6 +9,8 @@ export type SoftwareProject = Readonly<{
   imagePosition: string;
 }>;
 
+const publicAssetBaseUrl = import.meta.env.BASE_URL;
+
 export const softwareProjects: readonly SoftwareProject[] = [
   {
     id: 'kitless',
@@ -16,7 +18,7 @@ export const softwareProjects: readonly SoftwareProject[] = [
     category: 'Product',
     descriptor: 'Meal planning app',
     url: 'https://kitlessmeals.com',
-    image: '/images/software/kitless.png',
+    image: `${publicAssetBaseUrl}images/software/kitless.png`,
     imageAlt: 'Kitless website homepage',
     imagePosition: 'left top',
   },
@@ -26,7 +28,7 @@ export const softwareProjects: readonly SoftwareProject[] = [
     category: 'Product',
     descriptor: 'Operations software',
     url: 'https://plenumops.com',
-    image: '/images/software/plenum.png',
+    image: `${publicAssetBaseUrl}images/software/plenum.png`,
     imageAlt: 'PlenumOps website homepage',
     imagePosition: 'left top',
   },
@@ -36,7 +38,7 @@ export const softwareProjects: readonly SoftwareProject[] = [
     category: 'Web design',
     descriptor: 'Consulting practice',
     url: 'https://wshrinerconsulting.com',
-    image: '/images/software/wgs.png',
+    image: `${publicAssetBaseUrl}images/software/wgs.png`,
     imageAlt: 'WGS Consulting website homepage',
     imagePosition: 'left top',
   },
@@ -46,7 +48,7 @@ export const softwareProjects: readonly SoftwareProject[] = [
     category: 'Web design',
     descriptor: 'Street art museum',
     url: 'https://thewynwoodwalls.com',
-    image: '/images/software/wynwood.png',
+    image: `${publicAssetBaseUrl}images/software/wynwood.png`,
     imageAlt: 'Wynwood Walls website homepage',
     imagePosition: 'center top',
   },
@@ -56,7 +58,7 @@ export const softwareProjects: readonly SoftwareProject[] = [
     category: 'Web design',
     descriptor: 'Contemporary art gallery',
     url: 'https://www.articlesstpete.com',
-    image: '/images/software/articles.png',
+    image: `${publicAssetBaseUrl}images/software/articles.png`,
     imageAlt: 'ARTicles St. Pete website homepage',
     imagePosition: 'center top',
   },

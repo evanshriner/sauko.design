@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame, extend, useThree } from '@react-three/fiber';
-import { shaderMaterial, useTexture } from '@react-three/drei';
+import { shaderMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import styled from '@emotion/styled';
 import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
@@ -102,10 +102,9 @@ const AsciiShaderMaterial = shaderMaterial(
 
 extend({ AsciiShaderMaterial });
 
-const ArtistImage = ({ url, position, rotation, scale }: { url: string, position: [number, number, number], rotation: [number, number, number], scale: number }) => {
+const ArtistImage = ({ position, rotation, scale }: { position: [number, number, number], rotation: [number, number, number], scale: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<any>(null);
-  const texture = useTexture(url);
   const mouse = useRef(new THREE.Vector2(0, 0));
   const velocity = useRef(0);
   const lastMouse = useRef(new THREE.Vector2(0, 0));
@@ -235,7 +234,7 @@ const CarouselScene = () => {
     };
   }, []);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (groupRef.current) {
       if (!isDragging.current) {
         targetRotationY.current += delta * 0.1;
@@ -247,14 +246,13 @@ const CarouselScene = () => {
 
   return (
     <group ref={groupRef}>
-      {artistImages.map((url, i) => {
+      {artistImages.map((_, i) => {
         const angle = (i / artistImages.length) * Math.PI * 2;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
         return (
           <ArtistImage 
             key={i} 
-            url={url} 
             position={[x, 0, z]} 
             rotation={[0, -angle + Math.PI / 2, 0]}
             scale={responsiveScale}

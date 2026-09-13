@@ -1,12 +1,13 @@
 import styled from '@emotion/styled';
+import type { CSSObject } from '@emotion/react';
 import FlexBox from '../../shared/components/FlexBox';
 import { useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { useAnimation } from 'framer-motion';
 import Title from '@/shared/styles/Title';
 import ContentBox from '@/shared/styles/ContentBox';
 import NeonText from '@/shared/styles/NeonText';
 
-const CardText = styled(FlexBox)(({ theme }) => ({
+const CardText = styled(FlexBox)((): CSSObject => ({
   padding: '24px',
   alignItems: 'flex-end',
   justifyContent: 'flex-start',

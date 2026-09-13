@@ -8,6 +8,8 @@ import ProjectReview from './sections/ProjectReview';
 import { DetroitSkyline } from './components/DetroitSkyline';
 import ProjectCarousel from './components/ProjectCarousel';
 
+const publicAssetBaseUrl = import.meta.env.BASE_URL;
+
 const Container = styled(FlexBox)`
   --audio-ivory: rgba(241, 237, 232, 0.96);
   --audio-ivory-soft: rgba(241, 237, 232, 0.76);
@@ -290,7 +292,7 @@ function AudioEngineering() {
         content="Through calibrated, premium hardware chains and transparent digital restoration, we   
    meticulously remove age and noise, delivering master-quality digital files that       
    preserve your audio heritage for generations."
-        image="/images/restoration_equipment.png"
+        image={`${publicAssetBaseUrl}images/restoration_equipment.png`}
         imageAlt="Reel-to-reel and archival audio restoration equipment"
       />
 
@@ -306,7 +308,7 @@ function AudioEngineering() {
           </>
         }
         content="Whether developing a production or mixing a finished arrangement, we use critical listening, analogue circuitry, and precise digital control to shape tone, space, balance, and dynamics—delivering a coherent mix prepared for mastering without losing its character."
-        image="/images/modular_rack.png"
+        image={`${publicAssetBaseUrl}images/modular_rack.png`}
         imageAlt="Modular synthesis and analogue production rack"
       />
 

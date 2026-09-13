@@ -4,7 +4,6 @@ import BentoGrid from './BentoGrid';
 import BentoBlock from './BentoBlock';
 import TelemetryStream from './TelemetryStream';
 import CoordinateBuild from './CoordinateBuild';
-import NeonText from '@/shared/styles/NeonText';
 import useTypingAnimation from '@/shared/hooks/useTypingAnimation';
 import { useMediaPlayerContext } from '@/shared/context/MediaPlayerContext';
 

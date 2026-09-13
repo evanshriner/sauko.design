@@ -4,19 +4,21 @@ export interface Track {
   artist: string;
 }
 
+const publicAssetBaseUrl = import.meta.env.BASE_URL;
+
 export const TRACKS: readonly Track[] = [
   {
-    url: '/music/steady220.mp3',
+    url: `${publicAssetBaseUrl}music/steady220.mp3`,
     title: 'steady.220',
     artist: 'suralo',
   },
   {
-    url: '/music/summer_w_suralo.mp3',
+    url: `${publicAssetBaseUrl}music/summer_w_suralo.mp3`,
     title: 'Summer (with suralo)',
     artist: 'Know Now',
   },
   {
-    url: '/music/session_add.mp3',
+    url: `${publicAssetBaseUrl}music/session_add.mp3`,
     title: 'Session Add',
     artist: 'Skee Mask',
   },

@@ -1,6 +1,6 @@
 import { BlendFunction, Effect } from 'postprocessing';
 
-import { Uniform, Vector2 } from 'three';
+import { Uniform, WebGLRenderer, WebGLRenderTarget } from 'three';
 
 import dotScreenVertex from './dotScreenVertex.glsl';
 import dotScreenFragment from './dotScreenFragment.glsl';
@@ -22,8 +22,12 @@ export class CustomDotScreenShaderImpl extends Effect {
     );
   }
 
-  update(renderer, inputBuffer, deltaTime) {
+  update(_renderer: WebGLRenderer, _inputBuffer: WebGLRenderTarget, deltaTime = 0) {
     // Increment the time uniform on each frame
-    this.uniforms.get('u_time').value += deltaTime;
+    const timeUniform = this.uniforms.get('u_time');
+
+    if (timeUniform !== undefined) {
+      timeUniform.value += deltaTime;
+    }
   }
 }

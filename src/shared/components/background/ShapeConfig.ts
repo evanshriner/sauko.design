@@ -2,6 +2,8 @@
 import { Pages } from '@/shared/interfaces/pages';
 import * as THREE from 'three';
 
+const publicAssetBaseUrl = import.meta.env.BASE_URL;
+
 export enum DisplayedObject {
   Boombox = 'BOOMBOX',
   Lab = 'LAB',
@@ -47,7 +49,7 @@ export const objectConfigurations: ObjectConfig[] = [
     page: Pages.AudioEngineering,
     models: {
       desktop: {
-        gltfPath: '/Boombox.glb',
+        gltfPath: `${publicAssetBaseUrl}Boombox.glb`,
         scale: 0.45,
         responsiveScale: {
           minScale: 0.3,
@@ -66,7 +68,7 @@ export const objectConfigurations: ObjectConfig[] = [
         },
       },
       mobile: {
-        gltfPath: '/Speaker.glb',
+        gltfPath: `${publicAssetBaseUrl}Speaker.glb`,
         scale: 0.15,
         responsiveScale: {
           minScale: 0.05,
@@ -90,7 +92,7 @@ export const objectConfigurations: ObjectConfig[] = [
     page: Pages.AIDesloppification,
     models: {
       desktop: {
-        gltfPath: '/Robot.glb',
+        gltfPath: `${publicAssetBaseUrl}Robot.glb`,
         scale: 0.011,
         responsiveScale: {
           minScale: 0.009,
@@ -114,7 +116,7 @@ export const objectConfigurations: ObjectConfig[] = [
     id: DisplayedObject.Lab,
     models: {
       desktop: {
-        gltfPath: '/Lab.glb',
+        gltfPath: `${publicAssetBaseUrl}Lab.glb`,
         scale: 0.47,
         responsiveScale: {
           minScale: 0.38,
@@ -133,7 +135,7 @@ export const objectConfigurations: ObjectConfig[] = [
         },
       },
       mobile: {
-        gltfPath: '/Flask.glb',
+        gltfPath: `${publicAssetBaseUrl}Flask.glb`,
         scale: 0.47,
         responsiveScale: {
           minScale: 0.04,
