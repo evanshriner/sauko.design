@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Pages } from '../interfaces/pages';
 
-const SITE_ORIGIN = 'https://sauko.design';
+const SITE_ORIGIN = 'https://sauko.io';
 
 export interface PageSEOMetadata {
   title: string;
@@ -17,7 +17,7 @@ export const PAGE_SEO_CONFIG: Record<Pages, PageSEOMetadata> = {
     title:
       'sauko — applied signals | Detroit Audio Engineering & Software Consulting',
     description:
-      'Sauko applied signals: Motor City & Detroit audio engineering, analogue restoration, and software consulting.',
+      'sauko applied signals: Motor City & Detroit audio engineering, analogue restoration, and software consulting.',
     canonicalUrl: `${SITE_ORIGIN}/`,
     robots: 'index, follow',
     ogImage: `${SITE_ORIGIN}/apple-touch-icon.png`,
@@ -37,7 +37,7 @@ export const PAGE_SEO_CONFIG: Record<Pages, PageSEOMetadata> = {
     },
   },
   [Pages.AIDesloppification]: {
-    title: 'AI Desloppification & Codebase Recovery | Sauko',
+    title: 'AI desloppification & codebase recovery | sauko',
     description:
       'Human-led stabilization and architecture for AI-accelerated software. We turn fragile AI prototypes into systems your team can explain, test, and safely operate.',
     canonicalUrl: `${SITE_ORIGIN}/ai-desloppification`,
@@ -46,7 +46,7 @@ export const PAGE_SEO_CONFIG: Record<Pages, PageSEOMetadata> = {
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Service',
-      name: 'AI Desloppification & System Recovery',
+      name: 'AI desloppification & system recovery',
       provider: {
         '@type': 'Organization',
         name: 'Sauko',
@@ -59,7 +59,7 @@ export const PAGE_SEO_CONFIG: Record<Pages, PageSEOMetadata> = {
     },
   },
   [Pages.AudioEngineering]: {
-    title: 'Detroit Audio Engineering, Mixing & Analogue Restoration | Sauko',
+    title: 'Detroit Audio Engineering, Mixing & Analogue Restoration | sauko',
     description:
       'Rooted in Detroit with over a decade of Motor City audio engineering, mixing, mastering, and archival analogue restoration. Detroit soul, without compromise.',
     canonicalUrl: `${SITE_ORIGIN}/audio-engineering`,
