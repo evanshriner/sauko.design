@@ -12,11 +12,13 @@ export const TRACKS: readonly Track[] = [
     url: `${publicAssetBaseUrl}music/something_to_think_about.mp3`,
     title: 'Something to Think About',
     artist: 'Kiyoko',
+    normalizationGainDb: -5.04,
   },
   {
     url: `${publicAssetBaseUrl}music/romance.mp3`,
     title: 'ROMANCE',
     artist: '.CASTING',
+    normalizationGainDb: -11.46,
   },
   {
     url: `${publicAssetBaseUrl}music/steady220.mp3`,
@@ -28,7 +30,7 @@ export const TRACKS: readonly Track[] = [
     url: `${publicAssetBaseUrl}music/summer_w_suralo.mp3`,
     title: 'Summer (with suralo)',
     artist: 'Know Now',
-    normalizationGainDb: 0,
+    normalizationGainDb: -2.23,
   },
   {
     url: `${publicAssetBaseUrl}music/session_add.mp3`,
