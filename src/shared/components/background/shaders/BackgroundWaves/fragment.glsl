@@ -1,6 +1,7 @@
 uniform float time;
 uniform vec4 resolution;
 uniform float uAmplitude;
+uniform float uVisualResponse;
 varying vec3 vPosition;
 
 
@@ -49,14 +50,16 @@ void main() {
     float n = noise(vPosition + time);
 
     float response = clamp(uAmplitude, 0.0, 1.0);
-    float glow = pow(response, 0.72);
+    float glow = pow(response, 0.82);
 
     vec3 coolShadow = vec3(20./255., 23./255., 24./255.);
     vec3 warmShadow = vec3(27./255., 19./255., 12./255.);
     vec3 color1 = mix(coolShadow, warmShadow, glow * 0.18);
     vec3 color3 = vec3(9./255., 6./255., 3./255.);
 
-    vec3 idleHighlight = vec3(68./255.);
+    float contrastBoost = smoothstep(0.35, 1.0, clamp(uVisualResponse, 0.0, 1.0));
+    float idleLevel = mix(68.0, 32.0, contrastBoost) / 255.0;
+    vec3 idleHighlight = vec3(idleLevel);
     vec3 flashHighlight = vec3(1.0, 0.97, 0.91);
     vec3 color2 = mix(idleHighlight, flashHighlight, glow);
 
