@@ -15,6 +15,57 @@ import { cameraConfigurations } from './CameraConfig';
 import { useSceneQuality } from '@/shared/hooks/useSceneQuality';
 
 const WEBGL_PARAMETERS = { antialias: false } as const;
+const FRAME_INTERVAL_TOLERANCE_MS = 1;
+
+function SceneFrameScheduler({
+  active,
+  frameRate,
+}: {
+  active: boolean;
+  frameRate: number;
+}) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    invalidate();
+    if (!active) return undefined;
+
+    const frameInterval = 1000 / frameRate;
+    let animationFrameId = 0;
+    let previousFrameTime = 0;
+
+    const scheduleFrame = (timestamp: number) => {
+      if (
+        document.visibilityState === 'visible' &&
+        (previousFrameTime === 0 ||
+          timestamp - previousFrameTime >=
+            frameInterval - FRAME_INTERVAL_TOLERANCE_MS)
+      ) {
+        const elapsed = timestamp - previousFrameTime;
+        previousFrameTime = timestamp - (elapsed % frameInterval);
+        invalidate();
+      }
+
+      animationFrameId = window.requestAnimationFrame(scheduleFrame);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      previousFrameTime = 0;
+      invalidate();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    animationFrameId = window.requestAnimationFrame(scheduleFrame);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [active, frameRate, invalidate]);
+
+  return null;
+}
 
 function SceneEffects({ multisampling }: { multisampling: number }) {
   const composerRef = useRef<EffectComposerImpl>(null);
@@ -57,11 +108,13 @@ function CameraControl({ currentPage }: { currentPage: Pages }) {
 }
 
 export default function Background({
+  active,
   currentPage,
   currentSelectableSubPage,
   onObjectClick,
   onObjectHover,
 }: {
+  active: boolean;
   currentPage: Pages;
   currentSelectableSubPage?: Pages; // this is the subpage that is currently displayed at the menu 'home'
   onObjectClick: (page: Pages) => void;
@@ -71,10 +124,12 @@ export default function Background({
 
   return (
     <Canvas
+      frameloop="demand"
       dpr={quality.dpr}
       gl={WEBGL_PARAMETERS}
       data-scene-quality={quality.tier}
       data-scene-multisampling={quality.multisampling}
+      data-scene-frame-rate={quality.frameRate}
       data-scene-reflection-resolution={quality.reflectionResolution}
       data-scene-reflection-refresh-rate={quality.reflectionRefreshRate}
       camera={{
@@ -83,6 +138,7 @@ export default function Background({
         far: 100,
       }}
     >
+      <SceneFrameScheduler active={active} frameRate={quality.frameRate} />
       <CameraControl currentPage={currentPage} />
       {/* <Perf position="top-left" /> */}
 

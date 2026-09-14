@@ -3,7 +3,7 @@ import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
 import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import React from 'react';
 import { useProgress } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -16,14 +16,17 @@ import LoadingScreen from '@/shared/components/loading/LoadingScreen';
 
 import { MediaPlayerProvider } from './shared/context/MediaPlayerContext';
 import { Pages } from './shared/interfaces/pages';
-import AudioEngineering from './modules/audioEngineering';
-import Software from './modules/software';
-import AIDesloppification from './modules/aiDesloppification';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { getPageFromPath, getPathForPage } from './shared/utils/routing';
 import { usePageSEO } from './shared/hooks/usePageSEO';
+
+const AudioEngineering = lazy(() => import('./modules/audioEngineering'));
+const Software = lazy(() => import('./modules/software'));
+const AIDesloppification = lazy(
+  () => import('./modules/aiDesloppification'),
+);
 
 function App() {
   const { progress } = useProgress();
@@ -126,6 +129,7 @@ function App() {
         <CustomCursor isHoveringNav={isHoveringNav} />
         <BackgroundContainer>
           <Background
+            active={!showLoadingScreen || isTransitioning}
             currentPage={currentPage}
             currentSelectableSubPage={currentSelectableSubPage}
             onObjectClick={handlePageChange}
@@ -174,7 +178,9 @@ function App() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {pageComponents[currentPage]}
+                    <Suspense fallback={null}>
+                      {pageComponents[currentPage]}
+                    </Suspense>
                   </motion.div>
                 </AnimatePresence>
               </ContentContainer>
