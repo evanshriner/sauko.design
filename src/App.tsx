@@ -10,7 +10,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import FlexBox from '@/shared/components/FlexBox';
 import Background from '@/shared/components/background/Background';
 import BackgroundContainer from '@/shared/components/background/BackgroundContainer';
-import NavBar from '@/shared/components/navbar/index';
+import NavBar, {
+  FLOATING_NAVIGATION_ROOT_ID,
+} from '@/shared/components/navbar/index';
 import ContentContainer from '@/shared/components/contentContainer';
 import LoadingScreen from '@/shared/components/loading/LoadingScreen';
 
@@ -24,9 +26,7 @@ import { usePageSEO } from './shared/hooks/usePageSEO';
 
 const AudioEngineering = lazy(() => import('./modules/audioEngineering'));
 const Software = lazy(() => import('./modules/software'));
-const AIDesloppification = lazy(
-  () => import('./modules/aiDesloppification'),
-);
+const AIDesloppification = lazy(() => import('./modules/aiDesloppification'));
 
 function App() {
   const { progress } = useProgress();
@@ -136,12 +136,13 @@ function App() {
             onObjectHover={setIsHoveringNav}
           />
         </BackgroundContainer>
-        <div 
-          id="smooth-wrapper" 
+        <div id={FLOATING_NAVIGATION_ROOT_ID} />
+        <div
+          id="smooth-wrapper"
           style={{ pointerEvents: isHome ? 'none' : 'auto' }}
         >
-          <div 
-            id="smooth-content" 
+          <div
+            id="smooth-content"
             style={{ pointerEvents: isHome ? 'none' : 'auto' }}
           >
             <FlexBox flexDirection="column" id="dom-content" minHeight="100vh">

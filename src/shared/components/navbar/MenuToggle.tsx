@@ -1,31 +1,35 @@
 import styled from '@emotion/styled';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { forwardRef } from 'react';
+import { forwardRef, type MouseEventHandler } from 'react';
 import { LuAudioLines, LuChevronDown } from 'react-icons/lu';
 
 const MOTION_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export interface MenuToggleProps {
   isOpen: boolean;
-  onClick: () => void;
+  onClick: MouseEventHandler<HTMLButtonElement>;
   controlsId: string;
+  overlay?: boolean;
 }
 
-const MenuToggleContainer = styled('div')({
-  position: 'fixed',
-  top: '20px',
-  right: '5vw',
-  zIndex: 902,
+const MenuToggleContainer = styled('div', {
+  shouldForwardProp: (property) => property !== '$overlay',
+})<{ $overlay: boolean }>(({ $overlay }) => ({
+  position: $overlay ? 'fixed' : 'relative',
+  top: $overlay ? '20px' : 'auto',
+  right: $overlay ? '5vw' : 'auto',
+  zIndex: $overlay ? 902 : 1,
   display: 'flex',
   width: '48px',
   height: '48px',
+  flex: '0 0 48px',
   alignItems: 'center',
   justifyContent: 'center',
   pointerEvents: 'auto',
   '@media (min-width: 769px)': {
     display: 'none',
   },
-});
+}));
 
 const MenuToggleButton = styled('button', {
   shouldForwardProp: (property) => property !== '$isOpen',
@@ -85,14 +89,14 @@ const IconSlot = styled(motion.span)({
 });
 
 const MenuToggle = forwardRef<HTMLButtonElement, MenuToggleProps>(
-  function MenuToggle({ isOpen, onClick, controlsId }, ref) {
+  function MenuToggle({ isOpen, onClick, controlsId, overlay = false }, ref) {
     const prefersReducedMotion = useReducedMotion();
     const iconTransition = prefersReducedMotion
       ? { duration: 0 }
       : { duration: isOpen ? 0.26 : 0.2, ease: MOTION_EASE };
 
     return (
-      <MenuToggleContainer>
+      <MenuToggleContainer $overlay={overlay}>
         <MenuToggleButton
           ref={ref}
           type="button"

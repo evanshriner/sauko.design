@@ -92,6 +92,12 @@ const getFocusableElements = (container: HTMLElement) =>
     );
   });
 
+export const DesktopMediaMenu = () => (
+  <DesktopMenu clickable>
+    <MediaPlayer />
+  </DesktopMenu>
+);
+
 const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
   const prefersReducedMotion = useReducedMotion();
   const sheetRef = useRef<HTMLElement>(null);
@@ -233,9 +239,7 @@ const Menu = ({ open, onClose, toggleRef, id }: MenuProps) => {
 
   return (
     <>
-      <DesktopMenu clickable>
-        <MediaPlayer />
-      </DesktopMenu>
+      <DesktopMediaMenu />
       {typeof document !== 'undefined'
         ? createPortal(
             <AnimatePresence
