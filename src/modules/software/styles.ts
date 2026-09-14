@@ -13,7 +13,7 @@ const revealLabel = keyframes`
   }
 `;
 
-export const Page = styled.main`
+export const Page = styled(motion.main)`
   --lab-ivory: ${({ theme }) => theme.colors.primaryText};
   --lab-ivory-soft: rgba(241, 237, 232, 0.74);
   --lab-ivory-muted: rgba(241, 237, 232, 0.5);
