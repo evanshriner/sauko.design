@@ -54,7 +54,11 @@ const getAmplitudeForFrequencyRange = (
   return normalizedAmplitude;
 };
 
-const DEFAULT_VISUAL_RESPONSE = 35;
+const getPlaybackGain = (track: Track | undefined, userVolume: number) =>
+  userVolume * Math.pow(10, (track?.normalizationGainDb ?? 0) / 20);
+const PLAYBACK_GAIN_RAMP_SECONDS = 0.015;
+
+const DEFAULT_VISUAL_RESPONSE = 22;
 const AMPLITUDE_HISTORY_SIZE = 15;
 const MIN_ABSOLUTE_DYNAMIC_RANGE = 0.00025;
 const MIN_RELATIVE_DYNAMIC_RANGE = 0.3;
@@ -71,6 +75,7 @@ export const useMediaPlayer = () => {
   const amplitudeRef = useRef(0);
   const [intensity, setIntensity] = useState(DEFAULT_VISUAL_RESPONSE);
   const [volume, setVolumeState] = useState(1);
+  const volumeRef = useRef(1);
   const amplitudeHistoryRef = useRef<number[]>([]);
 
   const resetAudioResponse = useCallback(() => {
@@ -84,6 +89,24 @@ export const useMediaPlayer = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const frequencyDataRef = useRef<Uint8Array | null>(null);
   const gainRef = useRef<GainNode | null>(null);
+
+  const applyPlaybackGain = useCallback(
+    (track: Track | undefined, userVolume: number) => {
+      const context = audioContextRef.current;
+      const gainNode = gainRef.current;
+      if (!context || !gainNode) return;
+
+      const now = context.currentTime;
+      const currentGain = gainNode.gain.value;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(currentGain, now);
+      gainNode.gain.linearRampToValueAtTime(
+        getPlaybackGain(track, userVolume),
+        now + PLAYBACK_GAIN_RAMP_SECONDS,
+      );
+    },
+    [],
+  );
 
   const resumeAfterTrackChangeRef = useRef(false);
   const hasPlaybackBeenRequestedRef = useRef(false);
@@ -126,8 +149,9 @@ export const useMediaPlayer = () => {
       resetAudioResponse();
       audio.src = track.url;
       audio.load();
+      applyPlaybackGain(track, volumeRef.current);
     },
-    [resetAudioResponse],
+    [applyPlaybackGain, resetAudioResponse],
   );
 
   useEffect(() => {
@@ -140,11 +164,7 @@ export const useMediaPlayer = () => {
         resumeAfterTrackChangeRef.current || isPlayingRef.current;
       resumeAfterTrackChangeRef.current = false;
 
-      setProgress(0);
-      setDuration(0);
-      resetAudioResponse();
-      audio.src = track.url;
-      audio.load();
+      loadTrackSource(track);
 
       if (shouldResume) {
         audio.play().catch((e) => {
@@ -153,7 +173,7 @@ export const useMediaPlayer = () => {
         });
       }
     }
-  }, [currentTrackIndex, resetAudioResponse, tracks]);
+  }, [currentTrackIndex, loadTrackSource, tracks]);
 
   const animationFrameRef = useRef<number>();
 
@@ -215,16 +235,18 @@ export const useMediaPlayer = () => {
     }
   }, [intensity]);
 
-  const setVolume = useCallback((newVolume: number) => {
-    const clampedVolume = Math.max(0, Math.min(100, newVolume)) / 100; // convert to 0-1
-    setVolumeState(clampedVolume);
-    if (gainRef.current) {
-      gainRef.current.gain.setValueAtTime(
-        clampedVolume,
-        audioContextRef.current?.currentTime ?? 0,
-      );
-    }
-  }, []);
+  const setVolume = useCallback(
+    (newVolume: number) => {
+      const clampedVolume = Math.max(0, Math.min(100, newVolume)) / 100;
+      const track =
+        currentTrackIndex === null ? undefined : tracks[currentTrackIndex];
+
+      setVolumeState(clampedVolume);
+      volumeRef.current = clampedVolume;
+      applyPlaybackGain(track, clampedVolume);
+    },
+    [applyPlaybackGain, currentTrackIndex, tracks],
+  );
 
   useEffect(() => {
     if (isPlaying) {
@@ -265,7 +287,7 @@ export const useMediaPlayer = () => {
           analyserRef.current = analyser;
 
           const gainNode = context.createGain();
-          gainNode.gain.value = volume;
+          gainNode.gain.value = getPlaybackGain(track, volumeRef.current);
           gainRef.current = gainNode;
         } catch (e) {
           console.error('Web Audio API is not supported in this browser', e);
@@ -289,7 +311,7 @@ export const useMediaPlayer = () => {
     } catch (error) {
       console.error('Playback failed:', error);
     }
-  }, [currentTrackIndex, isAudioGraphSetup, loadTrackSource, tracks, volume]);
+  }, [currentTrackIndex, isAudioGraphSetup, loadTrackSource, tracks]);
 
   const pause = useCallback(() => {
     audioRef.current.pause();
