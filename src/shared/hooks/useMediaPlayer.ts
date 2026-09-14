@@ -57,6 +57,7 @@ const getAmplitudeForFrequencyRange = (
 const getPlaybackGain = (track: Track | undefined, userVolume: number) =>
   userVolume * Math.pow(10, (track?.normalizationGainDb ?? 0) / 20);
 const PLAYBACK_GAIN_RAMP_SECONDS = 0.015;
+const PLAYBACK_EDGE_FADE_SECONDS = 0.23;
 
 const DEFAULT_VISUAL_RESPONSE = 22;
 const AMPLITUDE_HISTORY_SIZE = 15;
@@ -89,30 +90,40 @@ export const useMediaPlayer = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const frequencyDataRef = useRef<Uint8Array | null>(null);
   const gainRef = useRef<GainNode | null>(null);
+  const pauseTimerRef = useRef<number | null>(null);
 
-  const applyPlaybackGain = useCallback(
-    (track: Track | undefined, userVolume: number) => {
+  const rampPlaybackGain = useCallback(
+    (targetGain: number, durationSeconds: number) => {
       const context = audioContextRef.current;
       const gainNode = gainRef.current;
       if (!context || !gainNode) return;
 
       const now = context.currentTime;
-      const currentGain = gainNode.gain.value;
       gainNode.gain.cancelScheduledValues(now);
-      gainNode.gain.setValueAtTime(currentGain, now);
-      gainNode.gain.linearRampToValueAtTime(
-        getPlaybackGain(track, userVolume),
-        now + PLAYBACK_GAIN_RAMP_SECONDS,
-      );
+
+      if (durationSeconds <= 0) {
+        gainNode.gain.setValueAtTime(targetGain, now);
+        return;
+      }
+
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(targetGain, now + durationSeconds);
     },
     [],
   );
+
+  const cancelPendingPause = useCallback(() => {
+    if (pauseTimerRef.current === null) return;
+    window.clearTimeout(pauseTimerRef.current);
+    pauseTimerRef.current = null;
+  }, []);
 
   const resumeAfterTrackChangeRef = useRef(false);
   const hasPlaybackBeenRequestedRef = useRef(false);
   useEffect(() => {
     audioRef.current.preload = 'none';
-  }, []);
+    return cancelPendingPause;
+  }, [cancelPendingPause]);
 
   const handleLoadedMetadata = useCallback(() => {
     setDuration(audioRef.current.duration);
@@ -143,15 +154,19 @@ export const useMediaPlayer = () => {
   const loadTrackSource = useCallback(
     (track: Track) => {
       const audio = audioRef.current;
+      cancelPendingPause();
 
       setProgress(0);
       setDuration(0);
       resetAudioResponse();
       audio.src = track.url;
       audio.load();
-      applyPlaybackGain(track, volumeRef.current);
+      rampPlaybackGain(
+        getPlaybackGain(track, volumeRef.current),
+        PLAYBACK_GAIN_RAMP_SECONDS,
+      );
     },
-    [applyPlaybackGain, resetAudioResponse],
+    [cancelPendingPause, rampPlaybackGain, resetAudioResponse],
   );
 
   useEffect(() => {
@@ -243,9 +258,12 @@ export const useMediaPlayer = () => {
 
       setVolumeState(clampedVolume);
       volumeRef.current = clampedVolume;
-      applyPlaybackGain(track, clampedVolume);
+      rampPlaybackGain(
+        getPlaybackGain(track, clampedVolume),
+        PLAYBACK_GAIN_RAMP_SECONDS,
+      );
     },
-    [applyPlaybackGain, currentTrackIndex, tracks],
+    [currentTrackIndex, rampPlaybackGain, tracks],
   );
 
   useEffect(() => {
@@ -268,6 +286,7 @@ export const useMediaPlayer = () => {
     if (!track) return;
 
     const audio = audioRef.current;
+    const shouldFadeIn = audio.paused;
     hasPlaybackBeenRequestedRef.current = true;
     if (audio.getAttribute('src') !== track.url) {
       loadTrackSource(track);
@@ -307,16 +326,43 @@ export const useMediaPlayer = () => {
       if (audioContextRef.current?.state === 'suspended') {
         await audioContextRef.current.resume();
       }
+      if (shouldFadeIn) rampPlaybackGain(0, 0);
       await audio.play();
+      if (shouldFadeIn) {
+        rampPlaybackGain(
+          getPlaybackGain(track, volumeRef.current),
+          PLAYBACK_EDGE_FADE_SECONDS,
+        );
+      }
     } catch (error) {
       console.error('Playback failed:', error);
     }
-  }, [currentTrackIndex, isAudioGraphSetup, loadTrackSource, tracks]);
+  }, [
+    currentTrackIndex,
+    isAudioGraphSetup,
+    loadTrackSource,
+    rampPlaybackGain,
+    tracks,
+  ]);
 
   const pause = useCallback(() => {
-    audioRef.current.pause();
-    resetAudioResponse();
-  }, [resetAudioResponse]);
+    const audio = audioRef.current;
+    const canFade = audioContextRef.current && gainRef.current;
+
+    cancelPendingPause();
+    if (audio.paused || !canFade) {
+      audio.pause();
+      resetAudioResponse();
+      return;
+    }
+
+    rampPlaybackGain(0, PLAYBACK_EDGE_FADE_SECONDS);
+    pauseTimerRef.current = window.setTimeout(() => {
+      audio.pause();
+      resetAudioResponse();
+      pauseTimerRef.current = null;
+    }, PLAYBACK_EDGE_FADE_SECONDS * 1000);
+  }, [cancelPendingPause, rampPlaybackGain, resetAudioResponse]);
 
   const skipForward = useCallback(() => {
     if (currentTrackIndex !== null && tracks.length > 0) {
