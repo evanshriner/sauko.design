@@ -1,5 +1,6 @@
 // Animation constants
 export const WAVE_ANIMATION_SPEED_DIVISOR = 1500;
+export const WAVE_TARGET_FRAME_INTERVAL_MS = 1000 / 30;
 export const WAVE_AMPLITUDE = 3.5;
 export const WAVE_FREQUENCY = 5;
 export const HANDLE_AMPLITUDE_MULTIPLIER = 1.1;

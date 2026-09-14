@@ -162,7 +162,8 @@ export default function Shapes({
   onObjectClick,
   onObjectHover,
 }: ShapesSwitcherProps) {
-  const { amplitude, currentTrackIndex, isPlaying } = useMediaPlayerContext();
+  const { amplitudeRef, currentTrackIndex, isPlaying } =
+    useMediaPlayerContext();
   const prefersReducedMotion = useReducedMotion();
   const audioEnvelopeRef = useRef(0);
   const pointerRotationTargetRef = useRef(new THREE.Vector2());
@@ -486,7 +487,7 @@ export default function Shapes({
     // controls the speed of the wave animation
     if (outerSphereRef.current) {
       const targetAmplitude = isPlaying
-        ? Math.max(0, Math.min(1, amplitude))
+        ? Math.max(0, Math.min(1, amplitudeRef.current))
         : 0;
       const envelopeSeconds =
         targetAmplitude > audioEnvelopeRef.current

@@ -68,14 +68,14 @@ export const useMediaPlayer = () => {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isAudioGraphSetup, setIsAudioGraphSetup] = useState(false);
-  const [amplitude, setAmplitude] = useState(0);
+  const amplitudeRef = useRef(0);
   const [intensity, setIntensity] = useState(DEFAULT_VISUAL_RESPONSE);
   const [volume, setVolumeState] = useState(1);
   const amplitudeHistoryRef = useRef<number[]>([]);
 
   const resetAudioResponse = useCallback(() => {
     amplitudeHistoryRef.current.length = 0;
-    setAmplitude(0);
+    amplitudeRef.current = 0;
   }, []);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
@@ -211,7 +211,7 @@ export const useMediaPlayer = () => {
       // console.log('finalAmplitude:', finalAmplitude);
       // Scale to a normalized target; the WebGL frame loop owns the envelope.
       const responseScale = Math.max(0, Math.min(100, intensity)) / 100;
-      setAmplitude(finalAmplitude * responseScale);
+      amplitudeRef.current = finalAmplitude * responseScale;
     }
   }, [intensity]);
 
@@ -344,7 +344,7 @@ export const useMediaPlayer = () => {
     seek,
     audioRef,
     analyserRef,
-    amplitude,
+    amplitudeRef,
     intensity,
     setIntensity,
     volume: volume * 100, // convert back to 0-100 for UI

@@ -292,7 +292,7 @@ function AudioEngineering() {
         content="Through calibrated, premium hardware chains and transparent digital restoration, we   
    meticulously remove age and noise, delivering master-quality digital files that       
    preserve your audio heritage for generations."
-        image={`${publicAssetBaseUrl}images/restoration_equipment.png`}
+        image={`${publicAssetBaseUrl}images/restoration_equipment.jpg`}
         imageAlt="Reel-to-reel and archival audio restoration equipment"
       />
 
@@ -308,7 +308,9 @@ function AudioEngineering() {
           </>
         }
         content="Whether developing a production or mixing a finished arrangement, we use critical listening, analogue circuitry, and precise digital control to shape tone, space, balance, and dynamics—delivering a coherent mix prepared for mastering without losing its character."
-        image={`${publicAssetBaseUrl}images/modular_rack.png`}
+        image={`${publicAssetBaseUrl}images/modular_rack.jpg`}
+        imageSrcSet={`${publicAssetBaseUrl}images/modular_rack-720.jpg 720w, ${publicAssetBaseUrl}images/modular_rack.jpg 1234w`}
+        imageSizes="(max-width: 64rem) 90vw, 38vw"
         imageAlt="Modular synthesis and analogue production rack"
       />
 

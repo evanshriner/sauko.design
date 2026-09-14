@@ -1,10 +1,5 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
-import {
-  animate,
-  useAnimationFrame,
-  useMotionValue,
-  useReducedMotion,
-} from 'framer-motion';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { animate, useMotionValue, useReducedMotion } from 'framer-motion';
 import { useTheme } from '@emotion/react';
 import FlexBox from '../FlexBox';
 import { FaPlay, FaPause } from 'react-icons/fa';
@@ -126,11 +121,41 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ variant = 'desktop' }) => {
   const intensityLabelId = `visual-response-${generatedId}`;
   const volumeLabelId = `volume-${generatedId}`;
 
-  useAnimationFrame((_, delta) => {
-    if (isPlaying && !prefersReducedMotion) {
-      timeRef.current += delta / C.WAVE_ANIMATION_SPEED_DIVISOR;
+  const drawWave = useCallback(() => {
+    const foregroundWave = foregroundWaveRef.current;
+    const backgroundWave = backgroundWaveRef.current;
+    if (!foregroundWave || !backgroundWave || scrubberWidth === 0) return;
+
+    const amplitude = C.WAVE_AMPLITUDE;
+    const frequency = C.WAVE_FREQUENCY;
+    const phase = timeRef.current;
+    let path = 'M 0 0';
+
+    for (let x = 0; x <= scrubberWidth; x += 1) {
+      const angle = (x / scrubberWidth) * frequency * Math.PI * 2 + phase;
+      path += ` L ${x} ${(Math.sin(angle) * amplitude).toFixed(2)}`;
     }
 
+    backgroundWave.setAttribute('d', path);
+    foregroundWave.setAttribute('d', path);
+
+    const visualProgress =
+      scrubberTravel > 0 ? handleX.get() / scrubberTravel : 0;
+    const handleAngle = visualProgress * frequency * Math.PI * 2 + phase;
+    const handleYOffset = prefersReducedMotion
+      ? 0
+      : Math.sin(handleAngle) * amplitude * C.HANDLE_AMPLITUDE_MULTIPLIER;
+
+    handleY.set(handleYOffset - C.SCRUBBER_HANDLE_Y_OFFSET);
+  }, [
+    handleX,
+    handleY,
+    prefersReducedMotion,
+    scrubberTravel,
+    scrubberWidth,
+  ]);
+
+  useEffect(() => {
     if (
       scrubberWidth > 0 &&
       !isDraggingRef.current &&
@@ -139,37 +164,44 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ variant = 'desktop' }) => {
       handleX.set(safeProgress * scrubberTravel);
     }
 
-    if (
-      !foregroundWaveRef.current ||
-      !backgroundWaveRef.current ||
-      scrubberWidth === 0
-    )
-      return;
+    if (!isPlaying || prefersReducedMotion) drawWave();
+  }, [
+    drawWave,
+    handleX,
+    isPlaying,
+    prefersReducedMotion,
+    safeProgress,
+    scrubberTravel,
+    scrubberWidth,
+  ]);
 
-    const amplitude = C.WAVE_AMPLITUDE;
-    const frequency = C.WAVE_FREQUENCY;
-
-    let d = 'M 0 0';
-    for (let x = 0; x <= scrubberWidth; x++) {
-      const angle =
-        (x / scrubberWidth) * frequency * Math.PI * 2 + timeRef.current;
-      const y = Math.sin(angle) * amplitude;
-      d += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
+  useEffect(() => {
+    if (!isPlaying || prefersReducedMotion || scrubberWidth === 0) {
+      return undefined;
     }
 
-    backgroundWaveRef.current.setAttribute('d', d);
-    foregroundWaveRef.current.setAttribute('d', d);
+    let animationFrameId = 0;
+    let previousTime = performance.now();
+    let previousDrawTime = 0;
 
-    const visualProgress =
-      scrubberTravel > 0 ? handleX.get() / scrubberTravel : 0;
-    const handleAngle =
-      visualProgress * frequency * Math.PI * 2 + timeRef.current;
-    const handleYOffset = prefersReducedMotion
-      ? 0
-      : Math.sin(handleAngle) * amplitude * C.HANDLE_AMPLITUDE_MULTIPLIER;
+    const animateWave = (timestamp: number) => {
+      const delta = timestamp - previousTime;
+      previousTime = timestamp;
+      timeRef.current += delta / C.WAVE_ANIMATION_SPEED_DIVISOR;
 
-    handleY.set(handleYOffset - C.SCRUBBER_HANDLE_Y_OFFSET);
-  });
+      if (
+        timestamp - previousDrawTime >= C.WAVE_TARGET_FRAME_INTERVAL_MS
+      ) {
+        previousDrawTime = timestamp;
+        drawWave();
+      }
+
+      animationFrameId = window.requestAnimationFrame(animateWave);
+    };
+
+    animationFrameId = window.requestAnimationFrame(animateWave);
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [drawWave, isPlaying, prefersReducedMotion, scrubberWidth]);
 
   useEffect(() => {
     const scrubberElement = scrubberRef.current;

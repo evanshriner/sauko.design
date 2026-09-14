@@ -49,7 +49,7 @@ export const objectConfigurations: ObjectConfig[] = [
     page: Pages.AudioEngineering,
     models: {
       desktop: {
-        gltfPath: `${publicAssetBaseUrl}Boombox.glb`,
+        gltfPath: `${publicAssetBaseUrl}Boombox.optimized.glb`,
         scale: 0.45,
         responsiveScale: {
           minScale: 0.3,
@@ -68,7 +68,7 @@ export const objectConfigurations: ObjectConfig[] = [
         },
       },
       mobile: {
-        gltfPath: `${publicAssetBaseUrl}Speaker.glb`,
+        gltfPath: `${publicAssetBaseUrl}Speaker.optimized.glb`,
         scale: 0.15,
         responsiveScale: {
           minScale: 0.05,
@@ -92,7 +92,7 @@ export const objectConfigurations: ObjectConfig[] = [
     page: Pages.AIDesloppification,
     models: {
       desktop: {
-        gltfPath: `${publicAssetBaseUrl}Robot.glb`,
+        gltfPath: `${publicAssetBaseUrl}Robot.optimized.glb`,
         scale: 0.011,
         responsiveScale: {
           minScale: 0.009,
@@ -116,7 +116,7 @@ export const objectConfigurations: ObjectConfig[] = [
     id: DisplayedObject.Lab,
     models: {
       desktop: {
-        gltfPath: `${publicAssetBaseUrl}Lab.glb`,
+        gltfPath: `${publicAssetBaseUrl}Lab.optimized.glb`,
         scale: 0.47,
         responsiveScale: {
           minScale: 0.38,
@@ -135,7 +135,7 @@ export const objectConfigurations: ObjectConfig[] = [
         },
       },
       mobile: {
-        gltfPath: `${publicAssetBaseUrl}Flask.glb`,
+        gltfPath: `${publicAssetBaseUrl}Flask.optimized.glb`,
         scale: 0.47,
         responsiveScale: {
           minScale: 0.04,
