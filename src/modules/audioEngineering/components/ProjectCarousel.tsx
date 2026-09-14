@@ -290,6 +290,8 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       <ImageWrapper className="project-image-wrapper">
         <ProjectImage
           src={project.image}
+          loading="lazy"
+          decoding="async"
           alt={`${project.title} artwork by ${project.artist}`}
           className="project-image"
         />

@@ -11,6 +11,8 @@ interface CinematicSectionProps {
   content?: string | React.ReactNode;
   imageAlt?: string;
   image?: string;
+  imageSrcSet?: string;
+  imageSizes?: string;
   background?: React.ReactNode;
   layout?: 'left' | 'right' | 'center';
   className?: string;
@@ -360,6 +362,8 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
   subtitle,
   content,
   image,
+  imageSrcSet,
+  imageSizes,
   imageAlt,
   background,
   layout = 'center',
@@ -519,6 +523,10 @@ const CinematicSection: React.FC<CinematicSectionProps> = ({
             <StyledImage
               ref={imageRef}
               src={image}
+              srcSet={imageSrcSet}
+              sizes={imageSizes}
+              loading="lazy"
+              decoding="async"
               alt={imageAlt ?? ''}
               $asset={imageTreatment}
               $filterId={displayFilterId}
