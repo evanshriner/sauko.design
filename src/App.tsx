@@ -130,6 +130,7 @@ function App() {
         <BackgroundContainer>
           <Background
             active={!showLoadingScreen || isTransitioning}
+            interactive={!showLoadingScreen}
             currentPage={currentPage}
             currentSelectableSubPage={currentSelectableSubPage}
             onObjectClick={handlePageChange}

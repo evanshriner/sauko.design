@@ -109,12 +109,14 @@ function CameraControl({ currentPage }: { currentPage: Pages }) {
 
 export default function Background({
   active,
+  interactive,
   currentPage,
   currentSelectableSubPage,
   onObjectClick,
   onObjectHover,
 }: {
   active: boolean;
+  interactive: boolean;
   currentPage: Pages;
   currentSelectableSubPage?: Pages; // this is the subpage that is currently displayed at the menu 'home'
   onObjectClick: (page: Pages) => void;
@@ -148,6 +150,7 @@ export default function Background({
         <Shapes
           reflectionResolution={quality.reflectionResolution}
           reflectionRefreshRate={quality.reflectionRefreshRate}
+          interactive={interactive}
           selectedObjectKey={
             objectConfigurations.find(
               (config) => config.page === currentSelectableSubPage,
