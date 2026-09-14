@@ -54,11 +54,6 @@ export const Page = styled.main`
     box-sizing: border-box;
   }
 
-  ::selection {
-    color: var(--lab-charcoal-solid);
-    background: var(--lab-sepia);
-  }
-
   a,
   button {
     -webkit-tap-highlight-color: transparent;
