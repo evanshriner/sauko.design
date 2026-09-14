@@ -88,7 +88,16 @@ export default function Software() {
   };
 
   return (
-    <Page id="software-lab" aria-labelledby="software-lab-title">
+    <Page
+      id="software-lab"
+      aria-labelledby="software-lab-title"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: prefersReducedMotion ? 0 : 0.7,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
       <Workbench data-nosnippet aria-describedby="software-lab-instructions">
         <LabHeader>
           <LabHeading>

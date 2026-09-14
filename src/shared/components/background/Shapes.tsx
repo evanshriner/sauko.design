@@ -34,6 +34,7 @@ import { useResponsiveScale } from '@/shared/hooks/useResponsiveScale';
 
 interface ShapesSwitcherProps {
   selectedObjectKey: DisplayedObject;
+  interactive: boolean;
   reflectionResolution: number;
   reflectionRefreshRate: number;
   onObjectClick?: (objectId: DisplayedObject) => void;
@@ -127,18 +128,30 @@ const ModelInstance = React.forwardRef<THREE.Group, ModelInstanceProps>(
         ref={ref}
         object={modelScene}
         scale={responsiveScale}
-        onClick={(event: ThreeEvent<MouseEvent>) => {
-          event.stopPropagation();
-          onClick?.(event);
-        }}
-        onPointerOver={(event: ThreeEvent<MouseEvent>) => {
-          event.stopPropagation();
-          onPointerOver?.(event);
-        }}
-        onPointerOut={(event: ThreeEvent<MouseEvent>) => {
-          event.stopPropagation();
-          onPointerOut?.(event);
-        }}
+        onClick={
+          onClick
+            ? (event: ThreeEvent<MouseEvent>) => {
+                event.stopPropagation();
+                onClick(event);
+              }
+            : undefined
+        }
+        onPointerOver={
+          onPointerOver
+            ? (event: ThreeEvent<MouseEvent>) => {
+                event.stopPropagation();
+                onPointerOver(event);
+              }
+            : undefined
+        }
+        onPointerOut={
+          onPointerOut
+            ? (event: ThreeEvent<MouseEvent>) => {
+                event.stopPropagation();
+                onPointerOut(event);
+              }
+            : undefined
+        }
       />
     );
   },
@@ -160,6 +173,7 @@ export default function Shapes({
   reflectionRefreshRate,
   selectedObjectKey = DisplayedObject.Boombox,
   onObjectClick,
+  interactive,
   onObjectHover,
 }: ShapesSwitcherProps) {
   const { amplitudeRef, currentTrackIndex, isPlaying } =
@@ -181,6 +195,10 @@ export default function Shapes({
   const requestedCompactModeRef = useRef(isCompact);
   const prefetchedPathsRef = useRef(new Set<string>());
   selectedObjectKeyRef.current = selectedObjectKey;
+
+  useEffect(() => {
+    if (!interactive) onObjectHover?.(null);
+  }, [interactive, onObjectHover]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -644,9 +662,15 @@ export default function Shapes({
               modelIndex={index}
               reflectiveMaterial={reflectiveMaterial}
               registerModelInstance={registerModelInstance}
-              onClick={() => onObjectClick?.(config.id)}
-              onPointerOver={() => onObjectHover?.(config.id)}
-              onPointerOut={() => onObjectHover?.(null)}
+              onClick={
+                interactive ? () => onObjectClick?.(config.id) : undefined
+              }
+              onPointerOver={
+                interactive ? () => onObjectHover?.(config.id) : undefined
+              }
+              onPointerOut={
+                interactive ? () => onObjectHover?.(null) : undefined
+              }
             />
           </Suspense>
         );

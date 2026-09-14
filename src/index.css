@@ -1,3 +1,13 @@
+:root {
+  --color-selection-background: rgba(224, 207, 173, 0.94);
+  --color-selection-foreground: #0d0d0c;
+}
+
+::selection {
+  color: var(--color-selection-foreground);
+  background-color: var(--color-selection-background);
+}
+
 html,
 body,
 #root {
