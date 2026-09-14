@@ -45,8 +45,10 @@ const X_OFFSET_SPACING = 5.5;
 const REFLECTION_INTERVAL_TOLERANCE_SECONDS = 0.001;
 const COMPACT_MODEL_BREAKPOINT = 558;
 const IDLE_PREFETCH_TIMEOUT_MS = 1500;
-const AUDIO_RESPONSE_ATTACK_SECONDS = 0.045;
-const AUDIO_RESPONSE_DECAY_SECONDS = 0.32;
+const AUDIO_RESPONSE_ATTACK_SECONDS = 0.025;
+const AUDIO_RESPONSE_DECAY_SECONDS = 0.2;
+const IDLE_WAVE_SPEED = 0.3;
+const PEAK_WAVE_SPEED = 0.65;
 const MAX_POINTER_ROTATION_RADIANS = THREE.MathUtils.degToRad(12);
 const POINTER_ROTATION_DAMPING = 5;
 
@@ -176,7 +178,7 @@ export default function Shapes({
   interactive,
   onObjectHover,
 }: ShapesSwitcherProps) {
-  const { amplitudeRef, currentTrackIndex, isPlaying } =
+  const { amplitudeRef, currentTrackIndex, intensity, isPlaying } =
     useMediaPlayerContext();
   const prefersReducedMotion = useReducedMotion();
   const audioEnvelopeRef = useRef(0);
@@ -370,6 +372,8 @@ export default function Shapes({
       time: { value: 0 },
       resolution: { value: new THREE.Vector4() },
       uAmplitude: { value: 0.0 },
+      uVisualResponse: { value: 0.0 },
+      uWaveEnergy: { value: 0.0 },
     }),
     [],
   );
@@ -377,7 +381,13 @@ export default function Shapes({
   useLayoutEffect(() => {
     audioEnvelopeRef.current = 0;
     outerUniforms.uAmplitude.value = 0;
+    outerUniforms.uWaveEnergy.value = 0;
   }, [currentTrackIndex, outerUniforms]);
+
+  useLayoutEffect(() => {
+    outerUniforms.uVisualResponse.value =
+      THREE.MathUtils.clamp(intensity, 0, 100) / 100;
+  }, [intensity, outerUniforms]);
 
   const reflectiveUniforms = useMemo(
     () => ({
@@ -519,9 +529,17 @@ export default function Shapes({
       );
 
       audioEnvelopeRef.current = nextAmplitude < 0.0001 ? 0 : nextAmplitude;
-      outerSphereRef.current.uniforms.time.value += delta * 0.2;
+      const waveEnergy = prefersReducedMotion ? 0 : audioEnvelopeRef.current;
+      const waveSpeed = THREE.MathUtils.lerp(
+        IDLE_WAVE_SPEED,
+        PEAK_WAVE_SPEED,
+        waveEnergy,
+      );
+
+      outerSphereRef.current.uniforms.time.value += delta * waveSpeed;
       outerSphereRef.current.uniforms.uAmplitude.value =
         audioEnvelopeRef.current;
+      outerSphereRef.current.uniforms.uWaveEnergy.value = waveEnergy;
     }
 
     // Rotate the outer sphere independently of the reflection capture cadence.

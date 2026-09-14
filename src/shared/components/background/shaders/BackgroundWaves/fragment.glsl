@@ -1,6 +1,8 @@
 uniform float time;
 uniform vec4 resolution;
 uniform float uAmplitude;
+uniform float uVisualResponse;
+uniform float uWaveEnergy;
 varying vec3 vPosition;
 
 
@@ -37,11 +39,11 @@ mat2 rotate2D(float angle){
     );
 }
 
-float lines(vec2 uv, float offset) {
+float lines(vec2 uv, float offset, float frequency, float phase) {
     return smoothstep(
         0.,
         0.5 + offset*0.5,
-        abs(0.5*(sin(uv.x*20.) + offset*2.))
+        abs(0.5*(sin(uv.x*frequency + phase) + offset*2.))
     );
 }
 
@@ -49,21 +51,34 @@ void main() {
     float n = noise(vPosition + time);
 
     float response = clamp(uAmplitude, 0.0, 1.0);
-    float glow = pow(response, 0.72);
+    float glow = pow(response, 0.82);
+    float waveEnergy = pow(clamp(uWaveEnergy, 0.0, 1.0), 0.9);
 
     vec3 coolShadow = vec3(20./255., 23./255., 24./255.);
     vec3 warmShadow = vec3(27./255., 19./255., 12./255.);
     vec3 color1 = mix(coolShadow, warmShadow, glow * 0.18);
     vec3 color3 = vec3(9./255., 6./255., 3./255.);
 
-    vec3 idleHighlight = vec3(68./255.);
+    float contrastBoost = smoothstep(0.35, 1.0, clamp(uVisualResponse, 0.0, 1.0));
+    float idleLevel = mix(68.0, 32.0, contrastBoost) / 255.0;
+    vec3 idleHighlight = vec3(idleLevel);
     vec3 flashHighlight = vec3(1.0, 0.97, 0.91);
     vec3 color2 = mix(idleHighlight, flashHighlight, glow);
 
-    vec2 b_uv = rotate2D(n) * vPosition.xy * 0.1;
+    float primaryFrequency = mix(20.0, 14.0, waveEnergy);
+    float secondaryFrequency = mix(20.0, 16.0, waveEnergy);
+    float wavePhase = waveEnergy * 0.85;
+    float waveBend =
+        sin(vPosition.z * 1.7 + time * 1.4) * waveEnergy * 0.12;
+    vec2 b_uv = rotate2D(n + waveBend) * vPosition.xy * 0.1;
 
-    float pattern = lines(b_uv, 0.5);
-    float pattern2 = lines(b_uv, 0.1);
+    float pattern = lines(b_uv, 0.5, primaryFrequency, wavePhase);
+    float pattern2 = lines(
+        b_uv,
+        0.1,
+        secondaryFrequency,
+        -wavePhase * 0.55
+    );
 
     vec3 mixedColors = mix(color1, color2, pattern);
     vec3 mixedColors2 = mix(mixedColors, color3, pattern2);
