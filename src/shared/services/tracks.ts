@@ -27,6 +27,12 @@ export const TRACKS: readonly Track[] = [
     normalizationGainDb: -7.04,
   },
   {
+    url: `${publicAssetBaseUrl}music/hedonic_treadmill.mp3`,
+    title: 'Hedonic Treadmill',
+    artist: 'Barker',
+    normalizationGainDb: -1.49,
+  },
+  {
     url: `${publicAssetBaseUrl}music/summer_w_suralo.mp3`,
     title: 'Summer (with suralo)',
     artist: 'Know Now',
