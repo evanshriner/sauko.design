@@ -171,7 +171,7 @@ export default function Software() {
                     src={project.image}
                     srcSet={project.imageSrcSet}
                     sizes="(max-width: 52rem) calc(100vw - 2.5rem), 58vw"
-                    loading={isActive ? 'eager' : 'lazy'}
+                    loading={'eager'}
                     width="1440"
                     height="900"
                     alt=""

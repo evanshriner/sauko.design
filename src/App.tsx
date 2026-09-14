@@ -3,7 +3,7 @@ import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme';
 import CustomCursor from './shared/components/CustomCursor';
 import Home from './modules/home';
-import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import React from 'react';
 import { useProgress } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -24,9 +24,9 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { getPageFromPath, getPathForPage } from './shared/utils/routing';
 import { usePageSEO } from './shared/hooks/usePageSEO';
 
-const AudioEngineering = lazy(() => import('./modules/audioEngineering'));
-const Software = lazy(() => import('./modules/software'));
-const AIDesloppification = lazy(() => import('./modules/aiDesloppification'));
+import AudioEngineering from "./modules/audioEngineering"
+import Software from "./modules/software"
+import AIDesloppification from "./modules/aiDesloppification"
 
 function App() {
   const { progress } = useProgress();
