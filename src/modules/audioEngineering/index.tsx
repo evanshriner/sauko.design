@@ -7,6 +7,7 @@ import CinematicSection from './components/CinematicSection';
 import ProjectReview from './sections/ProjectReview';
 import { DetroitSkyline } from './components/DetroitSkyline';
 import ProjectCarousel from './components/ProjectCarousel';
+import MasteringTranslationWaves from './components/MasteringTranslationWaves';
 
 const publicAssetBaseUrl = import.meta.env.BASE_URL;
 
@@ -326,6 +327,7 @@ function AudioEngineering() {
           </>
         }
         content="Working from a stereo mix or stems, we refine tonal balance, dynamics, stereo image, and final level for the release—preserving the record’s character across club systems, headphones, streaming, and physical formats."
+        background={<MasteringTranslationWaves />}
       />
 
       <ProjectCarousel id="projects" />
