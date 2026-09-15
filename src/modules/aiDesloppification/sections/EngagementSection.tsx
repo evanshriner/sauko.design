@@ -126,7 +126,7 @@ export default function EngagementSection() {
         <EngagementLayout>
           <EngagementLead data-chapter-reveal>
             <SectionTitle id="engagement-title">
-              Small phases. Clear ownership.
+              Our process
             </SectionTitle>
             <SectionBody>
               We sequence the work around the workflows the business needs to

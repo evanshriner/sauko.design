@@ -125,7 +125,7 @@ export default function DiagnosticsSection() {
       <Shell>
         <DiagnosticHeader data-chapter-reveal>
           <SectionTitle id="diagnostic-title">
-            Where the risk shows up
+            Where you might be...
           </SectionTitle>
           <SectionBody>
             These patterns appear when code is produced faster than it is
