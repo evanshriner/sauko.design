@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { engagement } from '../data';
 import {
   BREAKPOINTS,
-  ChapterFolio,
   Section,
   SectionBody,
   SectionTitle,

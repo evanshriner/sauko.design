@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { diagnostics } from '../data';
 import {
   BREAKPOINTS,
-  ChapterFolio,
   Section,
   SectionBody,
   SectionTitle,

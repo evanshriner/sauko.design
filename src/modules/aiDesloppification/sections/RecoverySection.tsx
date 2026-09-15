@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { RECOVERY_MAP_ID } from '../data';
 import {
   BREAKPOINTS,
-  ChapterFolio,
   Section,
   SectionBody,
   SectionTitle,

@@ -3,7 +3,6 @@ import {
   BREAKPOINTS,
   Shell,
   Section,
-  ChapterFolio,
   SectionTitle,
   PrimaryAction,
 } from '../styles';
