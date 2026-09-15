@@ -124,9 +124,6 @@ export default function EngagementSection() {
   return (
     <EngagementRoot aria-labelledby="engagement-title" data-chapter-section>
       <Shell>
-        <ChapterFolio aria-hidden="true" data-chapter-reveal>
-          03 / 04
-        </ChapterFolio>
         <EngagementLayout>
           <EngagementLead data-chapter-reveal>
             <SectionTitle id="engagement-title">

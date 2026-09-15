@@ -92,9 +92,6 @@ export default function RecoverySection() {
       data-chapter-section
     >
       <Shell>
-        <ChapterFolio aria-hidden="true" data-chapter-reveal>
-          01 / 04
-        </ChapterFolio>
         <RecoveryHeader data-chapter-reveal>
           <SectionTitle id="recovery-title">
             The expensive part starts after it works.

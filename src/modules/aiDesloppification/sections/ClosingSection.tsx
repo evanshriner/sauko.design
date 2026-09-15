@@ -78,9 +78,6 @@ export default function ClosingSection() {
   return (
     <ClosingRoot aria-labelledby="closing-title" data-chapter-section>
       <Shell>
-        <ChapterFolio aria-hidden="true" data-chapter-reveal>
-          04 / 04
-        </ChapterFolio>
         <ClosingLayout data-chapter-reveal>
           <ClosingTitle id="closing-title">
             Make the next change safely.

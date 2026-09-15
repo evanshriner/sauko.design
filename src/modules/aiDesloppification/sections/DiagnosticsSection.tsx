@@ -124,9 +124,6 @@ export default function DiagnosticsSection() {
   return (
     <DiagnosticSection aria-labelledby="diagnostic-title" data-chapter-section>
       <Shell>
-        <ChapterFolio aria-hidden="true" data-chapter-reveal>
-          02 / 04
-        </ChapterFolio>
         <DiagnosticHeader data-chapter-reveal>
           <SectionTitle id="diagnostic-title">
             Where the risk shows up
